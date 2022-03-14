@@ -1,0 +1,27 @@
+; tag::info[]
+; Info endpoint.
+info-arguments = ()
+info-returns = (info)
+
+info = {
+    ; Hash value of the key value state. If two stores have the same hashes,
+    ; chances are they have the same values on the same keys (with
+    ; some risk of collision).
+    ; This can include configuration, depending on the implementation.
+    ; The actual hashing method and size of the hash is left to the
+    ; implementation.
+    0 => bstr,
+}
+; end::info[]
+
+; tag::get[]
+get-arguments = {
+    ; The key to get.
+    0 => bstr,
+}
+
+get-returns = {
+    ; The value directly returned.
+    ? 0 => bstr,
+}
+; end::get[]

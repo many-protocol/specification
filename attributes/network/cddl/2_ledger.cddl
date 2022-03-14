@@ -1,0 +1,122 @@
+; tag::types[]
+; A token symbol which is its name.
+; A symbol is an identity now, and CAN be the anonymous identity. It is
+; unique across all networks. The given string name of a symbol is not
+; unique, though, and cannot be resolved using this attribute (a
+; separate resolver attribute is necessary).
+symbol = identity
+
+; An amount of tokens can be either an infinite uint or a regular one
+; for simplicity. The networks CAN use either when serializing, but
+; MUST accept both when doing transactions.
+amount = biguint / uint
+; end::types[]
+
+; tag::info[]
+; Info endpoint.
+info-arguments = ()
+info-returns = (info)
+
+info = {
+    ; List of supported symbols for this ledger.
+    0 => [* symbol],
+
+    ; Hash value of the ledger state. If two ledgers have the same hashes,
+    ; chances are they have the same balances on the same accounts (with
+    ; some risk of collision).
+    ; This can include configuration, depending on the implementation.
+    ; The actual hashing method and size of the hash is left to the
+    ; implementation.
+    1 => bstr,
+
+    ; Transfer fees for each symbols, between accounts.
+    ; TODO: not implemented.
+    2 => {
+        symbol => transaction-fee,
+    },
+
+    ; Conversion rates and fees between symbols.
+    ; TODO: not implemented.
+    3 => {
+        [symbol, symbol] => conversion,
+    },
+
+    ; Local human readable names for symbols.
+    ; These names are local only, and are only guaranteed to be unique on this
+    ; specific ledger.
+    4 => {
+        ; TODO: this.
+        symbol => {
+            0 => tstr,
+            1 => tstr,  ; Description
+            2 => uint, ; Number of precision digits
+            tstr => tstr ; metadata
+        }
+    }
+}
+
+; Fees can be set for each symbols independently.
+; If a symbol is missing (or empty map), transactions are free.
+; If no fixed or percent fee is specified, transactions are free.
+;
+; Percents are fixed point over 2**32, so a value of 0x100000000
+; would be 100% of fees.
+;
+; If both fixed and percent fees are specified, the calculation is
+;     TOTAL = amount + fixed + (amount * percent / 2**32)
+; Example:
+;   A token has a fixed transfer rate of 1000, and a percent of
+;   0x800000 (~0.195%).
+;   A user who wants to transfer an amount of 5_000_000, would
+;   need a balance over:
+;     5000000 + 1000 + (5000000 * 0x800000 / 0x100000000)
+;   Which is 5010765.625, rounded down to 5_010_765.
+;   So a total of 10_765 tokens as fees.
+transaction-fee = {
+    ; Fixed fees for each transactions.
+    ? 0 => amount,
+
+    ; Percent fees of the actual transfer amount, rounded down
+    ; if necessary.
+    ? 1 => fixed-point-percent,
+}
+
+; Fees between two symbols.
+conversion = {
+    ; Default value is 1 for 1.
+    ? 0 => conversion-rate,
+
+    ; How much does it cost to convert between 2 symbols.
+    ? 1 => conversion-fee,
+}
+
+; Conversion rate is a percent that will give
+conversion-rate = fixed-point-percent
+conversion-fee = transaction-fee
+
+; A percent based on 32 bits. The percent is fixed point over 32 bits,
+; so 50% would be 0x80000000, and 1% 0x28F5C28.
+fixed-point-percent = uint
+; end::info[]
+
+; tag::balance[]
+balance-arguments = {
+    ; Account's identity. If not specified, will use the message sender.
+    ? 0 => identity,
+
+    ; Symbol to check (or list of symbols). Symbols will be missing from
+    ; the output if their balance is 0. If this is an empty array or
+    ; omitted, all symbols with a balance for the account will be returned.
+    ? 1 => symbol // [* symbol],
+}
+
+; Return value for "ledger.balance".
+; Contains
+balance-returns = {
+    ; Balances as a record of Symbol => Amount.
+    ; Balances of zero might not be listed here.
+    0 => {
+        * symbol => amount,
+    },
+}
+; end::balance[]

@@ -1,0 +1,33 @@
+= Block Chain Attribute (#1)
+:cddl: ./cddl/
+
+This attribute is returned by servers that implement a blockchain or blockchain-like interface.
+It follows closely the http://www.rosetta-api.org[Rosetta API]'s block API, but does not provide a JSON endpoint or the full API (this is left for a bridge server).
+Although the server may not actually be backed by a decentralized blockchain, various proof can be obtained to validate that the server did act appropriately, as if it was backed by one.
+
+It exposes the following endpoints (matching the Rosetta API):
+
+- <<_info, `blockchain.info`>>.
+    Get the generic information of the blockchain (current height, etc).
+- <<_block, `blockchain.block`>>.
+    Get a block.
+- <<_transaction, `blockchain.transaction`>>
+    Get the transaction and its result either at a block height or using a transaction hash.
+
+== Arguments
+
+
+== Validators
+Every blockchain has a list of validators that must be kept up to date.
+The blockchain attribute gives express control over validators, but the actual implementation is up to the network itself.
+Basically, requirements to be a validator is left out of this attribute (1), and may differ depending on the network itself.
+The only method that this provides is to get a list of validators,
+
+== Response
+A blockchain that received a call and queued it, and does not have a proper response, MAY return an empty response with the attribute 1 (async).
+In that case the payload of the response MUST be empty.
+
+== Endpoints
+
+=== Block
+The `blockchain.block` endpoint returns a block and its metadata.

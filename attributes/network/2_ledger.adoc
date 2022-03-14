@@ -1,0 +1,73 @@
+= Ledger Attribute (#2)
+:cddl: ./cddl/
+
+This attribute is used by servers that implements an ledger interface which contains a map of accounts and symbols to amount held.
+It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
+It also does not have to list transactions.
+
+An account must be an identity which can be a subresource.
+
+It exposes the following endpoints:
+
+- <<_info, `ledger.info`>>. Returns information about this ledger.
+- <<_balance, `ledger.balance`>>. Returns the balance of the account specified (or the sender).
+- <<_send, `ledger.send`>>. Send tokens between ledgers.
+- <<_mint, `ledger.mint`>>. Creates new tokens and add them to an ledger.
+- <<_burn, `ledger.burn`>>. Destroys tokens from an ledger.
+
+== Accounts
+Accounts are non-anonymous identities.
+
+== Errors
+The following error codes are reserved for ledger servers:
+
+- 20001, `unknown_symbol(symbol)`.
+    A symbol name is unknown.
+- 20002, `unauthorized`.
+    A user is not authorized to make this transaction.
+- 20003, `insufficient_funds`.
+    An account does not have enough funds for a transaction.
+
+== Info
+The `ledger.info` endpoint returns general information about the ledger.
+
+[sources,cddl]
+----
+include::{cddl}/2_ledger.cddl[tag=info]
+----
+
+== Balance
+Returns the balance (a positive big integer) for a specific symbol (or default) for a specific account (or sender if not specified).
+
+[sources,cddl]
+----
+include::{cddl}/2_ledger.cddl[tag=balance]
+----
+
+== Send
+Transfer tokens between accounts.
+
+[sources,cddl]
+----
+include::{cddl}/2_ledger.cddl[tag=send]
+----
+
+== Mint
+Create new tokens.
+
+An ledger MAY return an `unauthorized` error if the message sender is not authorized to make this call.
+
+[sources,cddl]
+----
+include::{cddl}/2_ledger.cddl[tag=mint]
+----
+
+== Burn
+Destroy tokens.
+
+An ledger MAY return an `unauthorized` error if the message sender is not authorized to make this call.
+
+[sources,cddl]
+----
+include::{cddl}/2_ledger.cddl[tag=burn]
+----

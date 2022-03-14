@@ -1,0 +1,47 @@
+; tag::mint[]
+mint-arguments = {
+    ; Account that will receive the minted tokens.
+    0 => identity,
+
+    ; The amount of new tokens to mint.
+    1 => amount,
+
+    ; The symbol to mint.
+    2 => symbol,
+}
+mint-returns = ()
+; end::mint[]
+
+; tag::burn[]
+burn-arguments = {
+    ; Account whose tokens will be removed.
+    0 => identity,
+
+    ; The amount of tokens to burn.
+    1 => amount,
+
+    ; The symbol to burn.
+    2 => symbol,
+}
+burn-returns = ()
+; end::burn[]
+
+; tag::send[]
+send-arguments = {
+    ; Account that will send the tokens (From).
+    ; If omitted, will use the message sender.
+    ; The ledger may refuse to send from a different account than
+    ; the message sender.
+    ? 0 => identity,
+
+    ; The account that will receive the tokens.
+    1 => identity,
+
+    ; The amount of tokens to send.
+    2 => amount,
+
+    ; The symbol to send.
+    3 => symbol,
+}
+send-returns = ()
+; end::burn[]

@@ -1,0 +1,11 @@
+= Async Response Attribute (#1)
+:cddl: ./cddl/
+
+This attribute is used along with an empty payload to indicate that the call was a success but there is no response available at this time.
+This is the case when the server delay a response (for example, a blockchain might have queued a command on the block but does not have a reply yet).
+
+Having an actual response payload is specific to the network attributes.
+
+== Argument
+An argument MAY be provided with the attribute which contains a token.
+This token can be used with certain attributes to gather information about the async call.

@@ -1,0 +1,62 @@
+; tag::status[]
+status-arguments = ()
+status-returns = status
+
+status = {
+    ; Protocol version.
+    0 => uint,
+
+    ; Human readable name of this server. This is not unique.
+    ? 1 => tstr,
+
+    ; Human readable name (with potential subnames) of this network.
+    ; If omitted, the server might not be part of a network.
+    ? 6 => tstr / [ * tstr ],
+
+    ; The public key of this server, in cbor, if available.
+    ? 2 => bstr .cbor any,
+
+    ; The identity of this server. This might be different from
+    ; the public key published above, or a subresource of it.
+    3 => identity,
+
+    ; A list of attributes supported by this server.
+    4 => [ * attribute ],
+
+    ; A version of the server's software. This SHOULD follow
+    ; semver.
+    ? 5 => tstr,
+
+    ; A time delta where messages are allowed on this server, in seconds.
+    ; If the difference between the time of the server and the timestamp
+    ; on the message is larger than this, the message will be rejected.
+    ; A message might always be rejected if it was submitted after the
+    ; server time (in the future).
+    ; If this field is missing, the server does not advertize a timeout,
+    ; but it might still be enforced.
+    ? 7 => uint,
+
+    ; Additional fields are okay here as metadata, keys MUST be strings.
+    tstr => any,
+}
+; end::status[]
+
+; tag::heartbeat[]
+heartbeat-arguments = ()
+heartbeat-returns = ()
+; end::heartbeat[]
+
+; tag::endpoints[]
+endpoints-arguments = ? {
+  ? 0 => str,
+}
+endpoints-returns = [ * str ]
+; end::endpoints[]
+
+; tag::async-result[]
+async-result-arguments = {
+  ; A token returned by an async attribute.
+  ? 0 => bstr,
+}
+async-result-returns = bstr .cbor request;
+; end::result[]

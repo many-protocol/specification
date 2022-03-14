@@ -1,0 +1,208 @@
+= TBD-Verse Protocol Specification
+:cddl: ./cddl/
+Layer One Labs, LLC
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+.TODO:
+- [[attribute-index]] Attribute Index Source.
+Probably some github repository somewhere.
+
+== Introduction
+This is the {doctitle}, which describes a set of primitives and protocols to communicate with and across a network of decentralized, federated clouds, which can themselves be decentralized or not.
+The TBD-Verse itself will be decentralized because of the requirements set forth in this protocol.
+
+=== Requirements Terminology
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [https://datatracker.ietf.org/doc/html/rfc2119[RFC2119]] [https://datatracker.ietf.org/doc/html/rfc8174[RFC8174]] when, and only when, they appear in all capitals, as shown here.
+
+When the words appear in lowercase, this interpretation does not apply.
+
+=== Target Audience
+The protocol described in this specification is targeted specifically towards end users and developers.
+The requirements of end users and developers are different from protocol and cloud maintainers, notably:
+
+Users:
+
+1. want their existing technology to be usable,
+2. want their existing habits to not be vastly different with the new tech,
+3. don't want to go out of their way to buy new technology, even if the advantage is significant, unless they have a way to seamlessly transition.
+
+Similarly, Developers:
+
+1. want their existing stack to be usable and integrate with new tech,
+2. want existing APIs and documentation to be translatable with the new tech (e.g. OAuth, DNS, etc),
+3. don't want to go out of their way to learn new tooling, unless it provides a parity or advantage over their existing tools.
+
+This puts importance on integrating with the "old" world.
+
+=== Scope
+The TBD-Verse itself is the _result_ of multiple networks implementing this protocol.
+Networks MAY be decentralized themselves (e.g. by using a blockchain), or not.
+The TBD-Verse itself will be decentralized as a result of social constructs being established between networks and users.
+
+This allows for an heterogeneous global network of
+
+// == Concepts
+// === Glossary
+// - [[glossary-network]]`Network`.
+//     A `network` is a collection of 1 or more servers that act together and collude in some way, receiving messages and executing on them, and returning responses.
+//     A `network` has a message queue, and can (or not) be decentralized itself, or implement replication, as it sees fit.
+//     A `network` may or may not have a single identity.
+//     Each server running in the `network` should have its own private key and thus identity.
+// - [[glossary-server]]`Server`.
+//     A `server` is a single endpoint that is reachable and can receive messages and return responses.
+//     A `server` can be its own network, or be part of a larger network.
+// - [[glossary-messages]]`Message`.
+//     A `message` contains all information related to a transaction, its source and destination, arguments and expected metadata.
+//     It is the main method of communication between networks, and between users and the networks.
+
+== Technical Specification
+The TBD-Verse is a global actor-model based network where actors live as federated <<glossary-network,networks>>, and receive and send messages within or across those {network}s.
+Each network MUST advertize its set of attributes (e.g. whether it implements a ledger interface), and its connections and agreements with other networks (though it may not ex)
+
+[#messages]
+=== Messages
+
+All messages are encoded using https://cbor.io[CBOR] (https://datatracker.ietf.org/doc/html/rfc8949[RFC 8949]).
+
+A TBD-Verse request is a Tagged COSE Sign message (https://datatracker.ietf.org/doc/html/rfc8152[RFC 8152]) which contains as its payload a CBOR encoded request defined in this CDDL:
+
+[sources,cddl]
+----
+include::{cddl}/many.cddl[tag=request]
+----
+
+A server which implements this protocol properly MUST send back a response which is a Tagged COSE Sign message (https://datatracker.ietf.org/doc/html/rfc8152[RFC 8152]) containing as its payload a CBOR encoded response defined in this CDDL:
+
+[sources,cddl]
+----
+include::{cddl}/many.cddl[tag=response]
+----
+
+Even messages which don't have an answer (e.g. an async call) must have a response.
+
+A message that does not start with the official IANA tag (18) for a COSE message must be discarded and return a transport error.
+In the HTTP transport, this translates into a status code 500 (Internal Server Error).
+In that case, the response body MAY contain an error message, encoded as UTF-8 text.
+
+==== Keys
+
+In some cases, notably when the sender of a request or response does not have its public key shared or known, the key should be included with the request.
+To share keys with the recipient of a message, a map of `kid` to COSE Key must be added to the payload.
+
+The Key ID provided for signing the message MUST BE an identity.
+There MAY be more than one signature, and each one MUST be accompanied by the identity representing them.
+
+=== Transports
+
+Servers must implement two transports; an HTTP/s and a TCP transports (with `http://`, `https://` and `tcp://` URL schemes respectively).
+
+==== HTTP Transport
+
+In the HTTP transport, the correct `Content-Type` header is `application/cbor`.
+
+[#network]
+=== Network
+
+A network is a collection of 1 or more servers that;
+
+1. can receive and send <<messages>>,
+2. has 1 or more message recipients that can receive messages using its <<http-interface>>,
+3. has a single public key that can validate its signature,
+
+The resolution of a network recipients is left to clients.
+There is a plan for a global decentralized registry of networks for the FBF, but it is an implementation detail and should not be considered officially part of the {doctitle}.
+
+[#messages]
+=== Messages
+
+A message is a signed data envelope sent to networks (or inside a <<network>>) containing the following information:
+
+- A source <<identity>>.
+- A destination <<identity>>.
+- An optional endpoint name.
+- An optional nonce to distinguish multiple requests with the same other fields as separate.
+- An optional list of attributes for this message.
+- An optional binary payload.
+
+A message is always sent through a network's recipient's <<http-interface>>.
+A network's recipient can refuse or proxy messages that aren't addressed to it.
+
+The response to receiving a message is a signed data envelope containing the following information:
+
+- A success code, OR an error code and description (see <<api-error>>)
+- A monotonically increasing scalar that can be served as a timestamp and validation that the message was recorded.
+    This can be, e.g., a blockheight where this message is queued for (or the current blockheight).
+    It could also be an actual timestamp if the network does not have a blockchain.
+- An optional answer if the message has a synchronous answer (see TODO).
+
+[#http-interface]
+=== HTTP Interface
+
+A server that can receive messages must listen to a HTTPS (TLSv3) call with at least a few routes:
+
+|===
+| Path | Description
+
+| `/rpc` | Main entry point for the RPC endpoint.
+
+|===
+
+Other paths might need implementation depending on Network attributes.
+
+* HTTP Method MUST BE `POST`.
+* `Content-Type` MUST BE the string `application/cbor`.
+* Body must be a CBOR that follows the CBOR-RPC specification.
+  See <<http-interface-cbor-rpc>>.
+
+==== CBOR Best Practices
+
+
+[#api-error]
+==== Message Errors
+
+=== Messages
+
+==== Encoding
+
+=== Attributes
+A core tenet of the TBD-Verse is that networks can vary in size, decentralization, governance, capabilities, etc.
+As such, a proper shared and open attribute index for network is crucial to allow network to expose and advertise their implementation.
+One example would be to show support for certain signature curves.
+
+Attributes must be additive by design, and cannot be mutually exclusive.
+If a system sees an attribute that it knows is invalid, it must reject it (whether a dApp, a call, etc).
+
+Attributes are represented by a variable-length tuple that have at least one element, which is the attribute identifier.
+This identifier is an index numeral that comes from an open source repository (<<attribute-index,TODO>>).
+Attributes that are unknown should be ignored (but proxied if necessary).
+
+The other elements of the tuple are arguments to the attribute.
+The type is determined by the definition of the attribute.
+
+==== Network Attributes
+Network attributes are a list of capabilities of a network.
+
+==== Call Attributes
+Similar to capabilities for a network, attributes can be associated to a call, either on the request or the response.
+
+=== Trust and Verification
+Network's internal trust model (e.g. whether a network is fully decentralized) is loose and left to the networks.
+Some networks would build a fully decentralized network with proof (e.g. a blockchain), while other might sacrifice decentralization for performance, or specialize in certain architectures (e.g. GPGPU).
+Since each networks is federated and self-governed, it isn't fully enforceable at the protocol level.
+
+However, a network MUST sign every response and support at least secp256k1.
+An unsigned response from a message is considered an error and the message can be safely resent (or sent to a different destination).
+
+[#identity]
+include::protocol/identity.adoc[leveloffset=2]
+
+== CDDL
+The CBOR definition for the types described in this document is:
+
+[source,cddl]
+----
+include::{cddl}/many.cddl[]
+----

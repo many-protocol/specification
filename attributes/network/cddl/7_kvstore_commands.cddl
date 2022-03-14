@@ -1,0 +1,20 @@
+; tag::put[]
+put-arguments = {
+    ; Key.
+    0 => bstr,
+
+    ; Value
+    1 => bstr,
+}
+
+put-returns = {}
+; end::put[]
+
+; tag::delete[]
+delete-arguments = {
+    ; Key.
+    0 => bstr,
+}
+
+delete-returns = {}
+; end::delete[]

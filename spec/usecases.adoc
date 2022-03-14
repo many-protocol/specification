@@ -1,0 +1,12 @@
+
+
+== Use Cases
+a. Decentralized DNS.
+b. Push notifications email
+c. SMTP server
+  1. Decentralized mail storage dApp
+  2. Decentralized HTTP app client
+  3. Centralized SMTP port listener
+  4. Centralized Websocket server
+d. Decentralized Blockchain Map Reduce (Layer >= 2) of Blockchain networks
+  1. Necessary for data science

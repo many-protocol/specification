@@ -1,0 +1,68 @@
+= Key-Value Store Attribute (#3)
+:cddl: ./cddl/
+
+This attribute is used by servers that implements a key value store interface.
+It does not have to be behind a blockchain.
+
+It exposes the following endpoints:
+
+- <<_info, `kvstore.info`>>.
+    Returns information about this kvstore.
+- <<_put, `kvstore.put`>>.
+    Returns the balance of the account specified (or the sender).
+- <<_get, `kvstore.get`>>. Creates new tokens and add them to an account.
+
+== Errors
+The following error codes are reserved for ledger servers:
+
+- 20001, `u(symbol)`.
+    A symbol name is unknown.
+- 20002, `unauthorized`.
+    A user is not authorized to make this transaction.
+- 20003, `insufficient_funds`.
+    An account does not have enough funds for a transaction.
+
+== Keys
+Keys are any valid byte string, including NULL characters.
+Keys that don't exist should return
+
+== Schema
+The store MUST NOT do any validation on the schema of values.
+They MUST be considered opaque byte string.
+
+Other attributes might add this functionality.
+
+== ACLs
+Similarly, by default a kvstore is permission-less and should allow any identities to overwrite and read any keys.
+
+== Info
+The `kvstore.info` endpoint returns general information about the ledger.
+
+[sources,cddl]
+----
+include::{cddl}/3_kvstore.cddl[tag=info]
+----
+
+== Get
+The `kvstore.get` endpoint returns the value stored at a specific key.
+
+[sources,cddl]
+----
+include::{cddl}/3_kvstore.cddl[tag=get]
+----
+
+== Put
+The `kvstore.put` endpoint sets the value at a specific key.
+
+[sources,cddl]
+----
+include::{cddl}/3_kvstore.cddl[tag=put]
+----
+
+== Delete
+The `kvstore.delete` endpoint removes a value at a specific key.
+
+[sources,cddl]
+----
+include::{cddl}/3_kvstore.cddl[tag=delete]
+----

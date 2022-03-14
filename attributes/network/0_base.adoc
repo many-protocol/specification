@@ -1,0 +1,48 @@
+= Base Server Attribute (#0)
+:cddl: ./cddl/
+
+This attribute exposes the basic information of the server.
+
+It exposes the following endpoints:
+
+- <<_status, `status`>>.
+    Get the status of the network, its given name (non-unique), identity (unique), public key, and any other information the server wants to make available (free form dictionary).
+- <<_echo, `echo`>>.
+    Returns the input bytes per bytes, in a signed envelope.
+- <<_heartbeat, `heartbeat`>>.
+    Returns no data.
+- <<_endpoints, `endpoints`>>.
+    Returns a (maybe incomplete) list of all supported endpoints.
+
+== Status
+The `status` endpoint returns informations related to the network.
+It does not take any argument.
+
+[sources,cddl]
+----
+include::{cddl}/0_base.cddl[tag=status]
+----
+
+== Heartbeat
+The `heartbeat` endpoint returns no bytes at all. It can be used to
+see if the server is alive.
+
+[sources,cddl]
+----
+include::{cddl}/0_base.cddl[tag=heartbeat]
+----
+
+== Endpoints
+The `endpoints` endpoint returns an array of endpoints supported by this network.
+The list MAY be imcomplete, but endpoints returned by this call MUST be supported.
+
+Some networks don't know if they implement an endpoint before trying to execute a message (for example, if the endpoint is conditional on the sender).
+Those networks are not obligated to return endpoints that it might not want to expose.
+Another example are proxy networks which may or not know the actual list of endpoints as it differs based on the backend itself.
+
+A server MAY return an empty list.
+
+[sources,cddl]
+----
+include::{cddl}/0_base.cddl[tag=endpoints]
+----

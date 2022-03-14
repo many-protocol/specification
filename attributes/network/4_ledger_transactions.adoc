@@ -1,0 +1,41 @@
+= Ledger Attribute (#4)
+:cddl: ./cddl/
+
+This attribute is used by servers that implements a ledger interface which keeps a list of transactions performed on its address book.
+It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
+
+A network implementing this attribute MUST also implement the ledger attribute (#2) for exposing the finalized state view of the ledger.
+
+It exposes the following endpoints:
+
+- <<_info, `ledger.info`>>. Returns information about this ledger.
+- <<_list, `ledger.list`>>. List transactions.
+
+== Accounts
+Accounts in a ledger are non-anonymous identities.
+
+== Errors
+The following error codes are reserved for ledger servers:
+
+== Types
+[sources,cddl]
+----
+include::{cddl}/4_ledger_transactions.cddl[tag=types]
+----
+
+== Info
+The `ledger.info` endpoint adds new informations to the returned map.
+
+[sources,cddl]
+----
+include::{cddl}/4_ledger_transactions.cddl[tag=info]
+----
+
+== List
+List transactions, potentially filtered and sorted by transaction id.
+
+[sources,cddl]
+----
+include::{cddl}/4_ledger_transactions.cddl[tag=list]
+----
+

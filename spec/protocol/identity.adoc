@@ -1,0 +1,54 @@
+= Identity
+Every actor, signer and networks have an identity, which is similar to an address in Ethereum.
+
+There are really 3 types of identities as part of the TBD-Verse;
+
+1. *Anonymous.*
+An anonymous user does not sign messages.
+It's a fixed identity that can be used by anyone when sending messages.
+Those messages won't be able to identify the source.
+2. *Public Key.*
+A public key can be a program or a user that is the source of a message and can send messages.
+It MUST sign all messages sent, and its ID is a hash of the public key that can validate the signature.
+3. *Subresource.*
+A Subresource identity is an indexed resource inside a network that does not have its own internal public key but can be addressed.
+Messages to and from a subresource should use the same public key as the network they're part of.
+
+A TBD-Verse ID is a binary buffer of up to 256 bits (32 bytes).
+The first 8 bits contain the type of the ID.
+The rest depends on the type of identity:
+
+[stripes=odd,cols="1,1,1,2"]
+|===
+3+| Bytes | Description
+
+| Tag (8 bits)
+2+| Content (up to 31 bytes)
+|
+
+3+| 0x00 (Anonymous)
+| Anonymous Identifier.
+The identity field can be omitted for anonymous identities.
+If required, the serialization of the anonymous identity is a single nul byte.
+
+| 0x01 (Public Key)
+2+| SHA-3 (224 bits) of COSE encoded public key (see <<_cose_key>>).
+| An identity that has a private key (can sign), and MAY receive messages.
+This can be a user or a network of computers sharing a distributed key.
+
+| 0x80 - 0xFF (Subresource index high bits)
+| SHA-3 (224 bits) of COSE encoded public key (see <<_cose_key>>).
+| 24 bits subresource index low bits (see description).
+| A sub resource that is part of a Public Key identity.
+It can be directly addressed, but is sharing a public key with other resources and with the network itself.
+An example could be a distributed application or smart contract that doesn't have its own key.
+
+The Subresource ID is; a 0 bit, the lower 7 bits of the Identity's tag, then the 24 last bits of the identity bytes.
+This allows for 31 bits of subresource.
+|===
+
+== Textual Format
+To render an identity into a textual version.
+
+The string format is the character `o` followed by 3 characters that represent the checksum, followed by the content of the identity itself.
+

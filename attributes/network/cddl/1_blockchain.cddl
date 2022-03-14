@@ -1,0 +1,202 @@
+; tag::types[]
+; A message in a block.
+; `request` type is defined in the MANY protocol's CDDL. It should include the protected
+; header, payload and signature. A blockchain MAY drop the unprotected header to save
+; on block size.
+message = bstr .cbor request
+
+; Sorting order. This only matters if a call uses a maximum number of transactions
+; as they will be returned in the order and stopped.
+; For example, if a call lists ALL transactions, but the server returns only 100,
+; using an ASCENDING order returns the first 100, while a DESCENDING order returns
+; the last 100.
+order = (
+    indeterminate /
+    ascending /
+    descending
+)
+indeterminate = 0
+ascending = 1
+descending = 2
+
+; A bound, either upper or lower, serialized.
+bound<T> =
+    ; Unbounded.
+    []
+    ; Inclusive bound.
+    / [0, T]
+    ; Exclusive bound.
+    / [1, T]
+
+; A block query, which can contain either a hash, index (or height) or time.
+; This targets a single block. Since multiple blocks might have been created
+; at the same time, this cannot include a time value (use a bounded block
+; query instead).
+single-block-query = {
+    ; A hash of a block. The length and algorithm is implementation specific.
+    0 => bstr
+    ; A specific height.
+    // 1 => uint
+}
+
+; A block query over a range of height or time. This can also be a single
+; block-query.
+bound-block-query =
+    block-query
+    ; Height range.
+    / { 1 => bound<uint> }
+    ; Time value or time range.
+    / { 2 => time / bound<time> }
+
+; A block identifier, as a way to target a block. This matches loosely the fields
+; of single-block-query.
+block-identifier = {
+    ; Hash of the block.
+    0 => bstr,
+
+    ; Height of the block. This cannot be 0, unless the block is the genesis
+    ; block (see genesis-block-identifier).
+    1 => uint,
+}
+
+; A genesis block identifier. This should be used as the parent of a
+genesis-block-identifier = {
+    0 => bstr .size 0,
+    1 => 0,
+}
+
+; A query for a single transaction.
+single-transaction-query =
+    ; A transaction hash.
+    { 0 => bstr }
+    ; A block + transaction index.
+    / { 1 => [ single-block-query, uint ] }
+
+; A unique identifier for the transaction on this network.
+transaction-identifier = {
+    ; A hash value of the transaction.
+    0 => bstr,
+}
+
+; A transaction, which should be a message. Some metadata can be added.
+transaction = {
+    ; The identifier of the transaction.
+    0 => transaction-identifier,
+
+    ; The content of the transaction. This should be a MANY request.
+    ; If this field is missing, the transaction was too large to fit here and
+    ; should be queried separately. Use the `block.request` endpoint.
+    ; If this field is there but empty (not a request), the transaction is
+    ; empty or metadata-only (implementation specific).
+    ? 1 => bstr .cbor request / bstr .size 0,
+
+    ; The response for the transaction. This should be a MANY response.
+    ; If this field is missing, the response might be too large to fit in a single
+    ; response.  Use the `block.response` endpoint.
+    ; If this field is empty, the transaction is empty or metadata-only
+    ; (implementation specific).
+    ? 2 => bstr .cbor response / bstr .size 0,
+
+    ; Additional fields are okay here as metadata, as long as keys are strings.
+    tstr => any,
+}
+
+; A block. Blocks contain an array of transactions, and a parent block.
+; Blocks MUST be immutable and cacheable. If two block-identifier are the same,
+; the blocks their query MUST be the same as well (including meta-data).
+block = {
+    ; The block identifier.
+    0 => block-identifier,
+
+    ; The parent block identifier. If this is a genesis-block-identifier, this
+    ; specific block is the oldest in the chain. Request a genesis block
+    ; identifier should return a block unknown error.
+    ; If this field is missing, then the parent is not part of the retained
+    ; blocks, and cannot be queried. It is _not_ a genesis block.
+    ? 1 => block-identifier / genesis-block-identifier,
+
+    ; The application hash value after this block was executed.
+    ? 2 => bstr,
+
+    ; Time the block was created.
+    3 => time,
+
+    ; Total number of transactions.
+    4 => uint,
+
+    ; Transactions / Messages sent through this block. If the response is larger
+    ; than the maximum message size, the transaction content might be skipped.
+    ? 5 => [ * transaction ],
+    ; TODO: add transaction hashes in case messages don't fit.
+    ? 6 => [ * transaction-hashes ],
+
+    ; Additional fields are okay here as metadata, keys MUST be strings.
+    * tstr => any,
+}
+; end::types[]
+
+; tag::info[]
+; The blockchain.info endpoint returns information about the current state of this
+; blockchain.
+info-arguments = ()
+
+info-returns = {
+    ; The latest block identifier.
+    0 => block-identifier,
+
+    ; If a server with a state is running behind the blockchain, this is the
+    ; hash of the state.
+    ? 1 => bstr,
+
+    ; The earliest height that is queryable from the blockchain. A blockchain is
+    ; allowed to remove old block information. If this information is missing,
+    ; the blockchain might not know ahead of time and should be queried.
+    ? 2 => uint,
+}
+; end::info[]
+
+; tag::block[]
+; The blockchain.block endpoint returns a single block from the blockchain.
+block-arguments = {
+    ; A single block query.
+    0 => single-block-query,
+}
+
+block-returns = {
+    ; The block being requested.
+    0 => block,
+}
+; end::block[]
+
+; tag::transaction[]
+; The blockchain.transaction endpoint returns a single transaction by its identifier.
+transaction-arguments = {
+    0 => single-transaction-query,
+}
+
+transaction-returns = {
+    0 => transaction,
+}
+; end::transaction[]
+
+; tag::request[]
+; The blockchain.request endpoint returns a request of a transaction by its identifier.
+request-arguments = {
+    0 => single-transaction-query,
+}
+
+request-returns = {
+    0 => bstr .cbor request / bstr .size 0,
+}
+; end::request[]
+
+; tag::response[]
+; The blockchain.response endpoint returns a response of a transaction by its identifier.
+response-arguments = {
+    0 => single-transaction-query,
+}
+
+response-returns = {
+    0 => bstr .cbor response / bstr .size 0,
+}
+; end::response[]

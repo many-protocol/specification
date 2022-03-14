@@ -1,0 +1,6 @@
+= Best Practices
+
+=== Byte String Endianness
+Anytime a number is serialized to a byte string, prefer Network Byte Order (BigEndian) over other orders.
+
+

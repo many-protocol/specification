@@ -1,0 +1,13 @@
+= ABCI-MANY Frontend Attribute (#1001)
+:cddl: ./cddl/
+
+This attribute is advertised by a server which proxy messages in two different ways, following the CQRS (Command-Query Responsibility Segregation) pattern.
+
+A MANY server does not guarantee for decentralized security, so if using ABCI as an implementation of the decentralization, the Bridge Attribute must be implemented by the server and its MANY backend should not be exposed to external network.
+
+Servers exposing this attribute MUST also expose the <./1_blockchain.adoc>[Blockchain attribute (#1)].
+This attribute simply add more ABCI and tendermint specific endpoints.
+
+It exposes the following endpoints:
+
+- `abci.getHeight`.

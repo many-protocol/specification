@@ -1,0 +1,132 @@
+; tag::request[]
+; A request message.
+request = COSE_Sign<{
+    ; Protocol version. This is 1 by default.
+    ? 0 => uint,
+
+    ; Message originator (From). If anonymous, this field can be omitted.
+    ; This can also be omitted if the envelope only contains 1 signature and
+    ; public key.
+    ? 1 => identity,
+
+    ; Message destination (To). If omitted or anonymous, the first server who
+    ; receives this message should assume he is the destination. If different
+    ; than the server receiving the message, the server is allowed to reject
+    ; the message, or proxy/forward it. That behaviour is the same when using
+    ; an anonymous identity as destination.
+    ? 2 => identity,
+
+    ; Endpoint name.
+    3 => text,
+
+    ; Argument, as an opaque byte string. See endpoints for implementation.
+    ? 4 => bstr,
+
+    ; The timestamp of this message. A network can reject messages too far in the
+    ; future or the past.
+    5 => time,
+
+    ; Optional ID number (up to 64 bits). This will be returned in the response and
+    ; can be used to tag messages for async communication. This is different from
+    ; the Nonce as it is returned.
+    ? 6 => uint,
+
+    ; Nonce. This is ignored by the server and can be dropped by reverse proxies.
+    ; This can be used to avoid replay errors when a client has to send the same
+    ; message multiple times really quickly.
+    ? 7 => bstr,
+
+    ; Attributes. An optional list of request attributes defined in the spec. See
+    ; the list of all attributes in this repo.
+    ? 8 => [ * attribute ],
+}>
+; end::request[]
+
+; tag::response[]
+; Every request MUST return a response, even if empty.
+response = COSE_Sign<{
+    ; Protocol version. This is 1 by default.
+    ? 0 => uint,
+
+    ; Response originator (From). This SHOULD BE the request destination, but
+    ; can differ when proxying or depending on attributes.
+    1 => identity,
+
+    ; Message destination (To). This SHOULD BE the request originator, but can
+    ; differ depending on attributes. It should be checked by the client before
+    ; assuming the response is for itself. If anonymous or omitted, the client
+    ; should assume it is the intended recipient.
+    ? 2 => identity,
+
+    ; Skipping 3 so that fields from Request and Response matches their
+    ; "equivalent" index. 3 in Request is `endpoint` which doesn't exist in the
+    ; response.
+
+    ; The type of the return will indicate if it is an error or a success.
+    ; If this is a bytestring, it contains the return value of a successful
+    ; request.
+    ; If this is a map, it contains the error code, optional text and
+    ; optional arguments.
+    (
+        4 => bstr .cbor any / bstr .size 0
+        //
+        4 => error
+    ),
+
+    ; A timestamp of the response. This is when the response was generated, but
+    ; might not be close to the timestamp of the request message (for example, if
+    ; using some request/response mailbox). This shouldn't invalidate the response
+    ; itself.
+    5 => time,
+
+    ; If an ID was passed as the request, the same ID should be returned here.
+    ? 6 => uint,
+
+    ; Attributes. An optional list of response attributes defined in the spec. See
+    ; the list of all attributes in this repo.
+    ? 8 => [ * attribute ],
+}>
+; end::response[]
+
+; tag::error[]
+; An error type, representing an error and its description.
+; Error codes are specified in the MANY specification, with negative error codes reserved
+; for attributes and spec defined errors, and positive codes reserved for application
+; specific errors.
+error = {
+    ; Error code. See [../errors.adoc].
+    0 => int,
+
+    ; Optional error description. This MUST be provided if the error code is not defined
+    ; in the MANY specification. The string can contain replacement of the format
+    ; `{arg_name}` (a `{` character, followed by any non-space characters, followed by
+    ; a `}` character), which should be replaced by the value in the argument map.
+    ; To use an actual `{` character, replace with `{{`, and same with `}` and `}}`.
+    ; Note that `{}` is a valid replacement string.
+    ; If an argument is not in the map, it should be replaced with an empty string.
+    ? 1 => tstr,
+
+    ; An optional string to string argument map. More arguments may be provided than
+    ; needed in the description.
+    ? 2 => {
+        tstr => tstr
+    },
+}
+; end::error[]
+
+; tag::identity[]
+; An identity is either a tagged byte string matching the identity format, or a textual
+; representation of the identity (which can deserialize to the byte string matching the
+; identity format).
+identity = tstr / #6.10000(
+    anonymous-identity /
+    public-key-identity /
+    subresource-identity
+)
+
+anonymous-identity = h'00'
+public-key-identity = bytes .cbor [ h'01', bytes .size 28 ]
+subresource-identity = bytes .cbor [ h'80'..h'FF', bytes .size 28, bytes .size 3 ]
+; end::identity[]
+
+attribute = uint / [uint, * any]

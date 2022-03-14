@@ -1,0 +1,35 @@
+= TBD-Verse Attributes
+L-1 Labs
+:cddl-dir: ../cddl
+
+== Attribute Format
+Attributes are numeral indices into a table of additive attributes.
+The exact number is taken from the attribute blockchain.
+
+== Network Attributes
+These attributes are associated to a network and give a list of the capabilities of the network.
+
+=== Private Attributes
+Any negative attribute is reserved for experimental or private attributes that the network might define within itself, advertise, but is not yet finalized or adopted.
+The rest of the fields are up to the internal implementation.
+Unless a system is certain of the meaning of the attribute for a specific network, it should not interpret those attributes itself.
+
+=== Implementation specific Attributes
+Some attributes can be implementation specific, and will implement both the generic attribute endpoints, and its own implementation specific endpoints.
+
+For example, the blockchain attribute (1) implement endpoints that are generic to all blockchains or when dealing with blocks in general.
+An implementation of a blockchain, for example, might add more methods to manage the blockchain itself.
+
+=== Return Values
+Some attributes may change the return value of related attributes.
+This is important as not every attribute is synchronous.
+
+For example, the Mailbox attribute, which allow a server to store and delay sending messages and their responses, will never return a message when sending messages.
+
+Processes who expect answers in the proper schema will most likely fail.
+That's normal.
+
+A CBOR tag on the payload value (not in the bytestring) must be added by those processes to let the caller know there was a different result.
+The tags are specified per attribute.
+
+A tag MUST NOT be added to the result if the value follows the schema specified by the attribute specification.
