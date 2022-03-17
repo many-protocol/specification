@@ -13,6 +13,8 @@ Many protocol brings together a wide variety of technical solutions — includin
 limited to decentralized solutions like blockchains — in order to create an interoperable
 network-of-networks built for the real world in all it's messy, beautiful glory.
 
+![ManyVerse Diagram](assets/ManyVerse.png)
+
 As a protocol, Many defines the communications interface and several key behaviors (known
 as “attributes”) for any node operating within a network supporting the Many protocol.
 
