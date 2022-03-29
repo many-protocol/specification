@@ -1,0 +1,208 @@
+= ABCI Architecture
+Layer 1 Labs, LLC
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+== Abstract
+The Manifest Network currently uses ABCI for its blockchain implementation.
+Most modules developed by L-1 Labs can run behind a blockchain, provided that blockchain is implemented using tendermint and a pair of special modules to integrate with it.
+The goal of this document is to describe the interaction between the blockchain module (#1), the two ABCI modules (#1000 and #1001), and Tendermint itself.
+
+== Background
+In order to implement the generic blockchain attribute, a network has to have a consistent and well known blockchain implementation.
+Tendermint is the most chosen POS BFT consensus engine available.
+
+As an alternative example, Substrate was also considered as an alternative and may have become an implementation in the future.
+This would not invalidate this document as both Substrate and Tendermint can be used as a backend for the blockchain attribute in the MANY protocol.
+As long as MANY attributes are respected and the MANY protocol is used to communicate, any blockchain implementation can be interconnected.
+
+Tendermint has been chosen for its well documented API, good performance, ease of use and integration, and its versatility.
+
+== Design
+Any module that can be executed in a "blockchain-mode" MUST implement the ABCI Backend (#1000) attribute.
+The ABCI Backend attribute implements all the ABCI calls necessary to implement a Tendermint ABCI App.
+
+On the server, a MANY-ABCI bridge process should transform MANY requests into two categories;
+
+1. Queries, which don't affect the state and can be forwarded directly to the backend.
+2. Commands, which affect the state and should be sent (using `deliver_tx`) to Tendermint to queue in the mempool.
+
+This process MUST implement the ABCI frontend attribute (#1001), to let people verify that the blockchain itself is a Tendermint.
+
+For example, if a Ledger server is running, the components would look like this:
+
+[plantuml, format=png]
+....
+card "Ledger Server\n #2" as ledger {
+    agent "ABCI Backend\n #1000" as be
+}
+card "Tendermint" as tendermint {
+}
+card "Tendermint" as tendermint2 {
+}
+card "MANY-ABCI bridge" as bridge {
+    agent "ABCI Frontend\n #1001\n (#1 from backend)\n (#2 for blockchain)"
+}
+
+tendermint -up-> ledger : 127.0.0.1:26658
+tendermint <-down-> bridge : 127.0.0.1:26657
+tendermint <-right-> tendermint2 : 127.0.0.1:26656
+ledger <-up-> bridge : 127.0.0.1:8000
+....
+
+=== Initialization
+The initialization of the MANY ABCI bridge essentially lookup the backend's `status` to get the list of attributes and arguments from it.
+It should then remove the ABCI Backend attribute and endpoints from the list to build its own internal status information.
+
+Once the bridge has checked that both backends are online and responding,
+
+In pseudo-code, the initialization of the bridge should look like:
+
+[source, javascript]
+....
+function initialize(backend_url, tendermint_url) {
+    let many_client = new ManyClient(backend_url)
+    let tendermint_client = new TendermintTcpClient(tendermint_url)
+
+    let many_status = many_client.call_status()
+    tendermint_client.call_status()  // Verify the tendermint instance is ready.
+
+    // The name can vary, but it is recommended to include the name of the backend.
+    let name = "MANY-ABCI Bridge (" + many_status.name + ")"
+
+    let attributes = many_status.attributes.filter(a => a.id != 1000).concat([1001])
+    let endpoints = many_client.call("abci.init").endpoints  // See Attribute #1000
+
+    let status = new Status(attributes, endpoints);
+
+    return create_many_server(envelope => { /* See the message forwarding section */ })
+}
+....
+
+=== Message Passing
+When the MANY-ABCI bridge frontend receives a message, it has one of 3 options;
+
+1. handle it internally, for example for the blockchain or base network attributes.
+2. send it to the backend directly.
+3. send it to Tendermint for queueing it in the mempool.
+
+The way to differentiate between the second and third option is to keep an internal list of endpoints for the backend app (which you get by calling `abci.init`), which contains a type property which determines if a call is a query (send it directly), or a command (queue it in the mempool).
+
+In pseudo-code, the bridge initialization looks like this:
+
+[source, javascript]
+....
+function initialize(backend_url, tendermint_url) {
+    let many_client = new ManyClient(backend_url)
+    let tendermint_client = new TendermintTcpClient(tendermint_url)
+
+    let status = /* See initialization above. */ new Status(...);
+
+    let endpoints = many_client.call("abci.init").endpoints.filter(...);
+
+    return create_many_server(envelope => {
+        let message = decode_envelope(envelope);
+        switch (endpoints) {
+            case "status": return status;
+            case "endpoints": return new Set([
+                ...NetworkAttributes.Base.endpoints,
+                ...NetworkAttributes.Blockchain.endpoints,
+                ...endpoints
+            ]);
+            case "heartbeat": return null;
+        }
+
+        if (endpoints.contains(message.method)) {
+            let info = endpoints[message.method];
+            if (info.is_command) {
+                let tx = await tendermint_client.deliver_tx(envelope);
+                // The transaction hash is used as the async token.
+                return new Envelope(this.identity, null, [ResponseAttributes.ASYNC(tx.hash)]);
+            } else {
+                return many_client.send_envelope(envelope);
+            }
+        }
+        throw new MethodNotFound(message.method);
+    })
+}
+....
+
+=== Sequence
+A sequence diagram of the various use cases.
+
+[plantuml, format=png]
+....
+@startuml
+title Request - Response Sequence for the MANY - ABCI bridge.
+
+actor user as "User"
+participant many as "MANY Frontend\n(ABCI Bridge)"
+participant tendermint
+participant abci_app as "ABCI App"
+participant many_app as "MANY App"
+
+== Initialization ==
+many -> many_app : \
+    abci.info
+many_app -> many : \
+    many_abci::Info
+
+== Commands ==
+
+user -> many : \
+    many::RequestMessage\nmethod: "account.mint"
+many -> tendermint : \
+    broadcast_tx\n(signed envelope)
+
+tendermint -> abci_app : \
+    check_tx
+
+abci_app -> many_app : \
+    abci.checkTransaction
+
+many_app -> abci_app : \
+    Ok
+
+abci_app -> tendermint : \
+    Ok
+
+tendermint -> abci_app : \
+    deliver_tx
+
+abci_app -> many_app : \
+    many::RequestMessage
+
+activate many_app
+many_app -> abci_app : many::ResponseMessage
+note left of abci_app
+  Message saved in the block result.
+end note
+deactivate
+
+' ---
+
+== Queries ==
+
+user -> many : \
+    many::RequestMessage\nmethod: "account.balance"
+many -> tendermint : \
+    query\n(signed envelope)
+
+tendermint -> abci_app : \
+    query
+
+abci_app -> many_app : \
+    many::RequestMessage
+
+activate many_app
+many_app -> abci_app : many::ResponseMessage
+deactivate
+
+abci_app -> tendermint
+tendermint -> many
+many -> user : \
+    many::ResponseMessage
+
+@enduml
+....
