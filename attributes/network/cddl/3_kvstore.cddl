@@ -1,7 +1,7 @@
 ; tag::info[]
 ; Info endpoint.
-info-arguments = ()
-info-returns = (info)
+kvstore.info@param = ()
+kvstore.info@return = (info)
 
 info = {
     ; Hash value of the key value state. If two stores have the same hashes,
@@ -15,12 +15,12 @@ info = {
 ; end::info[]
 
 ; tag::get[]
-get-arguments = {
+kvstore.get@param = {
     ; The key to get.
     0 => bstr,
 }
 
-get-returns = {
+kvstore.get@return = {
     ; The value directly returned.
     ? 0 => bstr,
 }

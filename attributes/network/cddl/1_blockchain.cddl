@@ -138,9 +138,9 @@ block = {
 ; tag::info[]
 ; The blockchain.info endpoint returns information about the current state of this
 ; blockchain.
-info-arguments = ()
+blockchain.info@param = ()
 
-info-returns = {
+blockchain.info@return = {
     ; The latest block identifier.
     0 => block-identifier,
 
@@ -157,12 +157,12 @@ info-returns = {
 
 ; tag::block[]
 ; The blockchain.block endpoint returns a single block from the blockchain.
-block-arguments = {
+blockchain.block@param = {
     ; A single block query.
     0 => single-block-query,
 }
 
-block-returns = {
+blockchain.block@return = {
     ; The block being requested.
     0 => block,
 }
@@ -170,33 +170,33 @@ block-returns = {
 
 ; tag::transaction[]
 ; The blockchain.transaction endpoint returns a single transaction by its identifier.
-transaction-arguments = {
+blockchain.transaction@param = {
     0 => single-transaction-query,
 }
 
-transaction-returns = {
+blockchain.transaction@return = {
     0 => transaction,
 }
 ; end::transaction[]
 
 ; tag::request[]
 ; The blockchain.request endpoint returns a request of a transaction by its identifier.
-request-arguments = {
+blockchain.request@param = {
     0 => single-transaction-query,
 }
 
-request-returns = {
+blockchain.request@return = {
     0 => bstr .cbor request / bstr .size 0,
 }
 ; end::request[]
 
 ; tag::response[]
 ; The blockchain.response endpoint returns a response of a transaction by its identifier.
-response-arguments = {
+blockchain.response@param = {
     0 => single-transaction-query,
 }
 
-response-returns = {
+blockchain.response@return = {
     0 => bstr .cbor response / bstr .size 0,
 }
 ; end::response[]

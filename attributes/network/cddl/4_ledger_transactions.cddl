@@ -120,8 +120,8 @@ amount = biguint / uint
 
 ; tag::info[]
 ; `ledger.transactions` endpoint.
-transactions-arguments = ()
-transactions-returns = {
+ledger.transactions@param = ()
+ledger.transactions@return = {
     ; Total number of transactions.
     0 => uint,
 }
@@ -129,7 +129,7 @@ transactions-returns = {
 
 ; tag::list[]
 ; `ledger.list` endpoint for listing, filtering and sorting transactions.
-list-arguments = {
+ledger.list@param = {
     ; Maximum number of transactions to return. The server can still limit the number of
     ; transactions it returns if this number is high.
     ? 0 => uint,
@@ -142,7 +142,7 @@ list-arguments = {
     ; Transaction filter criteria.
     ? 2 => filter,
 }
-list-returns = {
+ledger.list@return = {
     ; Total number of transactions (currently). This is the same number that info
     ; would give, but it's atomic to this call.
     0 => uint,
@@ -152,3 +152,4 @@ list-returns = {
 }
 ; end::list[]
 
+ledger.list@param

@@ -1,6 +1,6 @@
 ; tag::status[]
-status-arguments = ()
-status-returns = status
+status@param = ()
+status@return = status
 
 status = {
     ; Protocol version.
@@ -42,21 +42,21 @@ status = {
 ; end::status[]
 
 ; tag::heartbeat[]
-heartbeat-arguments = ()
-heartbeat-returns = ()
+heartbeat@param = ()
+heartbeat@return = ()
 ; end::heartbeat[]
 
 ; tag::endpoints[]
-endpoints-arguments = ? {
+endpoints@param = () // {
   ? 0 => str,
 }
-endpoints-returns = [ * str ]
+endpoints@return = [ * str ]
 ; end::endpoints[]
 
-; tag::async-result[]
-async-result-arguments = {
+; tag::result[]
+result@param = {
   ; A token returned by an async attribute.
   ? 0 => bstr,
 }
-async-result-returns = bstr .cbor request;
-; end::result[]
+result@result = bstr .cbor request;
+; end::async[]
