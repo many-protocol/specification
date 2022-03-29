@@ -14,8 +14,8 @@ amount = biguint / uint
 
 ; tag::info[]
 ; Info endpoint.
-info-arguments = ()
-info-returns = (info)
+ledger.info@param = ()
+ledger.info@return = (info)
 
 info = {
     ; List of supported symbols for this ledger.
@@ -100,7 +100,7 @@ fixed-point-percent = uint
 ; end::info[]
 
 ; tag::balance[]
-balance-arguments = {
+ledger.balance@param = {
     ; Account's identity. If not specified, will use the message sender.
     ? 0 => identity,
 
@@ -112,7 +112,7 @@ balance-arguments = {
 
 ; Return value for "ledger.balance".
 ; Contains
-balance-returns = {
+ledger.balance@return = {
     ; Balances as a record of Symbol => Amount.
     ; Balances of zero might not be listed here.
     0 => {

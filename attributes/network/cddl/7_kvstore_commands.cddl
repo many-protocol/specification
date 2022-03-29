@@ -1,5 +1,5 @@
 ; tag::put[]
-put-arguments = {
+kvstore.put@param = {
     ; Key.
     0 => bstr,
 
@@ -7,14 +7,14 @@ put-arguments = {
     1 => bstr,
 }
 
-put-returns = {}
+kvstore.put@return = {}
 ; end::put[]
 
 ; tag::delete[]
-delete-arguments = {
+kvstore.delete@param = {
     ; Key.
     0 => bstr,
 }
 
-delete-returns = {}
+kvstore.delete@return = {}
 ; end::delete[]

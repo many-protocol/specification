@@ -1,5 +1,5 @@
 ; tag::mint[]
-mint-arguments = {
+ledger.mint@param = {
     ; Account that will receive the minted tokens.
     0 => identity,
 
@@ -9,11 +9,11 @@ mint-arguments = {
     ; The symbol to mint.
     2 => symbol,
 }
-mint-returns = ()
+ledger.mint@return = ()
 ; end::mint[]
 
 ; tag::burn[]
-burn-arguments = {
+ledger.burn@param = {
     ; Account whose tokens will be removed.
     0 => identity,
 
@@ -23,11 +23,11 @@ burn-arguments = {
     ; The symbol to burn.
     2 => symbol,
 }
-burn-returns = ()
+ledger.burn@return = ()
 ; end::burn[]
 
 ; tag::send[]
-send-arguments = {
+ledger.send@param = {
     ; Account that will send the tokens (From).
     ; If omitted, will use the message sender.
     ; The ledger may refuse to send from a different account than
@@ -43,5 +43,5 @@ send-arguments = {
     ; The symbol to send.
     3 => symbol,
 }
-send-returns = ()
+ledger.send@return = ()
 ; end::burn[]
