@@ -1,0 +1,73 @@
+= Async Request Status Attribute (#8)
+:cddl: ./cddl/
+
+A server normally MUST return the value of a request synchronously within a reasonable time, or error out with a timeout error.
+In the case of requests that are to be performed asynchronously, a server can support caching the result and allowing users to query the status of a request.
+The server MUST return an empty response with the attribute ASYNC (#1) added to it.
+
+That attribute MAY have an argument which is a token that can be used to verify the status.
+In the case where a token is missing, a hash of the whole envelope sent by the user can be used instead.
+The exact format of this hash is left as an implementation detail at the moment.
+
+If the server supports caching and checking the result of a request/response exchange, it should advertise this attribute.
+Request and response exchanges can be checked with either a token or a hash of the request's envelope.
+These two can be the same value.
+
+This attribute adds one method to the root namespace: `result`, which can be used to query one of four states of a request;
+
+- `unknown`.
+    A request has never been seen or its information is unavailable.
+    This can also happen when the server requires that a user have the same public key as the request it looks for the result.
+- `queued`.
+    A request is queued for being processed later.
+    The exact timing might not be known at this time.
+- `processing`.
+    A request is being processed.
+    The request might have some delay between the time it is being executed and the time it is done.
+    For example, the request is in the next block, but the block hasn't been fully executed yet.
+    The exact processing time might not be known at this time.
+- `done`.
+    A request is done and the result is available.
+    The result envelope MUST be part of this response.
+- `expired`.
+    A request has been processed, done, but the result expired from the cache.
+    This is an optional status and servers are allowed to go from `done` to `unknown`, skipping the `expired` status entirely.
+
+== Flow
+
+The flow a request can take looks like this:
+
+[plantuml, format=png]
+....
+@startuml
+
+(*) --> "Send a Request"
+
+if "Returns async?" then
+    -right->[no] ===B1===
+else
+    -left->[yes] "queued"
+    -->[ some time later] "processing"
+    -->[ more time] "done"
+endif
+
+if "Cache Expired?" then
+    -right->[yes (cache expiration)] "expired"
+else
+    -right->[yes] ===B1===
+else
+    -->[no] done
+endif
+
+expired -->[ later] ===B1===
+
+===B1=== -->[ later] "unknown"
+
+@enduml
+....
+
+== Errors
+An error might be returned synchronously if the request is detected to be invalid (e.g. the signature doesn't match).
+
+If an error happens during processing, the resulting envelope should be cached the same as if the request was successful.
+The full envelope will be available and the payload will contain the error code.

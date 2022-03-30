@@ -1,0 +1,26 @@
+; tag::result[]
+result-status =
+    ; The token has either never been seen or purged after expiration.
+    result-unknown /
+    ; The token is still being executed but a result isn't known at this point.
+    result-processing /
+    ; The token has a result and it is passed along this status.
+    result-done /
+    ; A result expired from the local cache and is not available anymore. This is optional
+    ; and networks may or may not keep a list of expired tokens.
+    result-expired
+
+result-unknown = 0
+result-processing = 1
+result-done = 2
+result-expired = 3
+
+async.status@param = {
+    ; A token returned by an async attribute.
+    ? 0 => bstr,
+}
+async.status@return = {
+    0 => result-status,
+    ? 1 => bstr .cbor COSE_Sign<response>;
+}
+; end::result[]
