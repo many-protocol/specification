@@ -1,8 +1,9 @@
 ; tag::result[]
 result-unknown = 0
-result-processing = 1
-result-done = 2
-result-expired = 3
+result-queued = 1
+result-processing = 2
+result-done = 3
+result-expired = 4
 
 async.status@param = {
     ; A token returned by an async attribute.
