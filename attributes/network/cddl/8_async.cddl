@@ -1,0 +1,33 @@
+; tag::result[]
+result-unknown = 0
+result-queued = 1
+result-processing = 2
+result-done = 3
+result-expired = 4
+
+async.status@param = {
+    ; A token returned by an async attribute.
+    ? 0 => bstr,
+}
+async.status@return =
+    ; The token has either never been seen or purged after expiration.
+    { 0 => result-unknown }
+
+    ; The token is known, but queued for processing later. This step can be skipped
+    ; by server that start processing requests immediately.
+    // { 0 => result-queued }
+
+    ; The token is still being executed but a result isn't known at this point.
+    // { 0 => result-processing }
+
+    ; The request associated with the token has a result available.
+    // {
+        0 => result-done,
+        1 => bstr .cbor COSE_Sign<response>,
+    }
+
+    ; A result expired from the local cache and is not available anymore. This is optional
+    ; and networks may or may not keep a list of expired tokens.
+    // { 0 => result-expired }
+}
+; end::result[]
