@@ -16,5 +16,9 @@ It exposes the following endpoints:
 - `abci.endBlock`.
 - `abci.init`.
 - `abci.info`.
+- `abci.checkTx`.
+- `abci.nodeInfo`.
+- `abci.validatorInfo`.
+
 
 
