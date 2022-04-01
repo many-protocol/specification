@@ -62,6 +62,6 @@ Genesis endpoint returns the genesis file, which includes genesis time, chainID,
 
 [sources,cddl]
 ----
-include::{cddl}/1000_abci_backend.cddl[tag=consensus-params]
+include::{cddl}/1000_abci_backend.cddl[tag=genesis]
 ----
 
