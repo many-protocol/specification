@@ -1,2 +1,182 @@
 ; tag::types[]
-; abci::types::Request
+; Node Information, takes no args and returns node information
+; public key, latest block hash, app hash, block height, latest block time
+node = {
+    ; Protocol version inof.
+    0 => uint,
+
+    ; Node Identity.
+    ? 1 => tstr,
+
+    ; listening Address
+    ? 2 => tstr,
+
+    ; The MANY network ID
+    ? 3 => bstr .cbor any,
+
+    ; Node Moniker
+    4 => tstr,
+
+    ; A list of attributes supported by this server.
+    5 => [ * attribute ],
+
+
+    ; A time delta where messages are allowed on this server, in seconds.
+    ; If the difference between the time of the server and the timestamp
+    ; on the message is larger than this, the message will be rejected.
+    ; A message might always be rejected if it was submitted after the
+    ; server time (in the future).
+    ; If this field is missing, the server does not advertize a timeout,
+    ; but it might still be enforced.
+    ? 8 => uint,
+
+    ; Additional fields are okay here as metadata, keys MUST be strings.
+    tstr => any,
+}
+
+; A Validator and all its information.
+validator = {
+    ; Validator Address
+    0 => identity,
+
+    ; Public key
+    1 => bstr,
+
+    ; Voting power
+    2 => uint,
+
+    ; Validator Name/Moniker
+    3 => tstr,
+
+    ; Proposer priority
+    ? 4 => uint,
+}
+
+; Block sync information includes latest block hash and height, block time
+sync = {
+    ; Latest block hash
+    0 => bstr,
+
+    ; Latest block height
+    1 => uint,
+
+    ; Latest block time
+    2 => uint,
+
+    ; App hash
+    3 => bstr,
+
+    ; Bool indicating if the node is synced
+    4 => bool,
+}
+
+; Types of PubKeys a validator can support 
+val-pubkey-type = {
+    ; Ed25519
+    0 => bstr,
+
+    ; Secp256k1
+    1 => bstr,
+}
+
+; Consensus Paramss contains a blocks max bytes, max gas, exidence max-age,
+; and types of PubKeys a Validator can use 
+consesnsus-params = {
+    ; Max Bytes per block
+    0 => uint,
+
+    ; Max Gas per block
+    1 => uint,
+
+    ; Exidence Max Age
+    2 => uint,
+
+    ; Validator PubKey Types
+    3 => [ * val-pubkey-type ],
+
+}
+; Genesis Information
+genesis = {
+
+    ; Genesis time
+    0 => uint,
+
+    ; Genesis chain id
+    1 => bstr,
+
+    ; Initial Height of blockchain
+    2 => uint,
+
+    ; Consensus parameters
+    3 => consesnsus-params,
+
+    ; Validators
+    4 => [ * validator ],
+
+    ; App hash
+    5 => bstr,
+
+    ; App State
+    ; ? 6 => tstr,
+
+}
+
+; Many Status, takes no args and returns node status
+many-status = {
+    ; Node Information
+    0 => node,
+
+    ; Sync Info
+    1 => sync,
+
+    ; Validator info
+     2 => validator,
+}
+; end::types[]
+
+; tag::genesis[]
+abci.genesis@params = ()
+abci.genesis@returns = {
+    ; Genesis information
+    0 => genesis,
+}
+; end::genesis[]
+
+; tag::many-status[]
+abci.many-status@param = ()
+abci.many-status@return = {
+    0 => many-status,
+}
+
+; end::many-status[]
+
+; tag::validators[]
+abci.validators@param = {
+    ; The height of the block to get validators for.
+    ? 0 => uint,
+
+}
+abci.validators@return = {
+    ; Block Height
+    0 => uint,
+
+    ; A list of validators
+    1 => [ * validator ],
+
+    ; totoal Number of validators
+    1 => uint,
+}
+; end::validators[]
+
+; tag::consensusParams[]
+abci.consensusParams@params = {
+    ; The height of the block to get consensus params for.
+    ? 0 => uint,
+}
+abci.consesnsus-params@returns = {
+    ; Block Height
+    0 => uint,
+    ; Genesis information
+    1 => consesnsus-params,
+}
+; end::consensusParams[]

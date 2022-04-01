@@ -18,10 +18,10 @@ It exposes the following endpoints:
 - `abci.info`.
 - `abci.checkTx`.
     Method controls what transactions get added to a new block
-- `abci.nodeInfo`.
-    Includes nodes pub Key, latest blockHash, appHash, blockHeight, and time a block is being committed.
-- `abci.validatorInfo`.
-    Get validator set at a specific height.
+- `abci.manyStatus`.
+    Includes nodes, sync and validator info.
+- `abci.validators`.
+    Get validator set at a block height.
 - `abci.genesis`.
     Get the genesis file.
 - `abci.consensusParams`.
