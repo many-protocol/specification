@@ -121,17 +121,6 @@ genesis = {
 
 }
 
-; Many Status, takes no args and returns node status
-many-status = {
-    ; Node Information
-    0 => node,
-
-    ; Sync Info
-    1 => sync,
-
-    ; Validator info
-    2 => validator,
-}
 ; end::types[]
 
 ; tag::genesis[]
@@ -145,7 +134,14 @@ abci.genesis@returns = {
 ; tag::many-status[]
 abci.many-status@param = ()
 abci.many-status@return = {
-    0 => many-status,
+    ; Node Information
+    0 => node,
+
+    ; Sync Info
+    1 => sync,
+
+    ; Validator info
+    2 => validator,
 }
 
 ; end::many-status[]
@@ -168,8 +164,8 @@ abci.validators@return = {
 }
 ; end::validators[]
 
-; tag::consensusParams[]
-abci.consensusParams@params = {
+; tag::consensus-params[]
+abci.consensus-params@params = {
     ; The height of the block to get consensus params for.
     ? 0 => uint,
 }
