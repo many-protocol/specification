@@ -130,7 +130,7 @@ many-status = {
     1 => sync,
 
     ; Validator info
-     2 => validator,
+    2 => validator,
 }
 ; end::types[]
 
