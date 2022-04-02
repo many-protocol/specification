@@ -58,14 +58,33 @@ transaction-id = bstr
 
 ; Transaction types. This can be extended and the server MUST provide a list of
 ; those types.
-; TODO: namespace transaction types per attribute ID.
-transaction-type = transaction-send
+; Extensible transaction info.
+; TODO: namespace transaction types per attribute ID, somehow.
+transaction-info = transaction-send
                  / transaction-mint
                  / transaction-burn
 
-transaction-send = 0
-transaction-mint = 1
-transaction-burn = 2
+transaction-send = [
+    0,
+    identity,   ; FROM
+    identity,   ; TO
+    symbol,     ; Symbol
+    amount     ; Amount
+]
+
+transaction-mint = [
+    1,
+    identity,   ; Account
+    symbol,     ; Symbol
+    amount     ; Amount
+]
+
+transaction-burn = [
+    transaction-burn,
+    identity,   ; Account
+    symbol,     ; Symbol
+    amount     ; Amount
+]
 
 transaction = {
     ; Transaction
@@ -75,40 +94,7 @@ transaction = {
     1 => time,
 
     ; Depends on the transaction type.
-    (
-        ; SEND transaction
-        (
-            2 => [
-                transaction-send,
-                identity,   ; FROM
-                identity,   ; TO
-                symbol,     ; Symbol
-                amount     ; Amount
-            ]
-        )
-        //
-
-        ; MINT transaction
-        (
-            2 => [
-                transaction-mint,
-                identity,   ; Account
-                symbol,     ; Symbol
-                amount     ; Amount
-            ]
-        )
-        //
-
-        ; BURN transaction
-        (
-            2 => [
-                transaction-burn,
-                identity,   ; Account
-                symbol,     ; Symbol
-                amount     ; Amount
-            ]
-        )
-    )
+    2 => transaction-info,
 }
 
 ; This is also defined in 2_ledger.cddl

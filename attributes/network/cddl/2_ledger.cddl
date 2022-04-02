@@ -102,7 +102,7 @@ fixed-point-percent = uint
 ; tag::balance[]
 ledger.balance@param = {
     ; Account's identity. If not specified, will use the message sender.
-    ? 0 => identity,
+    ? 0 => non-anonymous-identity,
 
     ; Symbol to check (or list of symbols). Symbols will be missing from
     ; the output if their balance is 0. If this is an empty array or

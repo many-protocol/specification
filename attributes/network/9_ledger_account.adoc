@@ -1,0 +1,84 @@
+= Ledger Account Attribute (#9)
+:cddl: ./cddl/
+
+== Overview
+This document describes a network attribute that allows people to create accounts that can perform operations when certain conditions are met.
+
+== Problem Statement
+A regular feature for money management is having a multi-signature wallet, vault, dripping wallet or other special access accounts that execute transactions automatically and/or under certain rules.
+
+== Use Cases
+Some examples of multi signature wallets are already available in traditional banking;
+
+*   1-of-2.
+    A husband and wife shared account; either spouse can spend the funds without approval from the other.
+*   2-of-2.
+    A husband and wife savings account; both signatures are required to spend the funds.
+*   2-of-3.
+    Parents’ savings account, where the child can spend with the approval of either parent, and money cannot be taken away unless both parents agree.
+*   3-out-of-7.
+    Low-trust donation. 7 people have a private key, but any 3 can sign a transfer.
+*   1 or 3-of-4.
+    Distributed backup. The private key can be recovered with 3 of the 4 parts, which can be distributed into safes or friends.
+
+Some example of dripping wallet's use cases include;
+
+*   vesting schedule for employees, in tokens.
+*   rent or loan payments.
+*   automatic transfer of funds to an execution network as gas payment.
+
+== Requirements
+*   An account MUST be created with an owner.
+    An account without an owner should be considered deactivated and is safe to be removed.
+*   Accounts are referred to by their identities.
+*   A server creating an account MUST use a subresource identity of its own identity for the identity of the account, or a public key it owns.
+
+== Detailed Design
+The simplified design for this attribute is to add the basics for account management, and let features (separate attributes) decide how the account act.
+Each type of account features should be additional attributes for the network.
+A server might support multiple account features, and apply multiple compatible features to the same account.
+
+A new namespace is created through this attribute; `account`, which contains the following basic methods implemented by this attribute:
+
+* `account.create`.
+    Creates an account and sets its owner.
+* `account.info`.
+    Retrieves information related to an account.
+* `account.set`.
+    Sets information related to the account.
+* `account.delete`.
+    Deletes an account.
+    The identity may not be reusable.
+
+=== Information
+An account has metadata associated with it.
+For example, it can have a name.
+
+The information is set when creating, and can be retrieved using `account.info`, and updated when using `account.set`.
+
+=== Features
+Features are specified through network attributes, exposed by the network's `status`, and attribute IDs set in the information of an account.
+
+=== Ownership
+An account can have one or more owners.
+Depending on features, owners will have special access controls over the account.
+For example, by default only an owner can set information on an account, or delete it.
+
+Owners is the only required role for a ledger account.
+Any additional roles should be defined by features.
+
+=== Ledger-less Accounts
+Accounts do not require a ledger, nor do they have to be token holders.
+Features implemented by the server might require the server to be a ledger (for example, a drip feature).
+
+== Constraints
+The design has a few flaws that can be mitigated:
+
+* There is a lack of ACL and roles, outside of owners.
+  Although this is by design to keep the API surface small, it makes it harder later to add such designs without revisiting all combinations of features.
+* There is a limit of ~2 billions accounts per ledger identity as the specification says that accounts must be subresource identities.
+  This might seem like a lot, but over the course of multiple years this will likely run out (even without malicious account creators). +
+  The first way to mitigate this would be to charge a price per account creation, to reduce the chance of abuse.
+  This can be implemented by servers. +
+  Another way is by creating new private keys to allow for more subresources.
+  This process can be done in a secure way, but needs to be researched further before being part of this specification.

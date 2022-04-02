@@ -1,0 +1,67 @@
+; tag::create[]
+; Create a new account.
+account.create@param = {
+    ; A name or description of the account. This does not have to be unique.
+    ; The server is welcome to limit the name of a wallet in any ways it sees
+    ; fit.
+    ? 0 => tstr,
+
+    ; A list of owners. The sender of this message MUST BE included in the list
+    ; of owners.
+    1 => [ * non-anonymous-identity ],
+
+    ; Optional list of features and their arguments.
+    2 => [ * attribute ],
+}
+account.create@return = {
+    ; The account identity. Use this to contact the account directly.
+    0 => identity,
+}
+; end::create[]
+
+; tag::set[]
+; Set, delete or reset information related to an account.
+account.set@param = {
+    ; The identity of the account to set.
+    0 => identity,
+
+    ; A new name or description.
+    ? 1 => tstr,
+
+    ; Update the list of owners. The sender does not have to be a new owner,
+    ; but it is required to be an owner to update the list here.
+    ? 2 => [ * non-anonymous-identity ],
+
+    ; Features to update. Features cannot be added or removed from an account
+    ; once its been created.
+    ; For an exact schema, please see the feature attribute description itself.
+    ? 3 => {
+        uint => any,
+    }
+}
+; end::set[]
+
+; tag::info[]
+; Get the information of an account. Some information might be missing if the
+; server desires it. For example, the server might restrict which identities
+; can have the list of owners.
+account.info@param = {
+    ; The identity of the account to request the information of.
+    0 => identity,
+
+    ; A list of features to filter.
+    ? 1 => [ * uint ],
+}
+account.info@return = {
+    ; The name or description of the wallet.
+    ? 0 => tstr,
+
+    ; The list of owners.
+    ? 1 => [ * non-anonymous-identity ],
+
+    ; The list of features and their information.
+    ? 2 => {
+        uint => attribute-arg,
+    }
+}
+; end::info

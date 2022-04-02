@@ -1,0 +1,9 @@
+== Multisig Account Feature Attribute (#256)
+:cddl: ./cddl/
+
+The multisig attribute indicates that an account system supports transactions using multiple signature.
+
+This document explains the design and interface of an account implementing the multisig attribute.
+
+== Design
+

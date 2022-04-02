@@ -1,0 +1,119 @@
+; Account multisig feature API.
+; tag::types[]
+account-multisig-token = bstr
+
+account-multisig-transaction =
+    transaction-info
+    // bstr .cbor {
+        ; Originator is always the account identity.
+        ; Destination is always the local server. Forwarding can be allowed by the server.
+
+        ; Endpoint name.
+        3 => tstr,
+
+        ; Payload.
+        4 => bstr,
+
+        ; Other fields are up to the server implementation.
+    }
+; end::types[]
+
+; tag::feature[]
+; The attribute argument when creating a new wallet.
+multisig@attribute-arg = {
+    ; List of identities that can suggest and approve transactions.
+    ; Owners can always suggest and approve transactions.
+    ; The list of approvers always includes the owner (sender of this message).
+    ? 0 => [ * identity ],
+
+    ; Threshold of number of approvals needed by default to execute a transaction.
+    ; This number can be overridden to be greater than the default per transaction,
+    ; but cannot be overridden to be less.
+    ; This number includes the suggester of a transaction, meaning that the value of
+    ; this field is always at least 1 (passing `0` will fail creating the wallet).
+    ; Similarly, this cannot be greater than the number of approvers + 1.
+    ; By default this is the number of approvers passed in (plus the number of owners).
+    ? 1 => uint,
+}
+; end::feature[]
+
+; tag::suggest[]
+; Suggest a transaction to be executed when the threshold is
+account.multisigSuggest@param = {
+    ; A memo associated with the transaction.
+    ? 0 => tstr,
+
+    ; The transaction to send. Either a ledger transaction object, or a bytestring that's
+    ; a request message with limited fields.
+    ; Servers are allowed to refuse a suggested message and return an error.
+    1 => account-multisig-transaction,
+}
+account.multisigSuggest@return = {
+    ; A token identifying this transaction. This is an implementation specific opaque
+    ; token and can be a hash or a random or incrementing integer.
+    0 => account-multisig-token,
+}
+; end::suggest[]
+
+; tag::info[]
+; Get the information of a multisig transaction.
+account.multisigInfo@param = {
+    ; The token of the transaction to revoke.
+    0 => account-multisig-token,
+}
+
+account.multisigInfo@return = {
+    ; Memo sent when creating the transaction.
+    0 => tstr,
+
+    ; The transaction info.
+    1 => account-multisig-transaction,
+
+    ; Approvers for this transaction, and their information.
+    2 => {
+        identity => {
+            ; Whether they approved or not.
+            0 => bool
+        }
+    }
+
+    ; How many approvers are needed to execute this transaction.
+    3 => uint,
+}
+; end::info[]
+
+; tag::approve[]
+; Approve a transaction, adding the sender to the list of transaction approvals.
+; Approving the same transaction twice has no effect.
+; Approving a transaction that's been executed has no effect.
+account.multisigApprove@param = {
+    ; The token of the transaction to approve.
+    0 => account-multisig-token,
+}
+
+account.multisigApprove@return = ()
+; end::approve[]
+
+; tag::revoke[]
+; Revoke a transaction's approval, removing the sender to the list of transaction
+; approvals. Revoking a transaction that's not been approved has no effect.
+; Revoking a transaction that's been executed has no effect.
+account.multisigRevoke@param = {
+    ; The token of the transaction to revoke.
+    0 => account-multisig-token,
+}
+
+account.multisigRevoke@return = ()
+; end::revoke[]
+
+; tag::execute[]
+; Execute a transaction if all the approvals needed has been reached.
+; The result is the return response of the transaction. This may include an async
+; token.
+account.multisigExecute@param = {
+    ; The token of the transaction to revoke.
+    0 => account-multisig-token,
+}
+
+account.multisigExecute@return = response
+; end::execute[]
