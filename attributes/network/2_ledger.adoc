@@ -49,7 +49,7 @@ Transfer tokens between accounts.
 
 [sources,cddl]
 ----
-include::{cddl}/2_ledger.cddl[tag=send]
+include::{cddl}/6_ledger_commands.cddl[tag=send]
 ----
 
 == Mint
@@ -59,7 +59,7 @@ An ledger MAY return an `unauthorized` error if the message sender is not author
 
 [sources,cddl]
 ----
-include::{cddl}/2_ledger.cddl[tag=mint]
+include::{cddl}/6_ledger_commands.cddl[tag=mint]
 ----
 
 == Burn
@@ -69,5 +69,5 @@ An ledger MAY return an `unauthorized` error if the message sender is not author
 
 [sources,cddl]
 ----
-include::{cddl}/2_ledger.cddl[tag=burn]
+include::{cddl}/6_ledger_commands.cddl[tag=burn]
 ----
