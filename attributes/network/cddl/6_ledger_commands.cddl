@@ -44,4 +44,4 @@ ledger.send@param = {
     3 => symbol,
 }
 ledger.send@return = ()
-; end::burn[]
+; end::send[]
