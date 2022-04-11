@@ -6,14 +6,11 @@ name: CDDL
 
 jobs:
   validate:
-    name: Validate CDDL
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/anweiss/cddl-cli:latest
     steps:
       - uses: actions/checkout@v3
-      - name: Concatenate all CDDL files
-        shell: bash
-        run: |
-          echo 123
-          cddl
+      - name: Build CDDL
+        run: find . -iname \*.cddl | xargs cat > temp.cddl
+      - uses: docker://ghcr.io/anweiss/cddl-cli:latest
+        with:
+          args: compile-cddl --cddl /github/workspace/temp.cddl
