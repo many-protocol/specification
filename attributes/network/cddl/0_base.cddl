@@ -47,10 +47,8 @@ heartbeat@return = ()
 ; end::heartbeat[]
 
 ; tag::endpoints[]
-endpoints@param = () // {
-  ? 0 => str,
-}
-endpoints@return = [ * str ]
+endpoints@param = ()
+endpoints@return = [ * tstr ]
 ; end::endpoints[]
 
 ; tag::result[]

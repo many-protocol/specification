@@ -1,0 +1,32 @@
+; Generic types defined for CDDL.
+; Sorting order. This only matters if a call uses a maximum number of transactions
+; as they will be returned in the order and stopped.
+; For example, if a call lists ALL transactions, but the server returns only 100,
+; using an ASCENDING order returns the first 100, while a DESCENDING order returns
+; the last 100.
+order = (
+    indeterminate /
+    ascending /
+    descending
+)
+indeterminate = 0
+ascending = 1
+descending = 2
+
+; A bound, either upper or lower, serialized.
+bound<T> =
+    ; Unbounded.
+    []
+    ; Inclusive bound.
+    / [0, T]
+    ; Exclusive bound.
+    / [1, T]
+
+; A Range of scalar. Must specify both bounds, but can specify any bound to being
+; unbounded. If omitted, the value is unbounded.
+range<T> = {
+    ; Lower bound.
+    ? 0 => bound<T>,
+    ; Upper bound.
+    ? 1 => bound<T>,
+}

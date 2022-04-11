@@ -4,10 +4,10 @@ ledger.mint@param = {
     0 => identity,
 
     ; The amount of new tokens to mint.
-    1 => amount,
+    1 => ledger-amount,
 
     ; The symbol to mint.
-    2 => symbol,
+    2 => ledger-symbol,
 }
 ledger.mint@return = ()
 ; end::mint[]
@@ -18,10 +18,10 @@ ledger.burn@param = {
     0 => identity,
 
     ; The amount of tokens to burn.
-    1 => amount,
+    1 => ledger-amount,
 
     ; The symbol to burn.
-    2 => symbol,
+    2 => ledger-symbol,
 }
 ledger.burn@return = ()
 ; end::burn[]
@@ -38,10 +38,10 @@ ledger.send@param = {
     1 => identity,
 
     ; The amount of tokens to send.
-    2 => amount,
+    2 => ledger-amount,
 
     ; The symbol to send.
-    3 => symbol,
+    3 => ledger-symbol,
 }
 ledger.send@return = ()
 ; end::send[]

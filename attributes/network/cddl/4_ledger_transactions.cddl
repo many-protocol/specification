@@ -1,49 +1,17 @@
 ; tag::types[]
-; Sorting order. This only matters if a call uses a maximum number of transactions
-; as they will be returned in the order and stopped.
-; For example, if a call lists ALL transactions, but the server returns only 100,
-; using an ASCENDING order returns the first 100, while a DESCENDING order returns
-; the last 100.
-order = (
-    indeterminate /
-    ascending /
-    descending
-)
-indeterminate = 0
-ascending = 1
-descending = 2
-
-; A bound, either upper or lower, serialized.
-bound<T> =
-    ; Unbounded.
-    []
-    ; Inclusive bound.
-    / [0, T]
-    ; Exclusive bound.
-    / [1, T]
-
-; A Range of scalar. Must specify both bounds, but can specify any bound to being
-; unbounded. If omitted, the value is unbounded.
-range<T> = {
-    ; Lower bound.
-    ? 0 => bound<T>,
-    ; Upper bound.
-    ? 1 => bound<T>,
-}
-
 ; A filter argument for transactions.
-filter = {
+ledger-transaction-filter = {
     ; Filter by account affected.
     ? 0 => identity / [ * identity ],
 
     ; Filter by transaction type.
-    ? 1 => transaction-type / [ * transaction-type ],
+    ? 1 => ledger-transaction-type / [ * ledger-transaction-type ],
 
     ; Filter by symbol.
-    ? 2 => symbol / [ * symbol ],
+    ? 2 => ledger-symbol / [ * ledger-symbol ],
 
     ; Filter by transaction ID range.
-    ? 3 => range<transaction-id>,
+    ? 3 => range<ledger-transaction-id>,
 
     ; Filter by date range.
     ? 4 => range<time>,
@@ -54,22 +22,22 @@ filter = {
 ; The system can consider this to be a `biguint` and add 1 to the last byte to gather
 ; the next item.
 ; Gaps between IDs can exist (they don't have to be continuous).
-transaction-id = bstr
+ledger-transaction-id = bstr
 
 ; Transaction types. This can be extended and the server MUST provide a list of
 ; those types.
 ; TODO: namespace transaction types per attribute ID.
-transaction-type = transaction-send
+ledger-transaction-type = transaction-send
                  / transaction-mint
                  / transaction-burn
 
-transaction-send = 0
-transaction-mint = 1
-transaction-burn = 2
+ledger-transaction-send = 0
+ledger-transaction-mint = 1
+ledger-transaction-burn = 2
 
-transaction = {
+ledger-transaction = {
     ; Transaction
-    0 => transaction-id,
+    0 => ledger-transaction-id,
 
     ; Transaction time.
     1 => time,
@@ -79,11 +47,11 @@ transaction = {
         ; SEND transaction
         (
             2 => [
-                transaction-send,
-                identity,   ; FROM
-                identity,   ; TO
-                symbol,     ; Symbol
-                amount     ; Amount
+                ledger-transaction-send,
+                identity,      ; FROM
+                identity,      ; TO
+                ledger-symbol, ; Symbol
+                ledger-amount  ; Amount
             ]
         )
         //
@@ -91,10 +59,10 @@ transaction = {
         ; MINT transaction
         (
             2 => [
-                transaction-mint,
-                identity,   ; Account
-                symbol,     ; Symbol
-                amount     ; Amount
+                ledger-transaction-mint,
+                identity,      ; Account
+                ledger-symbol, ; Symbol
+                ledger-amount  ; Amount
             ]
         )
         //
@@ -102,20 +70,14 @@ transaction = {
         ; BURN transaction
         (
             2 => [
-                transaction-burn,
-                identity,   ; Account
-                symbol,     ; Symbol
-                amount     ; Amount
+                ledger-transaction-burn,
+                identity,      ; Account
+                ledger-symbol, ; Symbol
+                ledger-amount  ; Amount
             ]
         )
     )
 }
-
-; This is also defined in 2_ledger.cddl
-; An amount of tokens can be either an infinite uint or a regular one
-; for simplicity. The networks CAN use either when serializing, but
-; MUST accept both when doing transactions.
-amount = biguint / uint
 ; end::types[]
 
 ; tag::info[]
@@ -140,7 +102,7 @@ ledger.list@param = {
     ? 1 => order,
 
     ; Transaction filter criteria.
-    ? 2 => filter,
+    ? 2 => ledger-transaction-filter,
 }
 ledger.list@return = {
     ; Total number of transactions (currently). This is the same number that info
@@ -148,8 +110,6 @@ ledger.list@return = {
     0 => uint,
 
     ; Transaction list.
-    1 => [ * transaction ]
+    1 => [ * ledger-transaction ]
 }
 ; end::list[]
-
-ledger.list@param
