@@ -1,0 +1,217 @@
+; Account multisig feature API.
+; tag::types[]
+account-role //= "canSubmit"
+              /  "canApprove"
+
+account-multisig-token = bstr
+
+account-multisig-transaction =
+    transaction-info
+    / bstr .cbor {
+        ; Originator is always the account identity.
+        ; Destination is always the local server. Forwarding can be allowed by the server.
+
+        ; Endpoint name.
+        3 => tstr,
+
+        ; Payload.
+        4 => bstr,
+
+        ; Other fields are up to the server implementation.
+    }
+
+; List of transaction types added by this feature.
+transaction-info //= account-multisig-transaction-submit
+                   / account-multisig-transaction-approve
+                   / account-multisig-transaction-revoke
+                   / account-multisig-transaction-execute
+
+account-multisig-transaction-submit = {
+    0 => [9, 1, 0],
+    1 => non-anonymous-identity, ; 
+    2 => account-multisig-token,
+    3 => text,
+    4 => account-multisig-transaction,
+    5 => uint,
+    6 => time,
+}
+account-multisig-transaction-approve = {
+    0 => [9, 1, 1],
+    1 => non-anonymous-identity,
+    2 => account-multisig-token,
+    3 => non-anonymous-identity,
+}
+account-multisig-transaction-revoke = {
+    0 => [9, 1, 2],
+    1 => non-anonymous-identity,
+    2 => account-multisig-token,
+    3 => non-anonymous-identity,
+}
+account-multisig-transaction-execute = {
+    0 => [9, 1, 3],
+    1 => non-anonymous-identity,
+    2 => account-multisig-token,
+    3 => non-anonymous-identity,
+}
+; end::types[]
+
+; tag::feature[]
+; The feature argument when creating a new account.
+multisig@account-feature@argument = {
+    ; Threshold of number of approvals needed by default to execute a transaction.
+    ; This number can be overridden to be greater than the default per transaction,
+    ; but cannot be overridden to be less.
+    ; This number includes the submitter of a transaction, meaning that the value of
+    ; this field is always at least 1 (passing `0` will fail creating the account).
+    ; If this value is greater than the number of people with the `canApprove` role,
+    ; the server MAY still create the account.
+    ; By default this is the number of identities with the `canApprove` role.
+    ? 0 => uint,
+
+    ; The time (in seconds) a transaction would automatically expire. The server is
+    ; allowed to clamp this value, or refuse to create an account if this is too
+    ; large.
+    ? 1 => uint,
+
+    ; If true, transactions will be executed automatically when the threshold is
+    ; met.
+    ; By default the `account.multisigExecute` must be called by an owner or the
+    ; creator of the transaction.
+    ; Server MAY return an error if this is true and it doesn't support automatic
+    ; execution.
+    ? 2 => bool,
+}
+; end::feature[]
+
+; tag::setDefaults[]
+; Update default values for new transactions.
+; The server MUST return an error if the sender does not have the `owner` role.
+account.multisigSetDefaults@param = {
+    ; A new default threshoold.
+    ? 0 => uint,
+
+    ; A new time (in seconds) to automatically expire transactions.
+    ? 1 => uint,
+
+    ; If true/false, update whether transactions are automatically executed.
+    ; Server MAY return an error if it doesn't support automatic execution.
+    ? 2 => bool,
+}
+
+account.multisigSetDefaults@return = ()
+; end::setApproverCount[]
+
+; tag::submitTransaction[]
+; Submit a transaction to be executed when the threshold is reached.
+account.multisigSubmitTransaction@param = {
+    ; A memo associated with the transaction.
+    ? 0 => tstr,
+
+    ; The transaction to send. Either a ledger transaction object, or a bytestring that's
+    ; a request message with limited fields.
+    ; Servers are allowed to refuse a submitted message and return an error.
+    1 => account-multisig-transaction,
+
+    ; A number of approvers for this specific transaction. The server MUST return an
+    ; error if this value is passed but the submitter does not have the `owner` role.
+    ? 2 => uint,
+
+    ; Whether to execute this transaction automatically when the threshold is met.
+    ; The server MUST return an error if this value is passed but the submitter
+    ; does not have the `owner` role, or if automatic execution is not supported.
+    ? 3 => bool,
+
+    ; The time (in seconds) this transaction would automatically expire. The server is
+    ; allowed to clamp this value, or refuse to create an account if this is too
+    ; large. The server MUST return an error if this value is passed but the submitter
+    ; does not have the `owner` role.
+    ? 4 => uint,
+}
+account.multisigSubmitTransaction@return = {
+    ; A token identifying this transaction. This is an implementation specific opaque
+    ; token and can be a hash or a random or incrementing integer.
+    0 => account-multisig-token,
+}
+; end::submitTransaction[]
+
+; tag::info[]
+; Get the information of a multisig transaction.
+account.multisigInfo@param = {
+    ; The token of the transaction to get the information of.
+    0 => account-multisig-token,
+}
+
+account.multisigInfo@return = {
+    ; Memo sent when creating the transaction.
+    0 => tstr,
+
+    ; The transaction info.
+    1 => account-multisig-transaction,
+
+    ; Approver list for this transaction, and their information.
+    2 => {
+        1* identity => {
+            ; Whether they approved or not.
+            0 => bool
+        }
+    }
+
+    ; How many approvers are needed to execute this transaction.
+    3 => uint,
+
+    ; When will this transaction expire. This is a timestamp in seconds since
+    ; Unix EPOCH.
+    4 => time,
+}
+; end::info[]
+
+; tag::approve[]
+; Approve a transaction, adding the sender to the list of transaction approvals.
+; Approving the same transaction twice has no effect.
+; Approving a transaction that's been executed has no effect.
+account.multisigApprove@param = {
+    ; The token of the transaction to approve.
+    0 => account-multisig-token,
+}
+
+account.multisigApprove@return = ()
+; end::approve[]
+
+; tag::revoke[]
+; Revoke a transaction's approval, removing the sender to the list of transaction
+; approvals. Revoking a transaction that's not been approved has no effect.
+; Revoking a transaction that's been executed has no effect.
+account.multisigRevoke@param = {
+    ; The token of the transaction to revoke.
+    0 => account-multisig-token,
+}
+
+account.multisigRevoke@return = ()
+; end::revoke[]
+
+; tag::execute[]
+; Execute a transaction if all the approvals needed has been reached.
+; The result is the return response of the transaction. This may include an async
+; token.
+; The server MUST return an error if the sender of this message does not have the
+; `owner` role and is not the submitter of this transaction.
+account.multisigExecute@param = {
+    ; The token of the transaction to revoke.
+    0 => account-multisig-token,
+}
+
+account.multisigExecute@return = response
+; end::execute[]
+
+; tag::withdraw[]
+; Withdraw a transaction submission. Any further action on the transaction
+; should return an error (or have no effect).
+; The server MUST return an error if the sender does not have the `owner` role,
+; or the one who submitted the transaction.
+account.multisigWithdraw@param = {
+    ; The token of the transaction to revoke.
+    0 => account-multisig-token,
+}
+
+account.multisigWithdraw@return = ()
+; end::withdraw[]

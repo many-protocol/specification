@@ -1,32 +1,5 @@
-; tag::mint[]
-ledger.mint@param = {
-    ; Account that will receive the minted tokens.
-    0 => identity,
-
-    ; The amount of new tokens to mint.
-    1 => amount,
-
-    ; The symbol to mint.
-    2 => symbol,
-}
-ledger.mint@return = ()
-; end::mint[]
-
-; tag::burn[]
-ledger.burn@param = {
-    ; Account whose tokens will be removed.
-    0 => identity,
-
-    ; The amount of tokens to burn.
-    1 => amount,
-
-    ; The symbol to burn.
-    2 => symbol,
-}
-ledger.burn@return = ()
-; end::burn[]
-
 ; tag::send[]
+; Send tokens between two accounts.
 ledger.send@param = {
     ; Account that will send the tokens (From).
     ; If omitted, will use the message sender.
@@ -44,4 +17,4 @@ ledger.send@param = {
     3 => symbol,
 }
 ledger.send@return = ()
-; end::burn[]
+; end::send[]

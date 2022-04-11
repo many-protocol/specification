@@ -1,0 +1,56 @@
+== Multisig Account Feature (#1)
+:cddl: ./cddl/
+
+The multisig account feature indicates that an account system supports transactions using multiple signature.
+
+This document explains the design and interface of an account implementing the multisig attribute.
+
+== Design
+
+=== Flow
+
+[plantuml, format=png]
+....
+@startuml
+
+(*) --> "account.multisigSuggest"
+
+if "canSuggest" then
+    -->[yes] suggested
+else
+    --> error
+    --> (*)
+endif
+
+(*) --> "account.multisigApprove"
+    --> waiting
+
+suggested --> waiting
+
+if "enough approvals" then
+    -->[yes] execute
+else
+    -->[no] waiting
+endif
+
+execute --> (*)
+
+@enduml
+....
+
+=== Expiration
+A transaction can expire after a certain time has passed after it has been suggested.
+This is left at the discretion of the server, but a value can be passed for each new transactions.
+
+=== Messages
+Design space has been left to have transactions be generic messages, useful for other messages than `ledger.send`.
+Destination is always the same server.
+
+=== Roles
+This feature adds 2 roles; `canSubmit` and `canApprove`.
+
+- `canSubmit` is allowed to submit new transactions, and to withdraw their own submitted transactions.
+- `canApprove` is allowed to approve transactions, and revoke their own approvals.
+- `owner` is allowed to withdraw transactions, and update defaults.
+
+Forced execution is not allowed, but an `owner` can recreate a new transaction with no approvals needed.

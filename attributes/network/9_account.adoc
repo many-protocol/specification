@@ -1,5 +1,6 @@
 = Ledger Account Attribute (#9)
 :cddl: ./cddl/
+:toc:
 
 == Overview
 This document describes a network attribute that allows people to create accounts that can perform operations when certain conditions are met.
@@ -28,48 +29,81 @@ Some example of dripping wallet's use cases include;
 *   automatic transfer of funds to an execution network as gas payment.
 
 == Requirements
-*   An account MUST be created with an owner.
-    An account without an owner should be considered deactivated and is safe to be removed.
+*   Every account MUST have at least one owner.
+    The server SHOULD return an error if the last owner attempts to remove itself.
 *   Accounts are referred to by their identities.
 *   A server creating an account MUST use a subresource identity of its own identity for the identity of the account, or a public key it owns.
 
 == Detailed Design
-The simplified design for this attribute is to add the basics for account management, and let features (separate attributes) decide how the account act.
-Each type of account features should be additional attributes for the network.
+The simplified design for this attribute is to add the basics for account management, and let account features decide how the account act.
+Each type of account features should be distinct.
+Features
 A server might support multiple account features, and apply multiple compatible features to the same account.
 
 A new namespace is created through this attribute; `account`, which contains the following basic methods implemented by this attribute:
 
 * `account.create`.
-    Creates an account and sets its owner.
+    Creates an account and sets its owner(s).
+* `account.listRoles`
+    List all the roles supported by the account.
+* `account.getRoles`
+    Get the roles of one or multiple identities.
+* `account.addRole`
+    Get the roles of one or multiple identities.
+* `account.removeRole`
+    Get the roles of one or multiple identities.
 * `account.info`.
     Retrieves information related to an account.
-* `account.set`.
-    Sets information related to the account.
+* `account.setName`.
+    Set the name to a new one.
 * `account.delete`.
     Deletes an account.
     The identity may not be reusable.
 
 === Information
 An account has metadata associated with it.
-For example, it can have a name.
+For example, it can have a name, or a list of features and their arguments.
 
-The information is set when creating, and can be retrieved using `account.info`, and updated when using `account.set`.
+Once an account has been created, its list of features is immutable and cannot be changed.
 
 === Features
 Features are specified through network attributes, exposed by the network's `status`, and attribute IDs set in the information of an account.
 
-=== Ownership
-An account can have one or more owners.
+The server MUST return an error on creation if two features are not compatible or supported with each others.
+
+The list of features is available through the attribute's arguments returned by the server's `status` endpoint.
+
+=== Roles
+Accounts have a map of identities to a list of roles internally.
+Identities can have multiple roles, with their actual access control defined by each feature available.
+
+A server MAY return an error if too many roles and identities are added to an account.
+For example, a server might want to limit its internal list of owners per accounts to 20, or maximum of roles per identity to 10, or any combination of these.
+
+Roles are case sensitive strings.
+Trying to add a role that isn't defined by the features associated with an account MUST result in an error.
+
+To list roles available for an account (depending on its features), call the `account.listRoles`.
+To list the roles of an identity, call the `account.getRoles`. To add roles to an identity, use the `account.addRoles` endpoint, and `account.removeRoles` to remove one or multiple roles.
+
+==== Owner Role
+An account MUST have one or more owners, with the role set as `"owner"`.
+Removing the `"owner"` role from the last `"owner"` identity on an account MUST result in an error.
+
 Depending on features, owners will have special access controls over the account.
 For example, by default only an owner can set information on an account, or delete it.
 
-Owners is the only required role for a ledger account.
+`"owner"` is the only required role for a ledger account.
 Any additional roles should be defined by features.
 
 === Ledger-less Accounts
-Accounts do not require a ledger, nor do they have to be token holders.
+Accounts do not require a ledger, nor do they have to be token holders, by design.
 Features implemented by the server might require the server to be a ledger (for example, a drip feature).
+
+On a ledger server, accounts can hold tokens.
+The `ledger.balance` endpoint would show the token balances for this account.
+
+On a ledger-less server, the account might have different transactions or messages.
 
 == Constraints
 The design has a few flaws that can be mitigated:
@@ -77,8 +111,8 @@ The design has a few flaws that can be mitigated:
 * There is a lack of ACL and roles, outside of owners.
   Although this is by design to keep the API surface small, it makes it harder later to add such designs without revisiting all combinations of features.
 * There is a limit of ~2 billions accounts per ledger identity as the specification says that accounts must be subresource identities.
-  This might seem like a lot, but over the course of multiple years this will likely run out (even without malicious account creators). +
   The first way to mitigate this would be to charge a price per account creation, to reduce the chance of abuse.
   This can be implemented by servers. +
-  Another way is by creating new private keys to allow for more subresources.
+  Another way is by creating new private keys to allow for more sub resources.
   This process can be done in a secure way, but needs to be researched further before being part of this specification.
+* Redefining the identity type in the protocol to allow for larger identities (e.g. up to 64 bytes).

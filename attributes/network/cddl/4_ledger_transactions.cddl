@@ -61,27 +61,11 @@ transaction-id = bstr
 ; Extensible transaction info.
 ; TODO: namespace transaction types per attribute ID, somehow.
 transaction-info = transaction-send
-                 / transaction-mint
-                 / transaction-burn
 
 transaction-send = [
     0,
     identity,   ; FROM
     identity,   ; TO
-    symbol,     ; Symbol
-    amount     ; Amount
-]
-
-transaction-mint = [
-    1,
-    identity,   ; Account
-    symbol,     ; Symbol
-    amount     ; Amount
-]
-
-transaction-burn = [
-    transaction-burn,
-    identity,   ; Account
     symbol,     ; Symbol
     amount     ; Amount
 ]
@@ -137,5 +121,3 @@ ledger.list@return = {
     1 => [ * transaction ]
 }
 ; end::list[]
-
-ledger.list@param
