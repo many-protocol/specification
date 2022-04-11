@@ -8,7 +8,7 @@ use sha3::{Digest, Sha3_224};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
-    let result = send(config, anonymous_message("status", Value::Null)).await;
+    let result = send(config, anonymous_message("status", "null")).await;
 
     let payload = result.payload.expect("No payload from status");
     let status: ciborium::value::Value =
@@ -71,8 +71,12 @@ pub struct Payload {
     pub attributes: Option<Value>,
 }
 
-impl Payload {
-    pub fn to_value(&self) -> Value {
+impl AsCborValue for Payload {
+    fn from_cbor_value(_value: Value) -> coset::Result<Self> {
+        unreachable!("Unimplemented.")
+    }
+
+    fn to_cbor_value(self) -> coset::Result<Value> {
         macro_rules! fields {
             ($map: ident { $($num: literal => $field: ident),* }) => {
                 $(
@@ -98,12 +102,14 @@ impl Payload {
             }
         );
 
-        Value::Map(map)
+        Ok(Value::Map(map))
     }
+}
 
-    pub fn to_tagged_value(&self) -> Value {
-        Value::Tag(10001, Box::new(self.to_value()))
-    }
+impl coset::CborSerializable for Payload {}
+
+impl coset::TaggedCborSerializable for Payload {
+    const TAG: u64 = 10001;
 }
 
 /// Returns the key pair, KID and the header for a key seed.
@@ -151,10 +157,8 @@ pub fn generate_key(key_seed: u8) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
 
 /// Create an envelope with a message and an optional key_seed. If the key_seed is
 /// specified, the protected headers and signatures will be filled.
-pub fn envelope(key_seed: Option<u8>, message: Value) -> CoseSign1 {
-    let mut buffer: Vec<u8> = Vec::new();
-    ciborium::ser::into_writer(&message, &mut buffer).unwrap();
-    let builder = coset::CoseSign1Builder::new().payload(buffer);
+pub fn envelope<M: AsRef<[u8]>>(key_seed: Option<u8>, message: M) -> CoseSign1 {
+    let builder = coset::CoseSign1Builder::new().payload(message.as_ref().to_vec());
 
     let builder = if let Some(key_seed) = key_seed {
         let (ed25519_key, _kid, protected) = generate_key(key_seed);
@@ -169,9 +173,10 @@ pub fn envelope(key_seed: Option<u8>, message: Value) -> CoseSign1 {
 }
 
 /// Create an anonymous message envelope.
-pub fn anonymous_message(endpoint: &str, args: Value) -> CoseSign1 {
-    let mut arg_bytes = Vec::new();
-    ciborium::ser::into_writer(&args, &mut arg_bytes).unwrap();
+pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
+    let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
+        .expect("Could not parse CBOR.")
+        .to_bytes();
 
     let message = Payload {
         version: Some(Value::from(1)),
@@ -188,15 +193,17 @@ pub fn anonymous_message(endpoint: &str, args: Value) -> CoseSign1 {
         )),
         ..Default::default()
     }
-    .to_tagged_value();
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
 
     envelope(None, message)
 }
 
 /// Create a signed message envelope.
-pub fn message(key_seed: u8, endpoint: &str, args: Value) -> CoseSign1 {
-    let mut arg_bytes = Vec::new();
-    ciborium::ser::into_writer(&args, &mut arg_bytes).unwrap();
+pub fn message<P: AsRef<str>>(key_seed: u8, endpoint: &str, payload: P) -> CoseSign1 {
+    let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
+        .expect("Could not parse CBOR.")
+        .to_bytes();
 
     let (_, kid, _) = generate_key(key_seed);
     let message = Payload {
@@ -215,7 +222,8 @@ pub fn message(key_seed: u8, endpoint: &str, args: Value) -> CoseSign1 {
         )),
         ..Default::default()
     }
-    .to_tagged_value();
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
 
     envelope(Some(key_seed), message)
 }
