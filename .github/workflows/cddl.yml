@@ -1,0 +1,19 @@
+on:
+  - push
+  - pull_request
+
+name: CDDL
+
+jobs:
+  validate:
+    name: Validate CDDL
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/anweiss/cddl-cli:latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Concatenate all CDDL files
+        shell: bash
+        run: |
+          echo 123
+          cddl
