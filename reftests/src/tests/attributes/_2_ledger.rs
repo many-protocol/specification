@@ -1,6 +1,5 @@
 use crate::helpers::{anonymous_message, has_attribute, send};
 use crate::tests::{TestCaseResult, TestConfig};
-use ciborium::value::Value;
 use reftests_macros::test_case;
 
 #[test_case]
@@ -10,7 +9,7 @@ async fn list_works_with_range(config: TestConfig) -> TestCaseResult {
     }
 
     // Create a few transactions.
-    let envelope = anonymous_message("status", Value::Null);
+    let envelope = anonymous_message("status", "null");
     let _response = send(&config, envelope).await;
 
     TestCaseResult::Success()
