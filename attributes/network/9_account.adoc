@@ -30,32 +30,31 @@ Some example of dripping wallet's use cases include;
 
 == Requirements
 *   Every account MUST have at least one owner.
-    The server SHOULD return an error if the last owner attempts to remove itself.
+    See the <<_owner_role>> section.
 *   Accounts are referred to by their identities.
 *   A server creating an account MUST use a subresource identity of its own identity for the identity of the account, or a public key it owns.
 
 == Detailed Design
 The simplified design for this attribute is to add the basics for account management, and let account features decide how the account act.
 Each type of account features should be distinct.
-Features
 A server might support multiple account features, and apply multiple compatible features to the same account.
 
 A new namespace is created through this attribute; `account`, which contains the following basic methods implemented by this attribute:
 
 * `account.create`.
     Creates an account and sets its owner(s).
+* `account.setDescription`.
+    Set the name to a new one.
 * `account.listRoles`
     List all the roles supported by the account.
 * `account.getRoles`
     Get the roles of one or multiple identities.
-* `account.addRole`
-    Get the roles of one or multiple identities.
-* `account.removeRole`
-    Get the roles of one or multiple identities.
+* `account.addRoles`
+    Add roles to an identity.
+* `account.removeRoles`
+    Remove roles from an identity.
 * `account.info`.
     Retrieves information related to an account.
-* `account.setName`.
-    Set the name to a new one.
 * `account.delete`.
     Deletes an account.
     The identity may not be reusable.
@@ -90,29 +89,67 @@ To list the roles of an identity, call the `account.getRoles`. To add roles to a
 An account MUST have one or more owners, with the role set as `"owner"`.
 Removing the `"owner"` role from the last `"owner"` identity on an account MUST result in an error.
 
-Depending on features, owners will have special access controls over the account.
-For example, by default only an owner can set information on an account, or delete it.
+By default, only an owner can set roles of identities on an account, or delete it.
+Some additional access control might be provided to account owners by features.
 
 `"owner"` is the only required role for a ledger account.
 Any additional roles should be defined by features.
 
-=== Ledger-less Accounts
-Accounts do not require a ledger, nor do they have to be token holders, by design.
-Features implemented by the server might require the server to be a ledger (for example, a drip feature).
-
-On a ledger server, accounts can hold tokens.
-The `ledger.balance` endpoint would show the token balances for this account.
-
-On a ledger-less server, the account might have different transactions or messages.
-
 == Constraints
 The design has a few flaws that can be mitigated:
 
-* There is a lack of ACL and roles, outside of owners.
-  Although this is by design to keep the API surface small, it makes it harder later to add such designs without revisiting all combinations of features.
-* There is a limit of ~2 billions accounts per ledger identity as the specification says that accounts must be subresource identities.
+* There is a limit of ~2 billions accounts per server identity as the specification says that accounts must be subresource identities.
   The first way to mitigate this would be to charge a price per account creation, to reduce the chance of abuse.
   This can be implemented by servers. +
   Another way is by creating new private keys to allow for more sub resources.
   This process can be done in a secure way, but needs to be researched further before being part of this specification.
 * Redefining the identity type in the protocol to allow for larger identities (e.g. up to 64 bytes).
+
+== CDDL
+=== Types
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=types]
+----
+
+=== `create`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=create]
+----
+
+=== `setDescription`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=setDescription]
+----
+
+=== `listRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=listRoles]
+----
+
+=== `getRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=getRoles]
+----
+
+=== `addRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=addRoles]
+----
+
+=== `removeRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=removeRoles]
+----
+
+=== `info`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=info]
+----

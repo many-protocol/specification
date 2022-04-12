@@ -11,4 +11,13 @@ For example, a `ledger.send` call with an able account as the source identity wo
 
 == Role
 A new role is added by this feature, `"canTransact"`, which allow any identities to perform regular ledger transactions.
-Identities MUST have this role to be allowed to perform transactions.
+Identities with the `"owner"` roles have this role implicitly.
+Identities MUST either be an `'"owner"` or have this role to be allowed to perform transactions.
+
+== CDDL
+
+=== Types
+[sources,cddl]
+----
+include::{cddl}/0_account_ledger.cddl[tag=types]
+----

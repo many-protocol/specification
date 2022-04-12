@@ -1,9 +1,13 @@
 ; tag::types[]
+; Features might extend this.
 account-role = "owner"
 
 ; The attribute argument contains a list of all account features supported by
 ; the server.
 account@attribute-arg = [ * uint ]
+
+account-feature-arg = any
+account-feature = uint / [uint, * account-feature-arg]
 ; end::types[]
 
 ; tag::create[]
@@ -26,7 +30,7 @@ account.create@param = {
     ; Required list of features and their arguments.
     ; The server MUST return an error if no features are selected; an account
     ; without features doesn't do anything and is an error.
-    2 => [ 1* attribute ],
+    2 => [ 1* account-feature ],
 
     ; Any other information pertinent to this account.
     * tstr => any,
@@ -75,32 +79,32 @@ account.getRoles@return = {
 }
 ; end::getRoles[]
 
-; tag::addRole[]
+; tag::addRoles[]
 ; Add roles to an identity related to the account. Adding a role that is already
 ; set to an identity does nothing. The only role that must be defined all the
 ; time is the "owner". Other roles can be added by features and can be listed by
 ; calling the `account.listRoles` endpoint.
-account.addRole@param = {
+account.addRoles@param = {
     ; The identity to add the role to.
     0 => non-anonymous-identity,
 
     ; One or more roles to add.
     1 => [ * account-role ] / account-role,
 }
-account.addRole@return = ()
-; end::addRole[]
+account.addRoles@return = ()
+; end::addRoles[]
 
-; tag::removeRole[]
+; tag::removeRoles[]
 ; Remove roles from an identity. If the role isn't set, this will do nothing.
-account.removeRole@param = {
+account.removeRoles@param = {
     ; The identity to remove the role to.
     0 => non-anonymous-identity,
 
     ; One or more roles to remove.
     1 => [ * account-role ] / account-role,
 }
-account.removeRole@return = ()
-; end::removeRole[]
+account.removeRoles@return = ()
+; end::removeRoles[]
 
 ; tag::info[]
 ; Get the information of an account. Some information might be missing if the
@@ -117,4 +121,4 @@ account.info@return = {
     ; The list of features and their argument.
     ? 1 => [ * attribute ],
 }
-; end::info
+; end::info[]
