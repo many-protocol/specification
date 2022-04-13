@@ -56,7 +56,7 @@ The `kvstore.put` endpoint sets the value at a specific key.
 
 [sources,cddl]
 ----
-include::{cddl}/3_kvstore.cddl[tag=put]
+include::{cddl}/7_kvstore_commands.cddl[tag=put]
 ----
 
 == Delete
@@ -64,5 +64,5 @@ The `kvstore.delete` endpoint removes a value at a specific key.
 
 [sources,cddl]
 ----
-include::{cddl}/3_kvstore.cddl[tag=delete]
+include::{cddl}/7_kvstore_commands.cddl[tag=delete]
 ----

@@ -1,7 +1,7 @@
 use crate::helpers::{anonymous_message, envelope, message, send, Payload};
 use crate::tests::{TestCaseResult, TestConfig};
 use ciborium::value::Value;
-use coset::CborSerializable;
+use coset::{CborSerializable, TaggedCborSerializable};
 use reftests_macros::test_case;
 use reqwest::StatusCode;
 use std::collections::BTreeMap;
@@ -9,7 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 #[test_case]
 async fn signature_works(config: TestConfig) -> TestCaseResult {
-    let envelope = message(0, "heartbeat", Value::Null);
+    let envelope = message(0, "heartbeat", "null");
     let response = send(&config, envelope).await;
 
     let payload = response.payload.expect("No payload");
@@ -22,7 +22,7 @@ async fn signature_works(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn anonymous(config: TestConfig) -> TestCaseResult {
-    let envelope = anonymous_message("heartbeat", Value::Null);
+    let envelope = anonymous_message("heartbeat", "null");
     let response = send(&config, envelope).await;
 
     let payload = response.payload.expect("No payload");
@@ -35,7 +35,7 @@ async fn anonymous(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn requires_tag(config: TestConfig) -> TestCaseResult {
-    let envelope = anonymous_message("heartbeat", Value::Null);
+    let envelope = anonymous_message("heartbeat", "null");
     let client = reqwest::Client::new();
     // Uses the `to_vec()` serializer instead of `to_tagged_vec()`.
     let r = client
@@ -55,7 +55,7 @@ async fn requires_tag(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn invalid_signature(config: TestConfig) -> TestCaseResult {
-    let mut envelope = message(0, "heartbeat", Value::Null);
+    let mut envelope = message(0, "heartbeat", "null");
     // Override the first 4 bytes with zeros to invalidate the signature.
     envelope.signature[0..4].copy_from_slice(&[0u8; 4]);
     let response = send(&config, envelope).await;
@@ -87,7 +87,8 @@ async fn accept_no_version(config: TestConfig) -> TestCaseResult {
         )),
         ..Default::default()
     }
-    .to_tagged_value();
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
 
     let response = send(&config, envelope(None, message)).await;
     let payload = response.payload.expect("No payload");
@@ -115,7 +116,8 @@ async fn refuse_non_numerical_version(config: TestConfig) -> TestCaseResult {
         )),
         ..Default::default()
     }
-    .to_tagged_value();
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
 
     let response = send(&config, envelope(None, message)).await;
     let payload = response.payload.expect("No payload");
@@ -143,7 +145,8 @@ async fn refuse_future_version(config: TestConfig) -> TestCaseResult {
         )),
         ..Default::default()
     }
-    .to_tagged_value();
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
 
     let response = send(&config, envelope(None, message)).await;
     let payload = response.payload.expect("No payload");
@@ -171,7 +174,8 @@ async fn refuse_version_zero(config: TestConfig) -> TestCaseResult {
         )),
         ..Default::default()
     }
-    .to_tagged_value();
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
 
     let response = send(&config, envelope(None, message)).await;
     let payload = response.payload.expect("No payload");
