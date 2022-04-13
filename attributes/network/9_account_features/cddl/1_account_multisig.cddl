@@ -1,18 +1,19 @@
 ; Account multisig feature API.
 ; tag::types[]
-account-role //= "canMultisigSubmit"
-              /  "canMultisigApprove"
+account-role /= "canMultisigSubmit"
+             /  "canMultisigApprove"
 
 account-multisig-token = bstr
 
-account-multisig-transaction = transaction-info
+account-multisig-transaction = ledger-transaction-info
 
 ; List of transaction types added by this feature.
-transaction-info //= account-multisig-transaction-submit
-                   / account-multisig-transaction-approve
-                   / account-multisig-transaction-revoke
-                   / account-multisig-transaction-execute
-                   / account-multisig-transaction-withdraw
+; These should be listed in ledger.list.
+ledger-transaction-info /= account-multisig-transaction-submit
+                         / account-multisig-transaction-approve
+                         / account-multisig-transaction-revoke
+                         / account-multisig-transaction-execute
+                         / account-multisig-transaction-withdraw
 
 account-multisig-transaction-submit = {
     0 => [9, 1, 0],
@@ -102,7 +103,7 @@ account.multisigSubmitTransaction@param = {
     ; A memo associated with the transaction.
     ? 0 => tstr,
 
-    ; The transaction to send. Must be a transaction ledger object.
+    ; The transaction to send. Must be a transaction ledger info.
     ; Servers are allowed to error on an invalid or unsupported transaction.
     1 => account-multisig-transaction,
 

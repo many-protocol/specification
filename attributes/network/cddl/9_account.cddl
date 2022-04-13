@@ -3,7 +3,7 @@
 account-identity = non-anonymous-identity
 
 ; Features might extend this.
-account-role = "owner"
+account-role /= "owner"
 
 ; The attribute argument contains a list of all account features supported by
 ; the server.

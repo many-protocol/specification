@@ -28,14 +28,17 @@ ledger-transaction-id = bstr
 ; those types.
 ; Extensible transaction info.
 ; TODO: namespace transaction types per attribute ID, somehow.
-ledger-transaction-info = ledger-transaction-send
+ledger-transaction-info /= ledger-transaction-send
+ledger-transaction-type = ledger-transaction-type-send
+
+ledger-transaction-type-send = 0
 
 ledger-transaction-send = [
-    0,
-    identity,   ; FROM
-    identity,   ; TO
-    symbol,     ; Symbol
-    amount     ; Amount
+    ledger-transaction-type-send,
+    identity,      ; FROM
+    identity,      ; TO
+    ledger-symbol, ; Symbol
+    ledger-amount  ; Amount
 ]
 
 ledger-transaction = {

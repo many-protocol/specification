@@ -1,3 +1,3 @@
 ; tag::types[]
-account-role //= "canLedgerTransact"
+account-role /= "canLedgerTransact"
 ; end::types[]
