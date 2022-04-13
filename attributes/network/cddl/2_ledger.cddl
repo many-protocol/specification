@@ -4,22 +4,22 @@
 ; unique across all networks. The given string name of a symbol is not
 ; unique, though, and cannot be resolved using this attribute (a
 ; separate resolver attribute is necessary).
-symbol = identity
+ledger-symbol = identity
 
 ; An amount of tokens can be either an infinite uint or a regular one
 ; for simplicity. The networks CAN use either when serializing, but
 ; MUST accept both when doing transactions.
-amount = biguint / uint
+ledger-amount = biguint / uint
 ; end::types[]
 
 ; tag::info[]
 ; Info endpoint.
 ledger.info@param = ()
-ledger.info@return = (info)
+ledger.info@return = (ledger-info)
 
-info = {
+ledger-info = {
     ; List of supported symbols for this ledger.
-    0 => [* symbol],
+    0 => [* ledger-symbol],
 
     ; Hash value of the ledger state. If two ledgers have the same hashes,
     ; chances are they have the same balances on the same accounts (with
@@ -32,13 +32,13 @@ info = {
     ; Transfer fees for each symbols, between accounts.
     ; TODO: not implemented.
     2 => {
-        symbol => transaction-fee,
+        ledger-symbol => transaction-fee,
     },
 
     ; Conversion rates and fees between symbols.
     ; TODO: not implemented.
     3 => {
-        [symbol, symbol] => conversion,
+        [ledger-symbol, ledger-symbol] => conversion,
     },
 
     ; Local human readable names for symbols.
@@ -46,7 +46,7 @@ info = {
     ; specific ledger.
     4 => {
         ; TODO: this.
-        symbol => {
+        ledger-symbol => {
             0 => tstr,
             1 => tstr,  ; Description
             2 => uint, ; Number of precision digits
@@ -74,7 +74,7 @@ info = {
 ;   So a total of 10_765 tokens as fees.
 transaction-fee = {
     ; Fixed fees for each transactions.
-    ? 0 => amount,
+    ? 0 => ledger-amount,
 
     ; Percent fees of the actual transfer amount, rounded down
     ; if necessary.
@@ -107,7 +107,7 @@ ledger.balance@param = {
     ; Symbol to check (or list of symbols). Symbols will be missing from
     ; the output if their balance is 0. If this is an empty array or
     ; omitted, all symbols with a balance for the account will be returned.
-    ? 1 => symbol // [* symbol],
+    ? 1 => ledger-symbol // [* ledger-symbol],
 }
 
 ; Return value for "ledger.balance".
@@ -116,7 +116,7 @@ ledger.balance@return = {
     ; Balances as a record of Symbol => Amount.
     ; Balances of zero might not be listed here.
     0 => {
-        * symbol => amount,
+        * ledger-symbol => ledger-amount,
     },
 }
 ; end::balance[]

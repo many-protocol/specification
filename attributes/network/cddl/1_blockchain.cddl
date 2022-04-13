@@ -5,29 +5,6 @@
 ; on block size.
 message = bstr .cbor request
 
-; Sorting order. This only matters if a call uses a maximum number of transactions
-; as they will be returned in the order and stopped.
-; For example, if a call lists ALL transactions, but the server returns only 100,
-; using an ASCENDING order returns the first 100, while a DESCENDING order returns
-; the last 100.
-order = (
-    indeterminate /
-    ascending /
-    descending
-)
-indeterminate = 0
-ascending = 1
-descending = 2
-
-; A bound, either upper or lower, serialized.
-bound<T> =
-    ; Unbounded.
-    []
-    ; Inclusive bound.
-    / [0, T]
-    ; Exclusive bound.
-    / [1, T]
-
 ; A block query, which can contain either a hash, index (or height) or time.
 ; This targets a single block. Since multiple blocks might have been created
 ; at the same time, this cannot include a time value (use a bounded block
@@ -126,9 +103,12 @@ block = {
 
     ; Transactions / Messages sent through this block. If the response is larger
     ; than the maximum message size, the transaction content might be skipped.
-    ? 5 => [ * transaction ],
-    ; TODO: add transaction hashes in case messages don't fit.
-    ? 6 => [ * transaction-hashes ],
+    ; The server MAY provide transaction hashes instead as a separate key.
+    (
+        5 => [ * transaction ]
+        //
+        6 => [ * bstr ],
+    )
 
     ; Additional fields are okay here as metadata, keys MUST be strings.
     * tstr => any,
