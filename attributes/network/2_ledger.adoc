@@ -12,8 +12,6 @@ It exposes the following endpoints:
 - <<_info, `ledger.info`>>. Returns information about this ledger.
 - <<_balance, `ledger.balance`>>. Returns the balance of the account specified (or the sender).
 - <<_send, `ledger.send`>>. Send tokens between ledgers.
-- <<_mint, `ledger.mint`>>. Creates new tokens and add them to an ledger.
-- <<_burn, `ledger.burn`>>. Destroys tokens from an ledger.
 
 == Accounts
 Accounts are non-anonymous identities.
@@ -50,24 +48,4 @@ Transfer tokens between accounts.
 [sources,cddl]
 ----
 include::{cddl}/6_ledger_commands.cddl[tag=send]
-----
-
-== Mint
-Create new tokens.
-
-An ledger MAY return an `unauthorized` error if the message sender is not authorized to make this call.
-
-[sources,cddl]
-----
-include::{cddl}/6_ledger_commands.cddl[tag=mint]
-----
-
-== Burn
-Destroy tokens.
-
-An ledger MAY return an `unauthorized` error if the message sender is not authorized to make this call.
-
-[sources,cddl]
-----
-include::{cddl}/6_ledger_commands.cddl[tag=burn]
 ----
