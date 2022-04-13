@@ -70,9 +70,9 @@ impl TestCase {
         let p = p
             .strip_prefix(parent_p.to_string_lossy().as_ref())
             .unwrap_or(p)
-            .strip_prefix("/")
+            .strip_prefix('/')
             .unwrap_or(p);
-        format!("{}::{}", p.replace("/", "::"), self.name)
+        format!("{}::{}", p.replace('/', "::"), self.name)
     }
 }
 

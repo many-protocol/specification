@@ -11,10 +11,10 @@ ledger.send@param = {
     1 => identity,
 
     ; The amount of tokens to send.
-    2 => amount,
+    2 => ledger-amount,
 
     ; The symbol to send.
-    3 => symbol,
+    3 => ledger-symbol,
 }
 ledger.send@return = ()
 ; end::send[]
