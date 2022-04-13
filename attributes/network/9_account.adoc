@@ -1,4 +1,4 @@
-= Ledger Account Attribute (#9)
+= Account Attribute (#9)
 :cddl: ./cddl/
 :toc:
 
@@ -58,12 +58,15 @@ A new namespace is created through this attribute; `account`, which contains the
 * `account.delete`.
     Deletes an account.
     The identity may not be reusable.
+* `account.addFeatures`
+    Add features to an account.
 
 === Information
 An account has metadata associated with it.
-For example, it can have a name, or a list of features and their arguments.
+For example, it can have a name, a list of features and their arguments, and a map of identities and their roles.
 
-Once an account has been created, its list of features is immutable and cannot be changed.
+Once an account has been created, features cannot be removed, nor their argument can be changed.
+New features can be added to an account as long as they don't interfere with previous features of that account.
 
 === Features
 Features are specified through network attributes, exposed by the network's `status`, and attribute IDs set in the information of an account.
@@ -86,13 +89,15 @@ To list roles available for an account (depending on its features), call the `ac
 To list the roles of an identity, call the `account.getRoles`. To add roles to an identity, use the `account.addRoles` endpoint, and `account.removeRoles` to remove one or multiple roles.
 
 ==== Owner Role
-An account MUST have one or more owners, with the role set as `"owner"`.
+An account MUST have at least one owners, with their role set including `"owner"`.
 Removing the `"owner"` role from the last `"owner"` identity on an account MUST result in an error.
 
 By default, only an owner can set roles of identities on an account, or delete it.
 Some additional access control might be provided to account owners by features.
 
-`"owner"` is the only required role for a ledger account.
+`"owner"`s have all other roles implicitly, as they can add any roles to themselves.
+
+`"owner"` is the only required role for an account.
 Any additional roles should be defined by features.
 
 == Constraints
@@ -152,4 +157,16 @@ include::{cddl}/9_account.cddl[tag=removeRoles]
 [sources,cddl]
 ----
 include::{cddl}/9_account.cddl[tag=info]
+----
+
+=== `delete`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=delete]
+----
+
+=== `addFeatures`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=addFeatures]
 ----

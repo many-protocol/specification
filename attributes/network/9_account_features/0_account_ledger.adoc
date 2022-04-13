@@ -4,14 +4,12 @@
 This attribute adds support for ledger transactions available to a regular identity on a ledger.
 If this attribute is present in an account, any allowed (see <<Role>>) identities can perform regular transactions that would be possible from their identities, from this account.
 
-To perform a transaction from an account, the transaction must support a `from` field in its parameters, and that `from` identity must be the identity of the account.
 Verification that the sender is able to transact on behalf of an account is left to the server.
 
 For example, a `ledger.send` call with an able account as the source identity would perform transactions from this account.
 
 == Role
-A new role is added by this feature, `"canTransact"`, which allow any identities to perform regular ledger transactions.
-Identities with the `"owner"` roles have this role implicitly.
+A new role is added by this feature, `"canLedgerTransact"`, which allow any identities to perform regular ledger transactions.
 Identities MUST either be an `'"owner"` or have this role to be allowed to perform transactions.
 
 == CDDL

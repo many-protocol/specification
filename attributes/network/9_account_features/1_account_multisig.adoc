@@ -15,7 +15,7 @@ This document explains the design and interface of an account implementing the m
 
 (*) --> "account.multisigSubmit"
 
-if "canSubmit" then
+if "canMultisigSubmit" then
     -->[yes] submitted
 else
     --> error
@@ -24,7 +24,7 @@ endif
 
 (*) --> "account.multisigApprove"
 
-if "canApprove" then
+if "canMultisigApprove" then
     -->[yes] waiting
 else
     -l-> error
@@ -48,17 +48,17 @@ A transaction can expire after a certain amount of time has passed after it has 
 This is left at the discretion of the server, but a value can be passed for each new transactions.
 
 === Roles
-This feature adds 2 roles; `canSubmit` and `canApprove`.
+This feature adds 2 roles; `canMultisigSubmit` and `canMultisigApprove`.
 
-- `"canSubmit"` is allowed to submit new transactions, and to withdraw their own submitted transactions.
-- `"canApprove"` is allowed to approve transactions, and revoke their own approvals.
+- `"canMultisigSubmit"` is allowed to submit new transactions, and to withdraw their own submitted transactions.
+- `"canMultisigApprove"` is allowed to approve transactions, and revoke their own approvals.
 
 Additionally, `"owner"` is allowed to withdraw transactions, and update defaults.
 
 Forced execution (without all approvals) is not allowed, but an `owner` can recreate a new transaction with no approvals needed.
 
 === Defaults
-By default, on account creation, the number of approval needed for any transaction will be the total number of users with the `"canApprove"` role (including `"owner"`).
+By default, on account creation, the number of approval needed for any transaction will be the total number of identities with the `"canMultisigApprove"` role on the account (including `"owner"`).
 
 A server MAY provide a reasonable default for the time a transaction expire.
 

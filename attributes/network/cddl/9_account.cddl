@@ -1,4 +1,7 @@
 ; tag::types[]
+; An account identity.
+account-identity = non-anonymous-identity
+
 ; Features might extend this.
 account-role = "owner"
 
@@ -24,12 +27,14 @@ account.create@param = {
     ; The server MUST return an error if any role is not supported by any
     ; feature included in the account.
     ? 1 => {
-        * non-anonymous-identity => [ * tstr ],
+        * non-anonymous-identity => [ * account-role ],
     },
 
     ; Required list of features and their arguments.
     ; The server MUST return an error if no features are selected; an account
     ; without features doesn't do anything and is an error.
+    ; The server MUST return an error if a combination of features on an
+    ; account is unsupported.
     2 => [ 1* account-feature ],
 
     ; Any other information pertinent to this account.
@@ -37,7 +42,7 @@ account.create@param = {
 }
 account.create@return = {
     ; The account identity. Use this to contact the account directly.
-    0 => identity,
+    0 => account-identity,
 }
 ; end::create[]
 
@@ -45,7 +50,7 @@ account.create@return = {
 ; Sets the description of an account.
 account.setDescription@param = {
     ; The identity of the account.
-    0 => non-anonymous-identity,
+    0 => account-identity,
 
     ; The new name or description.
     1 => tstr,
@@ -56,7 +61,10 @@ account.account.setDescription@return = ()
 
 ; tag::listRoles[]
 ; List all the roles available for an account, based on its features.
-account.listRoles@param = ()
+account.listRoles@param = {
+    ; The account to list identities available.
+    0 => account-identity,
+}
 
 account.listRoles@return = {
     ; The list of roles available for identities.
@@ -67,8 +75,11 @@ account.listRoles@return = {
 ; tag::getRoles[]
 ; List the roles of an identity.
 account.getRoles@param = {
+    ; The account to get the roles of.
+    0 => account-identity,
+
     ; The identity to get the roles from.
-    0 => non-anonymous-identity / [ * non-anonymous-identity ],
+    1 => non-anonymous-identity / [ * non-anonymous-identity ],
 }
 
 account.getRoles@return = {
@@ -85,11 +96,14 @@ account.getRoles@return = {
 ; time is the "owner". Other roles can be added by features and can be listed by
 ; calling the `account.listRoles` endpoint.
 account.addRoles@param = {
-    ; The identity to add the role to.
-    0 => non-anonymous-identity,
+    ; The account to add the role to.
+    0 => account-identity,
 
-    ; One or more roles to add.
-    1 => [ * account-role ] / account-role,
+    ; A map of identity with roles to add. These roles will be added to the
+    ; identity, not replacing the ones it currently have.
+    ? 1 => {
+        * non-anonymous-identity => [ * account-role ],
+    }
 }
 account.addRoles@return = ()
 ; end::addRoles[]
@@ -97,11 +111,13 @@ account.addRoles@return = ()
 ; tag::removeRoles[]
 ; Remove roles from an identity. If the role isn't set, this will do nothing.
 account.removeRoles@param = {
-    ; The identity to remove the role to.
-    0 => non-anonymous-identity,
+    ; The account to add the role to.
+    0 => account-identity,
 
-    ; One or more roles to remove.
-    1 => [ * account-role ] / account-role,
+    ; A map of identity with roles to remove from them.
+    ? 1 => {
+        * non-anonymous-identity => [ * account-role ],
+    }
 }
 account.removeRoles@return = ()
 ; end::removeRoles[]
@@ -112,13 +128,55 @@ account.removeRoles@return = ()
 ; can have the list of owners.
 account.info@param = {
     ; The identity of the account to request the information of.
-    0 => non-anonymous-identity,
+    0 => account-identity,
 }
 account.info@return = {
     ; The name or description of the wallet.
     ? 0 => tstr,
 
+    ; The list of roles for the account.
+    ? 1 => {
+        * non-anonymous-identity => [ * account-role ],
+    },
+
     ; The list of features and their argument.
-    ? 1 => [ * attribute ],
+    ? 2 => [ 1* account-feature ],
 }
 ; end::info[]
+
+; tag::delete[]
+; Delete an account. Its identity cannot be reused.
+; The server MUST return an error if the sender does not have the `"owner"` role
+; for this account.
+account.delete@param = {
+    0 => account-identity,
+}
+account.delete@return = ()
+; end::delete[]
+
+; tag::addFeatures[]
+; Add features and roles to an account, in one atomic call.
+; The roles added by this call can only come from the new features
+; added in this call.
+; The server MUST return an error if roles added by this call aren't available
+; to the features listed.
+; The server MAY return an error if adding features to an account is not
+; supported.
+account.addFeatures@param = {
+    ; The account to add features to.
+    0 => account-identity,
+
+    ; List of additional roles to add.
+    ? 1 => {
+        * non-anonymous-identity => [ * account-role ],
+    }
+
+    ; List of features to add and their arguments.
+    ; The server MUST return an error if a feature is already available on the
+    ; account.
+    ; The server MUST return an error if a combination of features on an
+    ; account is unsupported.
+    2 => [ 1* account-feature ],
+}
+account.addFeatures@return = ()
+; end::addFeatures[]
