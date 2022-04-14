@@ -1,0 +1,119 @@
+== Multisig Account Feature (#1)
+:cddl: ./cddl/
+
+The multisig account feature indicates that an account system supports transactions using multiple signatures.
+
+This document explains the design and interface of an account implementing the multisig attribute.
+
+== Design
+
+=== Flow
+
+[plantuml, format=png]
+....
+@startuml
+
+(*) --> "account.multisigSubmit"
+
+if "canMultisigSubmit" then
+    -->[yes] submitted
+else
+    --> error
+    --> (*)
+endif
+
+(*) --> "account.multisigApprove"
+
+if "canMultisigApprove" then
+    -->[yes] waiting
+else
+    -l-> error
+endif
+
+submitted --> waiting
+
+if "enough approvals" then
+    -->[yes] execute
+else
+    -->[no] waiting
+endif
+
+execute --> (*)
+
+@enduml
+....
+
+=== Expiration
+A transaction can expire after a certain amount of time has passed after it has been submitted.
+This is left at the discretion of the server, but a value can be passed for each new transactions.
+
+=== Roles
+This feature adds 2 roles; `canMultisigSubmit` and `canMultisigApprove`.
+
+- `"canMultisigSubmit"` is allowed to submit new transactions, and to withdraw their own submitted transactions.
+- `"canMultisigApprove"` is allowed to approve transactions, and revoke their own approvals.
+
+Additionally, `"owner"` is allowed to withdraw transactions, and update defaults.
+
+Forced execution (without all approvals) is not allowed, but an `owner` can recreate a new transaction with no approvals needed.
+
+=== Defaults
+By default, on account creation, the number of approval needed for any transaction will be the total number of identities with the `"canMultisigApprove"` role on the account (including `"owner"`).
+
+A server MAY provide a reasonable default for the time a transaction expire.
+
+== CDDL
+
+=== Types
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=types]
+----
+
+=== Feature
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=feature]
+----
+
+=== `setDefaults`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=setDefaults]
+----
+
+=== `submitTransaction`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=submitTransaction]
+----
+
+=== `info`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=info]
+----
+
+=== `approve`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=approve]
+----
+
+=== `revoke`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=revoke]
+----
+
+=== `execute`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=execute]
+----
+
+=== `withdraw`
+[sources,cddl]
+----
+include::{cddl}/1_account_multisig.cddl[tag=withdraw]
+----

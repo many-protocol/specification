@@ -26,10 +26,20 @@ ledger-transaction-id = bstr
 
 ; Transaction types. This can be extended and the server MUST provide a list of
 ; those types.
-; TODO: namespace transaction types per attribute ID.
-ledger-transaction-type = transaction-send
+; Extensible transaction info.
+; TODO: namespace transaction types per attribute ID, somehow.
+ledger-transaction-info /= ledger-transaction-send
+ledger-transaction-type = ledger-transaction-type-send
 
-ledger-transaction-send = 0
+ledger-transaction-type-send = 0
+
+ledger-transaction-send = [
+    ledger-transaction-type-send,
+    identity,      ; FROM
+    identity,      ; TO
+    ledger-symbol, ; Symbol
+    ledger-amount  ; Amount
+]
 
 ledger-transaction = {
     ; Transaction
@@ -39,18 +49,7 @@ ledger-transaction = {
     1 => time,
 
     ; Depends on the transaction type.
-    (
-        ; SEND transaction
-        (
-            2 => [
-                ledger-transaction-send,
-                identity,      ; FROM
-                identity,      ; TO
-                ledger-symbol, ; Symbol
-                ledger-amount  ; Amount
-            ]
-        )
-    )
+    2 => ledger-transaction-info,
 }
 ; end::types[]
 

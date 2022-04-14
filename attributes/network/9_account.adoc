@@ -1,0 +1,172 @@
+= Account Attribute (#9)
+:cddl: ./cddl/
+:toc:
+
+== Overview
+This document describes a network attribute that allows people to create accounts that can perform operations when certain conditions are met.
+
+== Problem Statement
+A regular feature for money management is having a multi-signature wallet, vault, dripping wallet or other special access accounts that execute transactions automatically and/or under certain rules.
+
+== Use Cases
+Some examples of multi signature wallets are already available in traditional banking;
+
+*   1-of-2.
+    A husband and wife shared account; either spouse can spend the funds without approval from the other.
+*   2-of-2.
+    A husband and wife savings account; both signatures are required to spend the funds.
+*   2-of-3.
+    Parents’ savings account, where the child can spend with the approval of either parent, and money cannot be taken away unless both parents agree.
+*   3-out-of-7.
+    Low-trust donation. 7 people have a private key, but any 3 can sign a transfer.
+*   1 or 3-of-4.
+    Distributed backup. The private key can be recovered with 3 of the 4 parts, which can be distributed into safes or friends.
+
+Some example of dripping wallet's use cases include;
+
+*   vesting schedule for employees, in tokens.
+*   rent or loan payments.
+*   automatic transfer of funds to an execution network as gas payment.
+
+== Requirements
+*   Every account MUST have at least one owner.
+    See the <<_owner_role>> section.
+*   Accounts are referred to by their identities.
+*   A server creating an account MUST use a subresource identity of its own identity for the identity of the account, or a public key it owns.
+
+== Detailed Design
+The simplified design for this attribute is to add the basics for account management, and let account features decide how the account act.
+Each type of account features should be distinct.
+A server might support multiple account features, and apply multiple compatible features to the same account.
+
+A new namespace is created through this attribute; `account`, which contains the following basic methods implemented by this attribute:
+
+* `account.create`.
+    Creates an account and sets its owner(s).
+* `account.setDescription`.
+    Set the name to a new one.
+* `account.listRoles`
+    List all the roles supported by the account.
+* `account.getRoles`
+    Get the roles of one or multiple identities.
+* `account.addRoles`
+    Add roles to an identity.
+* `account.removeRoles`
+    Remove roles from an identity.
+* `account.info`.
+    Retrieves information related to an account.
+* `account.delete`.
+    Deletes an account.
+    The identity may not be reusable.
+* `account.addFeatures`
+    Add features to an account.
+
+=== Information
+An account has metadata associated with it.
+For example, it can have a name, a list of features and their arguments, and a map of identities and their roles.
+
+Once an account has been created, features cannot be removed, nor their argument can be changed.
+New features can be added to an account as long as they don't interfere with previous features of that account.
+
+=== Features
+Features are specified through network attributes, exposed by the network's `status`, and attribute IDs set in the information of an account.
+
+The server MUST return an error on creation if two features are not compatible or supported with each others.
+
+The list of features is available through the attribute's arguments returned by the server's `status` endpoint.
+
+=== Roles
+Accounts have a map of identities to a list of roles internally.
+Identities can have multiple roles, with their actual access control defined by each feature available.
+
+A server MAY return an error if too many roles and identities are added to an account.
+For example, a server might want to limit its internal list of owners per accounts to 20, or maximum of roles per identity to 10, or any combination of these.
+
+Roles are case sensitive strings.
+Trying to add a role that isn't defined by the features associated with an account MUST result in an error.
+
+To list roles available for an account (depending on its features), call the `account.listRoles`.
+To list the roles of an identity, call the `account.getRoles`. To add roles to an identity, use the `account.addRoles` endpoint, and `account.removeRoles` to remove one or multiple roles.
+
+==== Owner Role
+An account MUST have at least one owners, with their role set including `"owner"`.
+Removing the `"owner"` role from the last `"owner"` identity on an account MUST result in an error.
+
+By default, only an owner can set roles of identities on an account, or delete it.
+Some additional access control might be provided to account owners by features.
+
+`"owner"`s have all other roles implicitly, as they can add any roles to themselves.
+
+`"owner"` is the only required role for an account.
+Any additional roles should be defined by features.
+
+== Constraints
+The design has a few flaws that can be mitigated:
+
+* There is a limit of ~2 billions accounts per server identity as the specification says that accounts must be subresource identities.
+  The first way to mitigate this would be to charge a price per account creation, to reduce the chance of abuse.
+  This can be implemented by servers. +
+  Another way is by creating new private keys to allow for more sub resources.
+  This process can be done in a secure way, but needs to be researched further before being part of this specification.
+* Redefining the identity type in the protocol to allow for larger identities (e.g. up to 64 bytes).
+
+== CDDL
+=== Types
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=types]
+----
+
+=== `create`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=create]
+----
+
+=== `setDescription`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=setDescription]
+----
+
+=== `listRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=listRoles]
+----
+
+=== `getRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=getRoles]
+----
+
+=== `addRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=addRoles]
+----
+
+=== `removeRoles`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=removeRoles]
+----
+
+=== `info`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=info]
+----
+
+=== `delete`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=delete]
+----
+
+=== `addFeatures`
+[sources,cddl]
+----
+include::{cddl}/9_account.cddl[tag=addFeatures]
+----

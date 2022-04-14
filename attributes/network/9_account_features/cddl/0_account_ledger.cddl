@@ -1,0 +1,3 @@
+; tag::types[]
+account-role /= "canLedgerTransact"
+; end::types[]

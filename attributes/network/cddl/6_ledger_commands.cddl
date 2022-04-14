@@ -1,4 +1,5 @@
 ; tag::send[]
+; Send tokens between two accounts.
 ledger.send@param = {
     ; Account that will send the tokens (From).
     ; If omitted, will use the message sender.
