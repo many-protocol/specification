@@ -28,12 +28,8 @@ ledger-transaction-id = bstr
 ; those types.
 ; TODO: namespace transaction types per attribute ID.
 ledger-transaction-type = transaction-send
-                 / transaction-mint
-                 / transaction-burn
 
 ledger-transaction-send = 0
-ledger-transaction-mint = 1
-ledger-transaction-burn = 2
 
 ledger-transaction = {
     ; Transaction
@@ -50,28 +46,6 @@ ledger-transaction = {
                 ledger-transaction-send,
                 identity,      ; FROM
                 identity,      ; TO
-                ledger-symbol, ; Symbol
-                ledger-amount  ; Amount
-            ]
-        )
-        //
-
-        ; MINT transaction
-        (
-            2 => [
-                ledger-transaction-mint,
-                identity,      ; Account
-                ledger-symbol, ; Symbol
-                ledger-amount  ; Amount
-            ]
-        )
-        //
-
-        ; BURN transaction
-        (
-            2 => [
-                ledger-transaction-burn,
-                identity,      ; Account
                 ledger-symbol, ; Symbol
                 ledger-amount  ; Amount
             ]
