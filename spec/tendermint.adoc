@@ -151,7 +151,7 @@ many_app -> many : \
 == Commands ==
 
 user -> many : \
-    many::RequestMessage\nmethod: "account.mint"
+    many::RequestMessage\nmethod: "account.send"
 many -> tendermint : \
     broadcast_tx\n(signed envelope)
 
