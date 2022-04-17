@@ -5,14 +5,26 @@ use ed25519_dalek::Signer;
 use rand::SeedableRng;
 use reqwest::StatusCode;
 use sha3::{Digest, Sha3_224};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    collections::BTreeMap,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
     let result = send(config, anonymous_message("status", "null")).await;
 
     let payload = result.payload.expect("No payload from status");
-    let status: ciborium::value::Value =
+
+    let response: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Invalid payload.");
+    let response_payload = response
+        .get(&4)
+        .expect("Response return value was not found")
+        .as_bytes()
+        .expect("Response return value was expected to be Bytes");
+
+    let status: Value =
+        ciborium::de::from_reader(response_payload.as_slice()).expect("Invalid response payload");
 
     let attrs = match status {
         Value::Map(m) => {
