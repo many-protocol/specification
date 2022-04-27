@@ -7,7 +7,7 @@ kvstore.put@param = {
     1 => bstr,
 }
 
-kvstore.put@return = {}
+kvstore.put@return = ()
 ; end::put[]
 
 ; tag::delete[]
@@ -16,5 +16,5 @@ kvstore.delete@param = {
     0 => bstr,
 }
 
-kvstore.delete@return = {}
+kvstore.delete@return = ()
 ; end::delete[]

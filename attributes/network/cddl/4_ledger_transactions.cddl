@@ -71,7 +71,7 @@ ledger.list@param = {
 
     ; Whether or not to show the last transactions or the first ones found. The default
     ; behaviour is left to the server implementation.
-    ; Ordering is done by transaction ID (which are monotically incrementing).
+    ; Ordering is done by transaction ID (which are monotonically incrementing).
     ? 1 => order,
 
     ; Transaction filter criteria.
