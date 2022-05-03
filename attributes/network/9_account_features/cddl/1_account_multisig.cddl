@@ -111,16 +111,16 @@ account.multisigSubmitTransaction@param = {
     ; error if this value is passed but the submitter does not have the `owner` role.
     ? 2 => uint,
 
-    ; Whether to execute this transaction automatically when the threshold is met.
-    ; The server MUST return an error if this value is passed but the submitter
-    ; does not have the `owner` role, or if automatic execution is not supported.
-    ? 3 => bool,
-
     ; The time (in seconds) this transaction would automatically expire. The server is
     ; allowed to clamp this value, or refuse to create an account if this is too
     ; large. The server MUST return an error if this value is passed but the submitter
     ; does not have the `owner` role.
-    ? 4 => uint,
+    ? 3 => uint,
+
+    ; Whether to execute this transaction automatically when the threshold is met.
+    ; The server MUST return an error if this value is passed but the submitter
+    ; does not have the `owner` role, or if automatic execution is not supported.
+    ? 4 => bool,
 }
 account.multisigSubmitTransaction@return = {
     ; A token identifying this transaction. This is an implementation specific opaque
@@ -154,9 +154,12 @@ account.multisigInfo@return = {
     ; How many approvers are needed to execute this transaction.
     3 => uint,
 
+    ; Whether to execute this transaction automatically when the threshold is met.
+    4 => bool,
+
     ; When will this transaction expire. This is a timestamp in seconds since
     ; Unix EPOCH.
-    4 => time,
+    5 => time,
 }
 ; end::info[]
 
