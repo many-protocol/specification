@@ -1,4 +1,4 @@
-; tag::result[]
+; tag::status[]
 async-result-unknown = 0
 async-result-queued = 1
 async-result-processing = 2
@@ -29,4 +29,4 @@ async.status@return =
     ; A result expired from the local cache and is not available anymore. This is optional
     ; and networks may or may not keep a list of expired tokens.
     / { 0 => async-result-expired }
-; end::result[]
+; end::status[]

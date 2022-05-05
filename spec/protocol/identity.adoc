@@ -1,22 +1,23 @@
 = Identity
-Every actor, signer and networks have an identity, which is similar to an address in Ethereum.
 
-There are really 3 types of identities as part of the TBD-Verse;
+Every actor, signer and networks have an identity (materialized in a ManyVerse Address), which is similar to an address in Ethereum.
+
+There are really 3 types of addresses as part of the ManyVerse;
 
 1. *Anonymous.*
 An anonymous user does not sign messages.
-It's a fixed identity that can be used by anyone when sending messages.
+It's a fixed address that can be used by anyone when sending messages.
 Those messages won't be able to identify the source.
 2. *Public Key.*
 A public key can be a program or a user that is the source of a message and can send messages.
 It MUST sign all messages sent, and its ID is a hash of the public key that can validate the signature.
 3. *Subresource.*
-A Subresource identity is an indexed resource inside a network that does not have its own internal public key but can be addressed.
+A Subresource address is an indexed resource inside a network that does not have its own internal public key but can be addressed.
 Messages to and from a subresource should use the same public key as the network they're part of.
 
-A TBD-Verse ID is a binary buffer of up to 256 bits (32 bytes).
+A ManyVerse Address is a binary buffer of up to 256 bits (32 bytes).
 The first 8 bits contain the type of the ID.
-The rest depends on the type of identity:
+The rest depends on the type of address:
 
 [stripes=odd,cols="1,1,1,2"]
 |===
@@ -27,13 +28,13 @@ The rest depends on the type of identity:
 |
 
 3+| 0x00 (Anonymous)
-| Anonymous Identifier.
-The identity field can be omitted for anonymous identities.
+| Anonymous Address.
+The address field can be omitted for anonymous identities (no bytes).
 If required, the serialization of the anonymous identity is a single nul byte.
 
 | 0x01 (Public Key)
 2+| SHA-3 (224 bits) of COSE encoded public key (see <<_cose_key>>).
-| An identity that has a private key (can sign), and MAY receive messages.
+| The address of an identity that has a private key (can sign), and MAY receive messages.
 This can be a user or a network of computers sharing a distributed key.
 
 | 0x80 - 0xFF (Subresource index high bits)
@@ -43,36 +44,36 @@ This can be a user or a network of computers sharing a distributed key.
 It can be directly addressed, but is sharing a public key with other resources and with the network itself.
 An example could be a distributed application or smart contract that doesn't have its own key.
 
-The Subresource ID is; a 0 bit, the lower 7 bits of the Identity's tag, then the 24 last bits of the identity bytes.
+The Subresource ID is; a 0 bit, the lower 7 bits of the address's tag, then the 24 last bits of the address bytes.
 This allows for 31 bits of subresource.
 |===
 
 == Textual Format
-The string format for an identity is the concatenation of:
+The string format for an ManyVerse identity address is the concatenation of:
 
 - the character `m`,
-- the base32 encoding (RFC4648 alphabet, all lowercase) of the identity binary value itself,
+- the base32 encoding (RFC4648 alphabet, all lowercase) of the address binary value itself,
 - the first 2 characters of the base32 encoding (RFC4648 alphabet, all lowercase) of the calculated checksum (see below).
 
-The exception is anonymous, which can be reduced to `maa` (no encoding of the identity itself).
+The exception is anonymous, which can be reduced to `maa` (no encoding of the address itself).
 
 === Checksum
-The checksum is the CRC16 checksum (polynomial 0xA001, initial value 0x0000, xor 0x0000, with reflection) of the identity bytestring.
+The checksum is the CRC16 checksum (polynomial 0xA001, initial value 0x0000, xor 0x0000, with reflection) of the address byte serialization.
 Then the Base32 encoding of this checksum is calculated (RFC4648 alphabet, all lowercase), and the first 2 characters of the encoded string is used as checksum in the textual format.
 
 ==== Security Considerations
 A Base32 character has 32 possible values, or 5 bits of entropy.
-Two characters give us 10 bits of entropy, which indicates that two typos on a textual identity has a (1 out of 1024)^2 chance of matching, assuming these typos are randomly distributed.
+Two characters give us 10 bits of entropy, which indicates that two typos on a textual address has a (1 out of 1024)^2 chance of matching, assuming these typos are randomly distributed.
 
-The Checksum therefore should not be considered secure for preventing collisions (e.g. for hashing), but it is only useful when manually entering identities from the keyboard.
+The Checksum therefore should not be considered secure for preventing collisions (e.g. for hashing), but it is only useful when manually entering addresses from the keyboard.
 As such, the risk of collision is acceptable in the case of manual data entry.
 
 === Examples
-The following identities can be used as examples:
+The following addresses can be used as examples:
 
 [stripes=odd]
 |===
-| Identity Bytes | Textual Format
+| Address Bytes | Textual Format
 | `0x00` (Anonymous) | `maa` or `maaaa`
 | `0x0100000000000000000000000000000000000000000000000000000000` | `maeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah`
 | `0x8000000000000000000000000000000000000000000000000000000000000000` | `mqaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaayb`
