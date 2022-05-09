@@ -1,7 +1,6 @@
 ; Account multisig feature API.
 ; tag::types[]
-account-role /= "canMultisigSubmit"
-             /  "canMultisigApprove"
+account-role /= "canMultisigParticipate"
 
 account-multisig-token = bstr
 
@@ -59,9 +58,10 @@ multisig@account-feature@argument = {
     ; but cannot be overridden to be less.
     ; This number includes the submitter of a transaction, meaning that the value of
     ; this field is always at least 1 (passing `0` will fail creating the account).
-    ; If this value is greater than the number of people with the `canMultisigApprove` role,
-    ; the server MAY still create the account.
-    ; By default this is the number of identities with the `canMultisigApprove` role.
+    ; If this value is greater than the number of people with the
+    ; `canMultisigParticipant` role, the server MAY still create the account.
+    ; By default this is the number of identities with the
+    ; `canMultisigParticipant` role.
     ? 0 => uint,
 
     ; The time (in seconds) a transaction would automatically expire. The server is
