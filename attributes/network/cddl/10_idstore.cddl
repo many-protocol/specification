@@ -1,6 +1,6 @@
 ; tag::types[]
 word = tstr
-idstore-words = [2* word]
+idstore-words = [2*5 word]
 idstore-id = non-anonymous-identity
 ; end::types[]
 
