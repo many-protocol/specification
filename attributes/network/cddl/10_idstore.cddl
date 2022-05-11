@@ -1,0 +1,27 @@
+; tag::types[]
+word = tstr
+idstore-words = [2* word]
+idstore-id = non-anonymous-identity
+; end::types[]
+
+; tag::store[]
+idstore.store@param = {
+    ; Easy-to-remember words to be associated to the identity
+    0 => idstore-words,
+
+    ; The identity associated to the easy-to-remember words
+    1 => idstore-id
+}
+idstore.store@return = ()
+; end::store[]
+
+; tag::get[]
+idstore.get@param = {
+    ; Easy-to-remember words to be associated to the identity
+    0 => idstore-words,
+}
+idstore.get@return = {
+    ; The identity associated to the easy-to-remember words
+    0 => idstore-id
+}
+; end::get[]

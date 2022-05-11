@@ -1,0 +1,36 @@
+= ID Store Attribute (#10)
+:cddl: ./cddl/
+
+Servers use this attribute to implement an identity store containing a map of easy-to-remember words to `identity`.
+It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
+
+A user cannot modify an entry after it is stored.
+
+It exposes the following endpoints:
+
+- <<_store, `idstore.store`>>. Store a new words/identity map.
+- <<_get, `idstore.get`>>. Get an identity from words.
+
+== Errors
+`idstore` servers reserve the following error codes:
+
+- 100001, `existing_entry`.
+    The entry key already exists in the storage.
+- 100002, `entry_not_found`.
+    Storage was unable to find entry.
+
+== Store
+Store a new entry words/identity pair in the persistent storage
+
+[sources,cddl]
+----
+include::{cddl}/10_idstore.cddl[tag=store]
+----
+
+== Get
+Get the identity associated with the given words from the persistent storage.
+
+[sources,cddl]
+----
+include::{cddl}/10_idstore.cddl[tag=get]
+----
