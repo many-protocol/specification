@@ -1,19 +1,16 @@
 = ID Store Attribute (#10)
 :cddl: ./cddl/
 
-Servers use this attribute to implement an identity store containing a map of
-recall phrase to credential ID and a map of public address to credential ID.  It
-does not have to be backed by a blockchain (but it MAY be if it implements
-attribute
-#1).
+Servers use this attribute to implement an identity store containing a map of recall phrase to credential ID and a map of public address to credential ID. 
+It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
 
 A user cannot modify an entry after it is stored.
 
 It exposes the following endpoints:
 
-- <<_store, `idstore.store`>>. Store a new words/identity map.
-- <<_get_from_recall_phrase, `idstore.get_from_recall_phrase`>>. Get the credential ID from a recall phrase.
-- <<_get_from_address, `idstore.get_from_address`>>. Get the credential ID from a public address.
+- <<_store, `idstore.store`>>. Store new recall phrase/credential ID and adress/credential ID maps.
+- <<_getfromrecallphrase, `idstore.getFromRecallPhrase`>>. Get the credential ID associated to the given recall phrase.
+- <<_getfromaddress, `idstore.getFromAddress`>>. Get the credential ID associated to the given public address.
 
 == Errors
 `idstore` servers reserve the following error codes:
@@ -27,18 +24,21 @@ It exposes the following endpoints:
 - 100004, `invalid_recall_phrase`.
     The number of words should be [2, 5].
 
-== Store
-Store a new entry words/identity pair in the persistent storage
-
+== CDDL
+=== `store`
 [sources,cddl]
 ----
 include::{cddl}/10_idstore.cddl[tag=store]
 ----
 
-== Get
-Get the identity associated with the given words from the persistent storage.
-
+=== `getFromRecallPhrase`
 [sources,cddl]
 ----
-include::{cddl}/10_idstore.cddl[tag=get]
+include::{cddl}/10_idstore.cddl[tag=getFromRecallPhrase]
+----
+
+=== `getFromAddress`
+[sources,cddl]
+----
+include::{cddl}/10_idstore.cddl[tag=getFromAddress]
 ----

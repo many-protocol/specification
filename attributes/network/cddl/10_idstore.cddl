@@ -19,25 +19,25 @@ idstore.store@param = {
 idstore.store@return = ()
 ; end::store[]
 
-; tag::get_from_recall_phrase[]
-idstore.get_from_recall_phrase@param = {
+; tag::getFromRecallPhrase[]
+idstore.getFromRecallPhrase@param = {
     ; The recall phrase to be associated to the credential ID
     0 => idstore-recall-phrase,
 }
-idstore.idstore.get_from_recall_phrase@return = {
+idstore.idstore.getFromRecallPhrase@return = {
     ; The credential ID
     0 => idstore-credid
 }
-; end::get_from_recall_phrase[]
+; end::getFromRecallPhrase[]
 
-; tag::get_from_address[]
-idstore.get_from_address@param = {
+; tag::getFromAddress[]
+idstore.getFromAddress@param = {
     ; The public address associated to the credential ID
     0 => idstore-address
 }
 
-idstore.get_from_address@return = {
+idstore.getFromAddress@return = {
     ; The credential ID
     0 => idstore-credid
 }
-; end::get_from_address[]
+; end::getFromAddress[]
