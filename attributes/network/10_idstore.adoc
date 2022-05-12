@@ -42,3 +42,4 @@ include::{cddl}/10_idstore.cddl[tag=getFromRecallPhrase]
 ----
 include::{cddl}/10_idstore.cddl[tag=getFromAddress]
 ----
+
