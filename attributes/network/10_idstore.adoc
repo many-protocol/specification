@@ -24,7 +24,7 @@ It exposes the following endpoints:
     Storage was unable to find entry.
 - 100003, `invalid_identity`.
     The identity is invalid.
-- 100004, `invalid_number_of_words`.
+- 100004, `invalid_recall_phrase`.
     The number of words should be [2, 5].
 
 == Store
