@@ -1,27 +1,43 @@
 ; tag::types[]
 word = tstr
-idstore-words = [2*5 word]
-idstore-id = non-anonymous-identity
+idstore-recall-phrase = [2*5 word]
+idstore-address = non-anonymous-identity
+idstore-credid = bstr
 ; end::types[]
 
 ; tag::store[]
 idstore.store@param = {
-    ; Easy-to-remember words to be associated to the identity
-    0 => idstore-words,
+    ; Recall phrase to be associated to the address and credential ID
+    0 => idstore-recall-phrase,
 
-    ; The identity associated to the easy-to-remember words
-    1 => idstore-id
+    ; The address associated to the recall phrase
+    1 => idstore-address
+
+    ; The credential ID associated to the recall phrase
+    2 => idstore-credid
 }
 idstore.store@return = ()
 ; end::store[]
 
-; tag::get[]
-idstore.get@param = {
-    ; Easy-to-remember words to be associated to the identity
-    0 => idstore-words,
+; tag::get_from_recall_phrase[]
+idstore.get_from_recall_phrase@param = {
+    ; The recall phrase to be associated to the credential ID
+    0 => idstore-recall-phrase,
 }
-idstore.get@return = {
-    ; The identity associated to the easy-to-remember words
-    0 => idstore-id
+idstore.idstore.get_from_recall_phrase@return = {
+    ; The credential ID
+    0 => idstore-credid
 }
-; end::get[]
+; end::get_from_recall_phrase[]
+
+; tag::get_from_address[]
+idstore.get_from_address@param = {
+    ; The public address associated to the credential ID
+    0 => idstore-address
+}
+
+idstore.get_from_address@return = {
+    ; The credential ID
+    0 => idstore-credid
+}
+; end::get_from_address[]
