@@ -71,3 +71,12 @@ An error might be returned synchronously if the request is detected to be invali
 
 If an error happens during processing, the resulting envelope should be cached the same as if the request was successful.
 The full envelope will be available and the payload will contain the error code.
+
+== CDDL
+=== Status
+
+[source,cddl]
+----
+include::{cddl}/8_async.cddl[tag=status]
+----
+

@@ -1,17 +1,13 @@
-= TBD-Verse Protocol Specification
+= MANY Protocol Specification
 :cddl: ./cddl/
 Layer One Labs, LLC
 // Metadata
 :toc:
 :hide-uri-scheme:
 
-.TODO:
-- [[attribute-index]] Attribute Index Source.
-Probably some github repository somewhere.
-
 == Introduction
 This is the {doctitle}, which describes a set of primitives and protocols to communicate with and across a network of decentralized, federated clouds, which can themselves be decentralized or not.
-The TBD-Verse itself will be decentralized because of the requirements set forth in this protocol.
+The ManyVerse itself will be decentralized because of the requirements set forth in this protocol.
 
 === Requirements Terminology
 
@@ -38,9 +34,9 @@ Similarly, Developers:
 This puts importance on integrating with the "old" world.
 
 === Scope
-The TBD-Verse itself is the _result_ of multiple networks implementing this protocol.
+The ManyVerse itself is the _result_ of multiple networks implementing this protocol.
 Networks MAY be decentralized themselves (e.g. by using a blockchain), or not.
-The TBD-Verse itself will be decentralized as a result of social constructs being established between networks and users.
+The ManyVerse itself will be decentralized as a result of social constructs being established between networks and users.
 
 This allows for an heterogeneous global network of
 
@@ -59,15 +55,14 @@ This allows for an heterogeneous global network of
 //     It is the main method of communication between networks, and between users and the networks.
 
 == Technical Specification
-The TBD-Verse is a global actor-model based network where actors live as federated <<glossary-network,networks>>, and receive and send messages within or across those {network}s.
+The ManyVerse is a global actor-model based network where actors live as federated <<glossary-network,networks>>, and receive and send messages within or across those {network}s.
 Each network MUST advertize its set of attributes (e.g. whether it implements a ledger interface), and its connections and agreements with other networks (though it may not ex)
 
-[#messages]
 === Messages
 
 All messages are encoded using https://cbor.io[CBOR] (https://datatracker.ietf.org/doc/html/rfc8949[RFC 8949]).
 
-A TBD-Verse request is a Tagged COSE Sign message (https://datatracker.ietf.org/doc/html/rfc8152[RFC 8152]) which contains as its payload a CBOR encoded request defined in this CDDL:
+A ManyVerse request is a Tagged COSE Sign message (https://datatracker.ietf.org/doc/html/rfc8152[RFC 8152]) which contains as its payload a CBOR encoded request defined in this CDDL:
 
 [sources,cddl]
 ----
@@ -168,7 +163,7 @@ Other paths might need implementation depending on Network attributes.
 ==== Encoding
 
 === Attributes
-A core tenet of the TBD-Verse is that networks can vary in size, decentralization, governance, capabilities, etc.
+A core tenet of the ManyVerse is that networks can vary in size, decentralization, governance, capabilities, etc.
 As such, a proper shared and open attribute index for network is crucial to allow network to expose and advertise their implementation.
 One example would be to show support for certain signature curves.
 

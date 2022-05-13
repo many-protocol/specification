@@ -1,4 +1,4 @@
-= TBD-Verse Attributes
+= MANY Attributes
 L-1 Labs
 :cddl-dir: ../cddl
 
