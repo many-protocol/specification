@@ -8,9 +8,11 @@ A user cannot modify an entry after it is stored.
 
 It exposes the following endpoints:
 
-- <<_store, `idstore.store`>>. Store new recall phrase/credential ID and adress/credential ID maps.
+- <<_store, `idstore.store`>>. Store new credential ID and address in the persistent storage and return the associated recall phrase.
 - <<_getfromrecallphrase, `idstore.getFromRecallPhrase`>>. Get the credential ID associated to the given recall phrase.
 - <<_getfromaddress, `idstore.getFromAddress`>>. Get the credential ID associated to the given public address.
+
+This attribute is temporary until we implement a proper WebAuthn/oAuth solution and key delegation.
 
 == Errors
 `idstore` servers reserve the following error codes:
@@ -21,25 +23,25 @@ It exposes the following endpoints:
     Storage was unable to find entry.
 - 100003, `invalid_identity`.
     The identity is invalid.
-- 100004, `invalid_recall_phrase`.
-    The number of words should be [2, 5].
+- 100004, `invalid_credential_id`.
+    The credential ID is invalid.
 
 == CDDL
 === `store`
 [sources,cddl]
 ----
-include::{cddl}/10_idstore.cddl[tag=store]
+include::{cddl}/1002_idstore.cddl[tag=store]
 ----
 
 === `getFromRecallPhrase`
 [sources,cddl]
 ----
-include::{cddl}/10_idstore.cddl[tag=getFromRecallPhrase]
+include::{cddl}/1002_idstore.cddl[tag=getFromRecallPhrase]
 ----
 
 === `getFromAddress`
 [sources,cddl]
 ----
-include::{cddl}/10_idstore.cddl[tag=getFromAddress]
+include::{cddl}/1002_idstore.cddl[tag=getFromAddress]
 ----
 

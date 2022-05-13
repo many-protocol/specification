@@ -7,16 +7,16 @@ idstore-credid = bstr
 
 ; tag::store[]
 idstore.store@param = {
-    ; Recall phrase to be associated to the address and credential ID
-    0 => idstore-recall-phrase,
-
     ; The address associated to the recall phrase
     1 => idstore-address
 
     ; The credential ID associated to the recall phrase
     2 => idstore-credid
 }
-idstore.store@return = ()
+idstore.store@return = {
+    ; Recall phrase associated to the address and credential ID
+    0 => idstore-recall-phrase,
+}
 ; end::store[]
 
 ; tag::getFromRecallPhrase[]
