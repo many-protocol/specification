@@ -19,10 +19,12 @@ account-multisig-transaction-submit = {
     0 => [9, 1, 0],
     1 => non-anonymous-identity,        ; Submitter
     2 => non-anonymous-identity,        ; Account source
-    3 => text,                          ; Description of the transaction
+    ? 3 => bstr,                        ; Description of the transaction
     4 => account-multisig-transaction,  ; The transaction submitted
-    5 => uint,                          ; The number of approvals needed.
-    6 => time,                          ; Expiration date time.
+    5 => account-multisig-token,        ; Token created by the submission
+    6 => uint,                          ; The number of approvals needed.
+    7 => time,                          ; Expiration date time.
+    8 => bool,                          ; Whether to automatically execute.
 }
 account-multisig-transaction-approve = {
     0 => [9, 1, 1],
@@ -108,7 +110,7 @@ account.multisigSubmitTransaction@param = {
     ? 0 => non-anonymous-identity,
 
     ; A memo associated with the transaction.
-    ? 1 => tstr,
+    ? 1 => bstr,
 
     ; The transaction to send. Must be a transaction ledger info.
     ; The _from_ field (or source) of the transaction will be used to resolve
@@ -147,7 +149,7 @@ account.multisigInfo@param = {
 
 account.multisigInfo@return = {
     ; Memo sent when creating the transaction.
-    0 => tstr,
+    0 => bstr,
 
     ; The transaction info.
     1 => account-multisig-transaction,
