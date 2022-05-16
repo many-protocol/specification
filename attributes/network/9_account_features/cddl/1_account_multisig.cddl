@@ -21,10 +21,12 @@ account-multisig-transaction-submit = {
     2 => non-anonymous-identity,        ; Account source
     ? 3 => bstr,                        ; Description of the transaction
     4 => account-multisig-transaction,  ; The transaction submitted
-    5 => account-multisig-token,        ; Token created by the submission
-    6 => uint,                          ; The number of approvals needed.
-    7 => time,                          ; Expiration date time.
-    8 => bool,                          ; Whether to automatically execute.
+    5 => uint,                          ; The number of approvals needed.
+    6 => time,                          ; Expiration date time.
+    7 => bool,                          ; Whether to automatically execute.
+    ? 8 => account-multisig-token,      ; Token created by the submission. This
+                                        ; is only available in the transaction
+                                        ; history.
 }
 account-multisig-transaction-approve = {
     0 => [9, 1, 1],
@@ -104,7 +106,7 @@ account.multisigSetDefaults@return = ()
 ; tag::submitTransaction[]
 ; Submit a transaction to be executed when the threshold is reached.
 account.multisigSubmitTransaction@param = {
-    ; The account to submit the transaction. If omitted, the content of the
+    ; The account to submit the transaction to. If omitted, the content of the
     ; transaction itself may be read to figure this out, or the server MAY
     ; return an error.
     ? 0 => non-anonymous-identity,
@@ -116,7 +118,7 @@ account.multisigSubmitTransaction@param = {
     ; The _from_ field (or source) of the transaction will be used to resolve
     ; the account.
     ; Servers are allowed to error on an invalid or unsupported transaction.
-    2 => account-multisig-transaction,
+    2 => transaction-ledger-info,
 
     ; A number of approvers for this specific transaction. The server MUST return an
     ; error if this value is passed but the submitter does not have the `owner` role.

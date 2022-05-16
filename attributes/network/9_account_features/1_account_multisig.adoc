@@ -24,10 +24,10 @@ endif
 
 (*) --> "account.multisigApprove"
 
-if "canMultisigSubmit" then
+if "canMultisigSubmit" \n| "canMultisigApprove" then
     -->[yes] waiting
 else
-    -l-> error
+    -l->[no] error
 endif
 
 submitted --> waiting
