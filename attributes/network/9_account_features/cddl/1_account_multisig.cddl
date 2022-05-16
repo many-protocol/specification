@@ -7,6 +7,8 @@ account-multisig-token = bstr
 
 account-multisig-transaction = ledger-transaction-info
 
+memo = tstr
+
 ; List of transaction types added by this feature.
 ; These should be listed in ledger.list.
 ledger-transaction-info /= account-multisig-transaction-submit
@@ -114,8 +116,9 @@ account.multisigSubmitTransaction@param = {
     ; return an error.
     ? 0 => non-anonymous-identity,
 
-    ; A memo associated with the transaction.
-    ? 1 => bstr,
+    ; A memo associated with the transaction. This is meant to be human readable
+    ; and can be used to explain the transaction to approvers.
+    ? 1 => memo,
 
     ; The transaction to send. Must be a transaction ledger info.
     ; The _from_ field (or source) of the transaction will be used to resolve
@@ -137,6 +140,9 @@ account.multisigSubmitTransaction@param = {
     ; The server MUST return an error if this value is passed but the submitter
     ; does not have the `owner` role, or if automatic execution is not supported.
     ? 5 => bool,
+
+    ; A CBOR associated data field.
+    ? 6 => bstr .cbor any,
 }
 account.multisigSubmitTransaction@return = {
     ; A token identifying this transaction. This is an implementation specific opaque
@@ -153,8 +159,9 @@ account.multisigInfo@param = {
 }
 
 account.multisigInfo@return = {
-    ; Memo sent when creating the transaction.
-    0 => bstr,
+    ; Memo sent when creating the transaction. This is meant to be human readable
+    ; and can be used to explain the transaction to approvers.
+    0 => memo,
 
     ; The transaction info.
     1 => account-multisig-transaction,
@@ -179,6 +186,9 @@ account.multisigInfo@return = {
     ; When will this transaction expire. This is a timestamp in seconds since
     ; Unix EPOCH.
     6 => time,
+
+    ; A CBOR associated data field.
+    ? 7 => bstr .cbor any,
 }
 ; end::info[]
 
