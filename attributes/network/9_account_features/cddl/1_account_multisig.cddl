@@ -89,15 +89,18 @@ multisig@account-feature@argument = {
 ; Update default values for new transactions.
 ; The server MUST return an error if the sender does not have the `owner` role.
 account.multisigSetDefaults@param = {
+    ; The account to set the new defaults.
+    0 => non-anonymous-identity,
+
     ; A new default threshold.
-    ? 0 => uint,
+    ? 1 => uint,
 
     ; A new time (in seconds) to automatically expire transactions.
-    ? 1 => uint,
+    ? 2 => uint,
 
     ; If true/false, update whether transactions are automatically executed.
     ; Server MAY return an error if it doesn't support automatic execution.
-    ? 2 => bool,
+    ? 3 => bool,
 }
 
 account.multisigSetDefaults@return = ()
