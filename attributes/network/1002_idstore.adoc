@@ -1,0 +1,54 @@
+= ID Store Attribute (#1002)
+:cddl: ./cddl/
+
+Servers use this attribute to implement an identity store containing a map of recall phrase to credential ID and a map of public address to credential ID. 
+The credential ID is at least 16 bytes long and at most 1023 bytes long.
+
+It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
+
+A user cannot modify an entry after it is stored.
+
+It exposes the following endpoints:
+
+- <<_store, `idstore.store`>>. Store new credential ID and address in the persistent storage and return the associated recall phrase.
+- <<_getfromrecallphrase, `idstore.getFromRecallPhrase`>>. Get the credential ID associated to the given recall phrase.
+- <<_getfromaddress, `idstore.getFromAddress`>>. Get the credential ID associated to the given public address.
+
+This attribute is temporary until we implement a proper WebAuthn/oAuth solution and key delegation.
+
+== Errors
+`idstore` servers reserve the following error codes:
+
+- 10020001, `existing_entry`.
+    The entry key already exists in the storage.
+- 10020002, `entry_not_found`.
+    Storage was unable to find entry.
+- 10020003, `invalid_identity`.
+    The identity is invalid.
+- 10020004, `invalid_credential_id`.
+    The credential ID is invalid.
+- 10020005, `recall_phrase_generation_failed`
+    The recall phrase generation failed.
+
+== CDDL
+=== `store`
+Store new credential ID and address in the persistent storage and return the associated recall phrase.
+[sources,cddl]
+----
+include::{cddl}/1002_idstore.cddl[tag=store]
+----
+
+=== `getFromRecallPhrase`
+Get the credential ID associated to the given recall phrase.
+[sources,cddl]
+----
+include::{cddl}/1002_idstore.cddl[tag=getFromRecallPhrase]
+----
+
+=== `getFromAddress`
+Get the credential ID associated to the given public address.
+[sources,cddl]
+----
+include::{cddl}/1002_idstore.cddl[tag=getFromAddress]
+----
+
