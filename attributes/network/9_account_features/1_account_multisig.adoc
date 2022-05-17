@@ -5,6 +5,16 @@ The multisig account feature indicates that an account system supports transacti
 
 This document explains the design and interface of an account implementing the multisig attribute.
 
+[WARNING]
+An account MUST have at least one address with the `"owner"` role, including multisig accounts.
+This owner will have all powerful access to update defaults, make transactions with different threshold, etc.
+This means that owners of a multisig account can send all tokens without even requiring an approval.
+ +
+ +
+The best workaround for this is to have the account be its own `"owner"`, and remove any other address from the `"owner"` role list.
+These addresses should likely be `"canMultisigSubmit"`.
+That way any transaction or default changes must go through the approval process.
+
 == Design
 
 === Flow
@@ -24,10 +34,10 @@ endif
 
 (*) --> "account.multisigApprove"
 
-if "canMultisigApprove" then
+if "canMultisigSubmit" \n| "canMultisigApprove" then
     -->[yes] waiting
 else
-    -l-> error
+    -l->[no] error
 endif
 
 submitted --> waiting
@@ -51,14 +61,15 @@ This is left at the discretion of the server, but a value can be passed for each
 This feature adds 2 roles; `canMultisigSubmit` and `canMultisigApprove`.
 
 - `"canMultisigSubmit"` is allowed to submit new transactions, and to withdraw their own submitted transactions.
+    It also includes any permissions granted by `"canMultisigApprove"`.
 - `"canMultisigApprove"` is allowed to approve transactions, and revoke their own approvals.
 
 Additionally, `"owner"` is allowed to withdraw transactions, and update defaults.
 
-Forced execution (without all approvals) is not allowed, but an `owner` can recreate a new transaction with no approvals needed.
+Forced execution (without all approvals) is not allowed.
 
 === Defaults
-By default, on account creation, the number of approval needed for any transaction will be the total number of identities with the `"canMultisigApprove"` role on the account (including `"owner"`).
+By default, on account creation, the number of approval needed for any transaction will be the total number of identities with the `"canMultisigApprove"` role on the account (including `"owner"` and `"canMultisigSubmit"`).
 
 A server MAY provide a reasonable default for the time a transaction expire.
 

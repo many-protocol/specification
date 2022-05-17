@@ -7,6 +7,8 @@ account-multisig-token = bstr
 
 account-multisig-transaction = ledger-transaction-info
 
+memo = tstr
+
 ; List of transaction types added by this feature.
 ; These should be listed in ledger.list.
 ledger-transaction-info /= account-multisig-transaction-submit
@@ -19,10 +21,16 @@ account-multisig-transaction-submit = {
     0 => [9, 1, 0],
     1 => non-anonymous-identity,        ; Submitter
     2 => non-anonymous-identity,        ; Account source
-    3 => text,                          ; Description of the transaction
+    ? 3 => memo,                        ; Memo of the transaction
     4 => account-multisig-transaction,  ; The transaction submitted
     5 => uint,                          ; The number of approvals needed.
     6 => time,                          ; Expiration date time.
+    7 => bool,                          ; Whether to automatically execute.
+    ? 8 => account-multisig-token,      ; Token created by the submission. This
+                                        ; is only available in the transaction
+                                        ; history.
+    ? 9 => bstr .cbor any,              ; CBOR data associated with the
+                                        ; transaction.
 }
 account-multisig-transaction-approve = {
     0 => [9, 1, 1],
@@ -49,6 +57,15 @@ account-multisig-transaction-withdraw = {
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Withdrawer
 }
+account-multisig-transaction-set-defaults = {
+    0 => [9, 1, 5],
+    1 => non-anonymous-identity,        ; Instigator of the transaction.
+    2 => non-anonymous-identity,        ; Account to change the multisig defaults.
+    3 => account-multisig-token,        ; Token created by the submission
+    ? 4 => uint,                        ; The number of approvals needed.
+    ? 5 => time,                        ; Expiration date time.
+    ? 6 => bool,                        ; Whether to automatically execute.
+}
 ; end::types[]
 
 ; tag::feature[]
@@ -59,9 +76,11 @@ multisig@account-feature@argument = {
     ; but cannot be overridden to be less.
     ; This number includes the submitter of a transaction, meaning that the value of
     ; this field is always at least 1 (passing `0` will fail creating the account).
-    ; If this value is greater than the number of people with the `canMultisigApprove` role,
-    ; the server MAY still create the account.
-    ; By default this is the number of identities with the `canMultisigApprove` role.
+    ; If this value is greater than the number of people with either the
+    ; `canMultisigApprove` or `canMultisigSubmit` role the server MAY still create
+    ; the account.
+    ; By default this is the number of identities with either the
+    ; `canMultisigApprove` or `canMultisigSubmit` role.
     ? 0 => uint,
 
     ; The time (in seconds) a transaction would automatically expire. The server is
@@ -83,15 +102,18 @@ multisig@account-feature@argument = {
 ; Update default values for new transactions.
 ; The server MUST return an error if the sender does not have the `owner` role.
 account.multisigSetDefaults@param = {
+    ; The account to set the new defaults.
+    0 => non-anonymous-identity,
+
     ; A new default threshold.
-    ? 0 => uint,
+    ? 1 => uint,
 
     ; A new time (in seconds) to automatically expire transactions.
-    ? 1 => uint,
+    ? 2 => uint,
 
     ; If true/false, update whether transactions are automatically executed.
     ; Server MAY return an error if it doesn't support automatic execution.
-    ? 2 => bool,
+    ? 3 => bool,
 }
 
 account.multisigSetDefaults@return = ()
@@ -100,27 +122,39 @@ account.multisigSetDefaults@return = ()
 ; tag::submitTransaction[]
 ; Submit a transaction to be executed when the threshold is reached.
 account.multisigSubmitTransaction@param = {
-    ; A memo associated with the transaction.
-    ? 0 => tstr,
+    ; The account to submit the transaction to. If omitted, the content of the
+    ; transaction itself may be read to figure this out, or the server MAY
+    ; return an error.
+    ? 0 => non-anonymous-identity,
 
-    ; The transaction to send. Must be a transaction ledger info.
-    ; Servers are allowed to error on an invalid or unsupported transaction.
-    1 => account-multisig-transaction,
+    ; A memo associated with the transaction. This is meant to be human readable
+    ; and can be used to explain the transaction to approvers.
+    ? 1 => memo,
+
+    ; The transaction to send. Must be a valid transaction understood by the
+    ; server.
+    ; The _from_ field (or source) of the transaction will be used to resolve
+    ; the account.
+    ; Servers MAY error on an invalid or unsupported transaction type or arguments.
+    2 => account-multisig-transaction,
 
     ; A number of approvers for this specific transaction. The server MUST return an
     ; error if this value is passed but the submitter does not have the `owner` role.
-    ? 2 => uint,
-
-    ; Whether to execute this transaction automatically when the threshold is met.
-    ; The server MUST return an error if this value is passed but the submitter
-    ; does not have the `owner` role, or if automatic execution is not supported.
-    ? 3 => bool,
+    ? 3 => uint,
 
     ; The time (in seconds) this transaction would automatically expire. The server is
     ; allowed to clamp this value, or refuse to create an account if this is too
     ; large. The server MUST return an error if this value is passed but the submitter
     ; does not have the `owner` role.
     ? 4 => uint,
+
+    ; Whether to execute this transaction automatically when the threshold is met.
+    ; The server MUST return an error if this value is passed but the submitter
+    ; does not have the `owner` role, or if automatic execution is not supported.
+    ? 5 => bool,
+
+    ; A CBOR associated data field.
+    ? 6 => bstr .cbor any,
 }
 account.multisigSubmitTransaction@return = {
     ; A token identifying this transaction. This is an implementation specific opaque
@@ -137,14 +171,18 @@ account.multisigInfo@param = {
 }
 
 account.multisigInfo@return = {
-    ; Memo sent when creating the transaction.
-    0 => tstr,
+    ; Memo sent when creating the transaction. This is meant to be human readable
+    ; and can be used to explain the transaction to approvers.
+    ? 0 => memo,
 
     ; The transaction info.
     1 => account-multisig-transaction,
 
+    ; The submitter of the transaction.
+    2 => non-anonymous-identity,
+
     ; Approver list for this transaction, and their information.
-    2 => {
+    3 => {
         1* identity => {
             ; Whether they approved or not.
             0 => bool
@@ -152,11 +190,17 @@ account.multisigInfo@return = {
     }
 
     ; How many approvers are needed to execute this transaction.
-    3 => uint,
+    4 => uint,
+
+    ; Whether to execute this transaction automatically when the threshold is met.
+    5 => bool,
 
     ; When will this transaction expire. This is a timestamp in seconds since
     ; Unix EPOCH.
-    4 => time,
+    6 => time,
+
+    ; A CBOR associated data field.
+    ? 7 => bstr .cbor any,
 }
 ; end::info[]
 
