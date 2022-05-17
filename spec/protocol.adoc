@@ -35,24 +35,10 @@ This puts importance on integrating with the "old" world.
 
 === Scope
 The ManyVerse itself is the _result_ of multiple networks implementing this protocol.
-Networks MAY be decentralized themselves (e.g. by using a blockchain), or not.
-The ManyVerse itself will be decentralized as a result of social constructs being established between networks and users.
+Networks MAY be decentralized themselves (e.g., by using a blockchain) or not.
+Social trust between networks and users will ensure The ManyVerse itself is decentralized.
 
-This allows for an heterogeneous global network of
-
-// == Concepts
-// === Glossary
-// - [[glossary-network]]`Network`.
-//     A `network` is a collection of 1 or more servers that act together and collude in some way, receiving messages and executing on them, and returning responses.
-//     A `network` has a message queue, and can (or not) be decentralized itself, or implement replication, as it sees fit.
-//     A `network` may or may not have a single identity.
-//     Each server running in the `network` should have its own private key and thus identity.
-// - [[glossary-server]]`Server`.
-//     A `server` is a single endpoint that is reachable and can receive messages and return responses.
-//     A `server` can be its own network, or be part of a larger network.
-// - [[glossary-messages]]`Message`.
-//     A `message` contains all information related to a transaction, its source and destination, arguments and expected metadata.
-//     It is the main method of communication between networks, and between users and the networks.
+The ManyVerse thus allows for a heterogeneous global network of decentralized public and private networks and nodes acting and communicating under a single protocol.
 
 == Technical Specification
 The ManyVerse is a global actor-model based network where actors live as federated <<glossary-network,networks>>, and receive and send messages within or across those {network}s.
