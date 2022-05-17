@@ -2,6 +2,8 @@
 :cddl: ./cddl/
 
 Servers use this attribute to implement an identity store containing a map of recall phrase to credential ID and a map of public address to credential ID. 
+The credential ID is at least 16 bytes long and at most 1023 bytes long.
+
 It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
 
 A user cannot modify an entry after it is stored.
@@ -30,18 +32,21 @@ This attribute is temporary until we implement a proper WebAuthn/oAuth solution 
 
 == CDDL
 === `store`
+Store new credential ID and address in the persistent storage and return the associated recall phrase.
 [sources,cddl]
 ----
 include::{cddl}/1002_idstore.cddl[tag=store]
 ----
 
 === `getFromRecallPhrase`
+Get the credential ID associated to the given recall phrase.
 [sources,cddl]
 ----
 include::{cddl}/1002_idstore.cddl[tag=getFromRecallPhrase]
 ----
 
 === `getFromAddress`
+Get the credential ID associated to the given public address.
 [sources,cddl]
 ----
 include::{cddl}/1002_idstore.cddl[tag=getFromAddress]

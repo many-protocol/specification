@@ -2,16 +2,16 @@
 word = tstr
 idstore-recall-phrase = [2*5 word]
 idstore-address = non-anonymous-identity
-idstore-credid = bstr
+idstore-credid = bstr .size (16..1023)
 ; end::types[]
 
 ; tag::store[]
 idstore.store@param = {
     ; The address associated to the recall phrase
-    1 => idstore-address
+    0 => idstore-address
 
     ; The credential ID associated to the recall phrase
-    2 => idstore-credid
+    1 => idstore-credid
 }
 idstore.store@return = {
     ; Recall phrase associated to the address and credential ID
