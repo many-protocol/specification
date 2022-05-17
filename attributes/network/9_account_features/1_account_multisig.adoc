@@ -5,6 +5,16 @@ The multisig account feature indicates that an account system supports transacti
 
 This document explains the design and interface of an account implementing the multisig attribute.
 
+[WARNING]
+An account MUST have at least one address with the `"owner"` role, including multisig accounts.
+This owner will have all powerful access to update defaults, make transactions with different threshold, etc.
+This means that owners of a multisig account can send all tokens without even requiring an approval.
+ +
+ +
+The best workaround for this is to have the account be its own `"owner"`, and remove any other address from the `"owner"` role list.
+These addresses should likely be `"canMultisigSubmit"`.
+That way any transaction or default changes must go through the approval process.
+
 == Design
 
 === Flow
