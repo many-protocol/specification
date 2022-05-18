@@ -37,7 +37,7 @@ status = {
     ? 7 => uint,
 
     ; Additional fields are okay here as metadata, keys MUST be strings.
-    tstr => any,
+    * tstr => any,
 }
 ; end::status[]
 

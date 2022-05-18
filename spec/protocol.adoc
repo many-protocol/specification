@@ -41,7 +41,7 @@ Social trust between networks and users will ensure The ManyVerse itself is dece
 The ManyVerse thus allows for a heterogeneous global network of decentralized public and private networks and nodes acting and communicating under a single protocol.
 
 == Technical Specification
-The ManyVerse is a global actor-model based network where actors live as federated <<glossary-network,networks>>, and receive and send messages within or across those {network}s.
+The ManyVerse is a global actor-model based network where actors live as federated <<network,networks>>, and receive and send messages within or across those networks.
 Each network MUST advertize its set of attributes (e.g. whether it implements a ledger interface), and its connections and agreements with other networks (though it may not ex)
 
 === Messages
