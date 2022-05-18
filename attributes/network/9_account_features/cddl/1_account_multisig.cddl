@@ -59,7 +59,9 @@ account-multisig-transaction-withdraw = {
 }
 account-multisig-transaction-set-defaults = {
     0 => [9, 1, 5],
-    1 => non-anonymous-identity,        ; Instigator of the transaction.
+    ? 1 => non-anonymous-identity,      ; Instigator of the transaction. This
+                                        ; is only available in the transaction
+                                        ; history.
     2 => non-anonymous-identity,        ; Account to change the multisig defaults.
     ? 3 => uint,                        ; The number of approvals needed.
     ? 4 => time,                        ; Expiration date time.
