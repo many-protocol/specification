@@ -61,10 +61,12 @@ account-multisig-transaction-set-defaults = {
     0 => [9, 1, 5],
     1 => non-anonymous-identity,        ; Instigator of the transaction.
     2 => non-anonymous-identity,        ; Account to change the multisig defaults.
-    3 => account-multisig-token,        ; Token created by the submission
-    ? 4 => uint,                        ; The number of approvals needed.
-    ? 5 => time,                        ; Expiration date time.
-    ? 6 => bool,                        ; Whether to automatically execute.
+    ? 3 => uint,                        ; The number of approvals needed.
+    ? 4 => time,                        ; Expiration date time.
+    ? 5 => bool,                        ; Whether to automatically execute.
+    ? 7 => account-multisig-token,      ; Token created by the submission. This
+                                        ; is only available in the transaction
+                                        ; history.
 }
 ; end::types[]
 
