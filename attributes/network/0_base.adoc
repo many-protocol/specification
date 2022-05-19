@@ -7,8 +7,6 @@ It exposes the following endpoints:
 
 - <<_status, `status`>>.
     Get the status of the network, its given name (non-unique), identity (unique), public key, and any other information the server wants to make available (free form dictionary).
-- <<_echo, `echo`>>.
-    Returns the input bytes per bytes, in a signed envelope.
 - <<_heartbeat, `heartbeat`>>.
     Returns no data.
 - <<_endpoints, `endpoints`>>.
