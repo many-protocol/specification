@@ -5,7 +5,14 @@ account-role /= "canMultisigSubmit"
 
 account-multisig-token = bstr
 
-account-multisig-transaction = ledger-transaction-info
+; A transaction that can be submitted.
+account-multisig-transaction /= ledger.send@param
+                             /  account.multisigSetDefaults@param
+                             /  account.multisigSubmitTransaction@param
+                             /  account.multisigApprove@param
+                             /  account.multisigRevoke@param
+                             /  account.multisigExecute@param
+                             /  account.multisigWithdraw@param
 
 memo = tstr
 
