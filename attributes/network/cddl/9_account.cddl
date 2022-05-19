@@ -11,6 +11,67 @@ account@attribute-arg = [ * uint ]
 
 account-feature-arg = any
 account-feature = uint / [uint, * account-feature-arg]
+
+ledger-transaction-info /= account-transaction-create
+                        /  account-transaction-set-description
+                        /  account-transaction-add-roles
+                        /  account-transaction-remove-roles
+                        /  account-transaction-delete
+                        /  account-transaction-add-features
+ledger-transaction-type /= account-transaction-type-create
+                        /  account-transaction-type-set-description
+                        /  account-transaction-type-add-roles
+                        /  account-transaction-type-remove-roles
+                        /  account-transaction-type-delete
+                        /  account-transaction-type-add-features
+
+account-transaction-type-create             = [9, 0]
+account-transaction-type-set-description    = [9, 1]
+account-transaction-type-add-roles          = [9, 2]
+account-transaction-type-remove-roles       = [9, 3]
+account-transaction-type-delete             = [9, 4]
+account-transaction-type-add-feature        = [9, 5]
+
+account-transaction-create = {
+    0 => account-transaction-type-create,
+    1 => non-anonymous-identity,    ; Account identity
+    ? 2 => tstr,                    ; Description
+    3 => {
+        * non-anonymous-identity => [ * account-role ],
+    },                              ; List of initial roles, including default ones.
+    4 => [ 1* account-feature ],    ; Features
+}
+account-transaction-set-description = {
+    0 => account-transaction-type-set-description,
+    1 => non-anonymous-identity,    ; Account identity.
+    2 => tstr,                      ; Description
+}
+account-transaction-add-roles = {
+    0 => account-transaction-type-add-roles,
+    1 => non-anonymous-identity,    ; Account identity.
+    2 => {
+        * non-anonymous-identity => [ * account-role ],
+    },                              ; List of roles added.
+}
+account-transaction-remove-roles = {
+    0 => account-transaction-type-remove-roles,
+    1 => non-anonymous-identity,    ; Account identity.
+    2 => {
+        * non-anonymous-identity => [ * account-role ],
+    },                              ; List of roles removed.
+}
+account-transaction-delete = {
+    0 => account-transaction-type-delete,
+    1 => non-anonymous-identity,    ; Account identity.
+}
+account-transaction-add-features = {
+    0 => account-transaction-type-add-features,
+    1 => non-anonymous-identity,    ; Account identity.
+    2 => {
+        * non-anonymous-identity => [ * account-role ],
+    },                              ; List of roles to add.
+    3 => [ 1* account-feature ],    ; New features added.
+}
 ; end::types[]
 
 ; tag::create[]
@@ -36,9 +97,6 @@ account.create@param = {
     ; The server MUST return an error if a combination of features on an
     ; account is unsupported.
     2 => [ 1* account-feature ],
-
-    ; Any other information pertinent to this account.
-    * tstr => any,
 }
 account.create@return = {
     ; The account identity. Use this to contact the account directly.
