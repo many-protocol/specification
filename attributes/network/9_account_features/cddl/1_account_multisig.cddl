@@ -66,9 +66,6 @@ account-multisig-transaction-set-defaults = {
     ? 3 => uint,                        ; The number of approvals needed.
     ? 4 => time,                        ; Expiration date time.
     ? 5 => bool,                        ; Whether to automatically execute.
-    ? 6 => account-multisig-token,      ; Token created by the submission. This
-                                        ; is only available in the transaction
-                                        ; history.
 }
 ; end::types[]
 
