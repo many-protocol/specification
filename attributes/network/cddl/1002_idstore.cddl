@@ -9,45 +9,45 @@ idstore-pubkey = bstr .cbor COSE_Key
 ; tag::store[]
 idstore.store@param = {
     ; The address associated with the credential ID and public key
-    0 => idstore-address
+    0 => idstore-address,
 
     ; The credential ID associated with the recall phrase
-    1 => idstore-credid
+    1 => idstore-credid,
 
     ; The public key associated with the recall phrase
-    2 => idstore-pubkey
+    2 => idstore-pubkey,
 }
 idstore.store@return = {
     ; The recall phrase associated with the credential ID and public key
-    0 => idstore-recall-phrase 
+    0 => idstore-recall-phrase, 
 }
 ; end::store[]
 
 ; tag::getFromRecallPhrase[]
 idstore.getFromRecallPhrase@param = {
     ; The recall phrase associated with the credential ID and public key
-    0 => idstore-recall-phrase 
+    0 => idstore-recall-phrase, 
 }
 idstore.idstore.getFromRecallPhrase@return = {
     ; The credential ID associated with the recall phrase
-    0 => idstore-credid
+    0 => idstore-credid,
 
     ; The public key associated with the recall phrase
-    1 => idstore-pubkey
+    1 => idstore-pubkey,
 }
 ; end::getFromRecallPhrase[]
 
 ; tag::getFromAddress[]
 idstore.getFromAddress@param = {
     ; The public address associated with the credential ID and public key
-    0 => idstore-address 
+    0 => idstore-address, 
 }
 idstore.getFromAddress@return = {
     ; The credential ID associated with the address
-    0 => idstore-credid
+    0 => idstore-credid,
 
     ; The public key associated with the address
-    1 => idstore-pubkey
+    1 => idstore-pubkey,
 }
 ; end::getFromAddress[]
 
