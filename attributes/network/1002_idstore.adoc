@@ -1,8 +1,9 @@
 = ID Store Attribute (#1002)
 :cddl: ./cddl/
 
-Servers use this attribute to implement an identity store containing a map of recall phrase to credential ID and a map of public address to credential ID. 
+Servers use this attribute to implement an identity store containing a map of recall phrase to credential ID and public key and a map of public address to credential ID and public key. 
 The credential ID is at least 16 bytes long and at most 1023 bytes long.
+The public key is a CBOR serialized COSE_Key.
 
 It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
 
@@ -10,9 +11,9 @@ A user cannot modify an entry after it is stored.
 
 It exposes the following endpoints:
 
-- <<_store, `idstore.store`>>. Store new credential ID and address in the persistent storage and return the associated recall phrase.
-- <<_getfromrecallphrase, `idstore.getFromRecallPhrase`>>. Get the credential ID associated to the given recall phrase.
-- <<_getfromaddress, `idstore.getFromAddress`>>. Get the credential ID associated to the given public address.
+- <<_store, `idstore.store`>>. Store new credential ID, public key, and address in the persistent storage and return the associated recall phrase.
+- <<_getfromrecallphrase, `idstore.getFromRecallPhrase`>>. Get the credential ID and public key associated with the given recall phrase.
+- <<_getfromaddress, `idstore.getFromAddress`>>. Get the credential ID and public key associated with the given public address.
 
 This attribute is temporary until we implement a proper WebAuthn/oAuth solution and key delegation.
 
@@ -32,21 +33,21 @@ This attribute is temporary until we implement a proper WebAuthn/oAuth solution 
 
 == CDDL
 === `store`
-Store new credential ID and address in the persistent storage and return the associated recall phrase.
+Store new credential ID, public key, and address in the persistent storage and return the associated recall phrase.
 [sources,cddl]
 ----
 include::{cddl}/1002_idstore.cddl[tag=store]
 ----
 
 === `getFromRecallPhrase`
-Get the credential ID associated to the given recall phrase.
+Get the credential ID and public key associated with the given recall phrase.
 [sources,cddl]
 ----
 include::{cddl}/1002_idstore.cddl[tag=getFromRecallPhrase]
 ----
 
 === `getFromAddress`
-Get the credential ID associated to the given public address.
+Get the credential ID and public key associated with the given public address.
 [sources,cddl]
 ----
 include::{cddl}/1002_idstore.cddl[tag=getFromAddress]
