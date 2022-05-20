@@ -141,4 +141,5 @@ subresource-identity = bytes .cbor [ h'80'..h'FF', bytes .size 28, bytes .size 3
 
 ; An attribute can have one or many attribute arguments.
 attribute-arg = ()
-attribute = uint / [uint, * attribute-arg]
+attribute-id = uint
+attribute = attribute-id / [attribute-id, * attribute-arg]

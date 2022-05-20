@@ -27,11 +27,10 @@ ledger-transaction-id = bstr
 ; Transaction types. This can be extended and the server MUST provide a list of
 ; those types.
 ; Extensible transaction info.
-; TODO: namespace transaction types per attribute ID, somehow.
 ledger-transaction-info /= ledger-transaction-send
 ledger-transaction-type /= ledger-transaction-type-send
 
-ledger-transaction-type-send = 0
+ledger-transaction-type-send = [4, 0]
 
 ledger-transaction-send = {
     0 => ledger-transaction-type-send,

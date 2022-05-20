@@ -5,8 +5,6 @@ account-role /= "canMultisigSubmit"
 
 account-multisig-token = bstr
 
-account-multisig-transaction = ledger-transaction-info
-
 memo = tstr
 
 ; List of transaction types added by this feature.
@@ -16,9 +14,25 @@ ledger-transaction-info /= account-multisig-transaction-submit
                          / account-multisig-transaction-revoke
                          / account-multisig-transaction-execute
                          / account-multisig-transaction-withdraw
+                         / account-multisig-transaction-set-defaults
+
+; Set of indices for multisig transaction entries.
+account-transaction-type-multisig-submit        = [9, [1, 0]]
+account-transaction-type-multisig-approve       = [9, [1, 1]]
+account-transaction-type-multisig-revoke        = [9, [1, 2]]
+account-transaction-type-multisig-execute       = [9, [1, 3]]
+account-transaction-type-multisig-withdraw      = [9, [1, 4]]
+account-transaction-type-multisig-set-defaults  = [9, [1, 5]]
+
+ledger-transaction-type /= account-transaction-type-multisig-submit
+                         / account-transaction-type-multisig-approve
+                         / account-transaction-type-multisig-revoke
+                         / account-transaction-type-multisig-execute
+                         / account-transaction-type-multisig-withdraw
+                         / account-transaction-type-multisig-set-defaults
 
 account-multisig-transaction-submit = {
-    0 => [9, 1, 0],
+    0 => account-transaction-type-multisig-submit,
     1 => non-anonymous-identity,        ; Submitter
     2 => non-anonymous-identity,        ; Account source
     ? 3 => memo,                        ; Memo of the transaction
@@ -26,46 +40,65 @@ account-multisig-transaction-submit = {
     5 => uint,                          ; The number of approvals needed.
     6 => time,                          ; Expiration date time.
     7 => bool,                          ; Whether to automatically execute.
-    ? 8 => account-multisig-token,      ; Token created by the submission. This
-                                        ; is only available in the transaction
-                                        ; history.
+    8 => account-multisig-token,        ; Token created by the submission.
     ? 9 => bstr .cbor any,              ; CBOR data associated with the
                                         ; transaction.
 }
 account-multisig-transaction-approve = {
-    0 => [9, 1, 1],
+    0 => account-transaction-type-multisig-approve,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Approver
 }
 account-multisig-transaction-revoke = {
-    0 => [9, 1, 2],
+    0 => account-transaction-type-multisig-revoke,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Revoker
 }
 account-multisig-transaction-execute = {
-    0 => [9, 1, 3],
+    0 => account-transaction-type-multisig-execute,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    ? 3 => non-anonymous-identity,      ; Executer. This is omitted if the
+    3 => identity,                      ; Executer. This is anonymous if the
                                         ; execution was automatic.
 }
 account-multisig-transaction-withdraw = {
-    0 => [9, 1, 4],
+    0 => account-transaction-type-multisig-withdraw,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Withdrawer
 }
 account-multisig-transaction-set-defaults = {
-    0 => [9, 1, 5],
+    0 => account-transaction-type-multisig-set-defaults,
     1 => non-anonymous-identity,        ; Instigator of the transaction.
     2 => non-anonymous-identity,        ; Account to change the multisig defaults.
-    3 => account-multisig-token,        ; Token created by the submission
-    ? 4 => uint,                        ; The number of approvals needed.
-    ? 5 => time,                        ; Expiration date time.
-    ? 6 => bool,                        ; Whether to automatically execute.
+    ? 3 => null / uint,                 ; The number of approvals needed. Use null to reset
+                                        ; this default to its default value.
+    ? 4 => null / time,                 ; Expiration date time. Use null to reset this default
+                                        ; to its default value.
+    ? 5 => null / bool,                 ; Whether to automatically execute. Use null to reset
+                                        ; this default to its default value.
 }
+
+; Transactions that can be submitted, approved and executed. Not all transactions are supported
+; by multisig.
+; TODO: find a better place for these to live. We cannot just keep updating this file everytime
+; we have a new transaction type.
+account-multisig-transaction /=
+       { 0 => ledger-transaction-type-send, 1 => ledger.send@param }
+    /  { 0 => account-transaction-type-create, 1 => account.create@param }
+    /  { 0 => account-transaction-type-set-description, 1 => account.setDescription@param }
+    /  { 0 => account-transaction-type-add-roles, 1 => account.addRoles@param }
+    /  { 0 => account-transaction-type-remove-roles, 1 => account.removeRoles@param }
+    /  { 0 => account-transaction-type-delete, 1 => account.delete@param }
+    /  { 0 => account-transaction-type-add-features, 1 => account.addFeatures@param }
+    /  { 0 => account-transaction-type-multisig-submit, 1 => account.multisigSubmitTransaction@param }
+    /  { 0 => account-transaction-type-multisig-approve, 1 => account.multisigApprove@param }
+    /  { 0 => account-transaction-type-multisig-revoke, 1 => account.multisigRevoke@param }
+    /  { 0 => account-transaction-type-multisig-execute, 1 => account.multisigExecute@param }
+    /  { 0 => account-transaction-type-multisig-withdraw, 1 => account.multisigWithdraw@param }
+    /  { 0 => account-transaction-type-multisig-set-defaults, 1 => account.multisigSetDefaults@param }
 ; end::types[]
 
 ; tag::feature[]
@@ -122,10 +155,8 @@ account.multisigSetDefaults@return = ()
 ; tag::submitTransaction[]
 ; Submit a transaction to be executed when the threshold is reached.
 account.multisigSubmitTransaction@param = {
-    ; The account to submit the transaction to. If omitted, the content of the
-    ; transaction itself may be read to figure this out, or the server MAY
-    ; return an error.
-    ? 0 => non-anonymous-identity,
+    ; The account to submit the transaction to.
+    0 => non-anonymous-identity,
 
     ; A memo associated with the transaction. This is meant to be human readable
     ; and can be used to explain the transaction to approvers.
