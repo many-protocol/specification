@@ -60,7 +60,7 @@ account-multisig-transaction-execute = {
     0 => account-transaction-type-multisig-execute,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    ? 3 => non-anonymous-identity,      ; Executer. This is omitted if the
+    3 => identity,                      ; Executer. This is anonymous if the
                                         ; execution was automatic.
 }
 account-multisig-transaction-withdraw = {
@@ -155,10 +155,8 @@ account.multisigSetDefaults@return = ()
 ; tag::submitTransaction[]
 ; Submit a transaction to be executed when the threshold is reached.
 account.multisigSubmitTransaction@param = {
-    ; The account to submit the transaction to. If omitted, the content of the
-    ; transaction itself may be read to figure this out, or the server MAY
-    ; return an error.
-    ? 0 => non-anonymous-identity,
+    ; The account to submit the transaction to.
+    0 => non-anonymous-identity,
 
     ; A memo associated with the transaction. This is meant to be human readable
     ; and can be used to explain the transaction to approvers.
