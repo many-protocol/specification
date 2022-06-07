@@ -185,3 +185,74 @@ async fn refuse_version_zero(config: TestConfig) -> TestCaseResult {
 
     TestCaseResult::Success()
 }
+
+#[test_case]
+async fn id_on_success(config: TestConfig) -> TestCaseResult {
+    for id in 0..10 {
+        let message = Payload {
+            endpoint: Some(Value::Text("status".to_string())),
+            arguments: Some(Value::Bytes(vec![])),
+            id: Some(Value::from(id)),
+            time: Some(Value::Tag(
+                1,
+                Box::new(Value::from(
+                    SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs(),
+                )),
+            )),
+            ..Default::default()
+        }
+        .to_tagged_vec()
+        .expect("Could not serialize payload");
+
+        let response = send(&config, envelope(None, message)).await;
+        let payload = response.payload.expect("No payload");
+        let value: BTreeMap<u8, Value> =
+            ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
+        assert_eq!(value.get(&6), Some(&Value::from(id)));
+    }
+
+    TestCaseResult::Success()
+}
+
+#[test_case]
+async fn id_on_error(config: TestConfig) -> TestCaseResult {
+    for id in 0u32..10 {
+        let message = Payload {
+            endpoint: Some(Value::Text("non-existent-method".to_string())),
+            id: Some(Value::from(id)),
+            ..Default::default()
+        }
+        .to_tagged_vec()
+        .expect("Could not serialize payload");
+
+        let response = send(&config, envelope(None, message)).await;
+        let payload = response.payload.expect("No payload");
+        let value: BTreeMap<u8, Value> =
+            ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
+        assert_eq!(value.get(&6), Some(&Value::from(id)));
+    }
+
+    TestCaseResult::Success()
+}
+
+#[test_case]
+async fn missing_id(config: TestConfig) -> TestCaseResult {
+    let message = Payload {
+        endpoint: Some(Value::Text("status".to_string())),
+        id: None,
+        ..Default::default()
+    }
+    .to_tagged_vec()
+    .expect("Could not serialize payload");
+
+    let response = send(&config, envelope(None, message)).await;
+    let payload = response.payload.expect("No payload");
+    let value: BTreeMap<u8, Value> =
+        ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
+    assert_eq!(value.get(&6), None);
+
+    TestCaseResult::Success()
+}
