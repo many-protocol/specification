@@ -28,7 +28,6 @@ async fn main() {
     let mut failed = 0;
 
     let test_cases: Box<dyn Iterator<Item = &TestCase>> = if let Some(f) = filter {
-        let f = f.clone();
         Box::new(
             TEST_CASES
                 .iter()
