@@ -7,6 +7,12 @@ account-multisig-token = bstr
 
 memo = tstr
 
+multisig-transaction-state /= 0  ; Pending
+                            / 1  ; Executed automatically
+                            / 2  ; Executed manually
+                            / 3  ; Withdrawn
+                            / 4  ; Expired
+
 ; List of transaction types added by this feature.
 ; These should be listed in ledger.list.
 ledger-transaction-info /= account-multisig-transaction-submit
@@ -241,6 +247,9 @@ account.multisigInfo@return = {
 
     ; A CBOR associated data field.
     ? 7 => bstr .cbor any,
+
+    ; A state of the transaction.
+    8 => multisig-transaction-state,
 }
 ; end::info[]
 
