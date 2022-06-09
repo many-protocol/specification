@@ -15,6 +15,7 @@ ledger-transaction-info /= account-multisig-transaction-submit
                          / account-multisig-transaction-execute
                          / account-multisig-transaction-withdraw
                          / account-multisig-transaction-set-defaults
+                         / account-multisig-transaction-expire
 
 ; Set of indices for multisig transaction entries.
 account-transaction-type-multisig-submit        = [9, [1, 0]]
@@ -23,6 +24,7 @@ account-transaction-type-multisig-revoke        = [9, [1, 2]]
 account-transaction-type-multisig-execute       = [9, [1, 3]]
 account-transaction-type-multisig-withdraw      = [9, [1, 4]]
 account-transaction-type-multisig-set-defaults  = [9, [1, 5]]
+account-transaction-type-multisig-expire        = [9, [1, 6]]
 
 ledger-transaction-type /= account-transaction-type-multisig-submit
                          / account-transaction-type-multisig-approve
@@ -30,6 +32,7 @@ ledger-transaction-type /= account-transaction-type-multisig-submit
                          / account-transaction-type-multisig-execute
                          / account-transaction-type-multisig-withdraw
                          / account-transaction-type-multisig-set-defaults
+                         / account-transaction-type-multisig-expire
 
 account-multisig-transaction-submit = {
     0 => account-transaction-type-multisig-submit,
@@ -60,8 +63,8 @@ account-multisig-transaction-execute = {
     0 => account-transaction-type-multisig-execute,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    3 => identity,                      ; Executer. This is anonymous if the
-                                        ; execution was automatic.
+    ? 3 => identity,                    ; Executer. This is omitted if the execution was automatic.
+    4 => response,                      ; The response message from executing this transaction.
 }
 account-multisig-transaction-withdraw = {
     0 => account-transaction-type-multisig-withdraw,
@@ -79,6 +82,12 @@ account-multisig-transaction-set-defaults = {
                                         ; to its default value.
     ? 5 => null / bool,                 ; Whether to automatically execute. Use null to reset
                                         ; this default to its default value.
+}
+account-multisig-transaction-expire = {
+    0 => account-transaction-type-multisig-expire,
+    1 => non-anonymous-identity,        ; Account source
+    2 => account-multisig-token,        ; Token created by the submission
+    3 => time,                          ; The time this transaction expired.
 }
 
 ; Transactions that can be submitted, approved and executed. Not all transactions are supported
