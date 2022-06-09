@@ -63,8 +63,7 @@ account-multisig-transaction-execute = {
     0 => account-transaction-type-multisig-execute,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    ? 3 => identity,                    ; Executer. This is omitted if the
-                                        ; execution was automatic.
+    ? 3 => identity,                    ; Executer. This is omitted if the execution was automatic.
     4 => response,                      ; The response message from executing this transaction.
 }
 account-multisig-transaction-withdraw = {
