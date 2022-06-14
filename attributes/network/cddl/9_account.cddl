@@ -199,6 +199,12 @@ account.info@return = {
 
     ; The list of features and their argument.
     2 => [ 1* account-feature ],
+
+    ; Whether this account is still enabled. A server MAY choose to disable
+    ; accounts for some reasons (or instead of deleting), and MAY choose to
+    ; put an error record here instead of `true`.
+    ; If this field is omitted, this account is enabled.
+    ? 3 => bool / error,
 }
 ; end::info[]
 
