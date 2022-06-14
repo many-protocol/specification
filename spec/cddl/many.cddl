@@ -98,7 +98,7 @@ error = reason<int>
 
 ; A reason is a more generic type to a string that is both parseable by scripts and human
 ; readable.
-reason<T = uint> = {
+reason<T> = {
     ; Code.
     0 => T,
 

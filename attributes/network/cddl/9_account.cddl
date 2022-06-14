@@ -206,7 +206,7 @@ account.info@return = {
     ; the regular error code space and should only use application-specific
     ; codes (positive codes).
     ; If this field is omitted, this account is enabled.
-    ? 3 => bool / reason,
+    ? 3 => bool / reason<uint>,
 }
 ; end::info[]
 
