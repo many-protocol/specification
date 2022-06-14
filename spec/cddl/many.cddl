@@ -93,9 +93,14 @@ response = COSE_Sign<{
 ; Error codes are specified in the MANY specification, with negative error codes reserved
 ; for attributes and spec defined errors, and positive codes reserved for application
 ; specific errors.
-error = {
-    ; Error code. See [../errors.adoc].
-    0 => int,
+; See [../errors.adoc].
+error = reason<int>
+
+; A reason is a more generic type to a string that is both parseable by scripts and human
+; readable.
+reason<T = uint> = {
+    ; Code.
+    0 => T,
 
     ; Optional error description. This MUST be provided if the error code is not defined
     ; in the MANY specification. The string can contain replacement of the format
@@ -125,11 +130,11 @@ identity =
     / #6.10000(anonymous-identity)
 
 ; A textual version of an identity that is anonymous.
-textual-anonymous-identity = "oaa" / "oaaaa"
+textual-anonymous-identity = "maa" / "maaaa"
 
 ; A textual identity. This does not validate the actual content of the text (ie. the
 ; checksum might be wrong).
-textual-identity = tstr .regexp "o[abcdefghijklmnopqrstuvwxyz234567]{2}[abcdefghijklmnopqrstuvwxyz234567]*"
+textual-identity = tstr .regexp "m[abcdefghijklmnopqrstuvwxyz234567]{2}[abcdefghijklmnopqrstuvwxyz234567]*"
 
 ; An identity that isn't anonymous.
 non-anonymous-identity = public-key-identity / subresource-identity
