@@ -24,13 +24,13 @@ event-info /= account-multisig-event-info-submit
            /  account-multisig-event-info-expire
 
 ; Set of indices for multisig event entries.
-account-event-type-multisig-submit        = [9, 1, 0]
-account-event-type-multisig-approve       = [9, 1, 1]
-account-event-type-multisig-revoke        = [9, 1, 2]
-account-event-type-multisig-execute       = [9, 1, 3]
-account-event-type-multisig-withdraw      = [9, 1, 4]
-account-event-type-multisig-set-defaults  = [9, 1, 5]
-account-event-type-multisig-expire        = [9, 1, 6]
+account-event-type-multisig-submit        = [9, [1, 0]]
+account-event-type-multisig-approve       = [9, [1, 1]]
+account-event-type-multisig-revoke        = [9, [1, 2]]
+account-event-type-multisig-execute       = [9, [1, 3]]
+account-event-type-multisig-withdraw      = [9, [1, 4]]
+account-event-type-multisig-set-defaults  = [9, [1, 5]]
+account-event-type-multisig-expire        = [9, [1, 6]]
 
 event-type /= account-event-type-multisig-submit
            /  account-event-type-multisig-approve
