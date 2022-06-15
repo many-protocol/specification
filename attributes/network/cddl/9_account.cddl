@@ -16,20 +16,20 @@ ledger-transaction-info /= account-transaction-create
                         /  account-transaction-set-description
                         /  account-transaction-add-roles
                         /  account-transaction-remove-roles
-                        /  account-transaction-delete
+                        /  account-transaction-disable
                         /  account-transaction-add-features
 ledger-transaction-type /= account-transaction-type-create
                         /  account-transaction-type-set-description
                         /  account-transaction-type-add-roles
                         /  account-transaction-type-remove-roles
-                        /  account-transaction-type-delete
+                        /  account-transaction-type-disable
                         /  account-transaction-type-add-features
 
 account-transaction-type-create             = [9, 0]
 account-transaction-type-set-description    = [9, 1]
 account-transaction-type-add-roles          = [9, 2]
 account-transaction-type-remove-roles       = [9, 3]
-account-transaction-type-delete             = [9, 4]
+account-transaction-type-disable             = [9, 4]
 account-transaction-type-add-feature        = [9, 5]
 
 account-transaction-create = {
@@ -60,8 +60,8 @@ account-transaction-remove-roles = {
         * non-anonymous-identity => [ * account-role ],
     },                              ; List of roles removed.
 }
-account-transaction-delete = {
-    0 => account-transaction-type-delete,
+account-transaction-disable = {
+    0 => account-transaction-type-disable,
     1 => non-anonymous-identity,    ; Account identity.
     ? 2 => reason<u64>,             ; The reason this was deleted/disabled.
 }
@@ -211,17 +211,17 @@ account.info@return = {
 }
 ; end::info[]
 
-; tag::delete[]
-; Delete an account. Its identity cannot be reused.
+; tag::disable[]
+; Disable or delete an account. Its identity cannot be reused.
 ; The server MUST return an error if the sender does not have the `"owner"` role
 ; for this account.
-; The server MAY choose to fully delete the account (in which case other calls
-; like `info` will return an error), or disable the account using a flag.
-account.delete@param = {
+; The server MAY choose to fully delete the account (in which case any calls
+; to `account.info` will return an error), or disable the account.
+account.disable@param = {
     0 => account-identity,
 }
-account.delete@return = ()
-; end::delete[]
+account.disable@return = ()
+; end::disable[]
 
 ; tag::addFeatures[]
 ; Add features and roles to an account, in one atomic call.

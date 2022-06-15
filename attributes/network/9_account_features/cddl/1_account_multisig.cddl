@@ -106,7 +106,7 @@ account-multisig-transaction /=
     /  { 0 => account-transaction-type-set-description, 1 => account.setDescription@param }
     /  { 0 => account-transaction-type-add-roles, 1 => account.addRoles@param }
     /  { 0 => account-transaction-type-remove-roles, 1 => account.removeRoles@param }
-    /  { 0 => account-transaction-type-delete, 1 => account.delete@param }
+    /  { 0 => account-transaction-type-disable, 1 => account.disable@param }
     /  { 0 => account-transaction-type-add-features, 1 => account.addFeatures@param }
     /  { 0 => account-transaction-type-multisig-submit, 1 => account.multisigSubmitTransaction@param }
     /  { 0 => account-transaction-type-multisig-approve, 1 => account.multisigApprove@param }
