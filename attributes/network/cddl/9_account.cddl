@@ -12,28 +12,28 @@ account@attribute-arg = [ * uint ]
 account-feature-arg = any
 account-feature = uint / [uint, * account-feature-arg]
 
-ledger-transaction-info /= account-transaction-create
-                        /  account-transaction-set-description
-                        /  account-transaction-add-roles
-                        /  account-transaction-remove-roles
-                        /  account-transaction-disable
-                        /  account-transaction-add-features
-ledger-transaction-type /= account-transaction-type-create
-                        /  account-transaction-type-set-description
-                        /  account-transaction-type-add-roles
-                        /  account-transaction-type-remove-roles
-                        /  account-transaction-type-disable
-                        /  account-transaction-type-add-features
+event-info /= account-event-info-create
+           /  account-event-info-set-description
+           /  account-event-info-add-roles
+           /  account-event-info-remove-roles
+           /  account-event-info-disable
+           /  account-event-info-add-features
+event-type /= account-event-type-create
+           /  account-event-type-set-description
+           /  account-event-type-add-roles
+           /  account-event-type-remove-roles
+           /  account-event-type-disable
+           /  account-event-type-add-features
 
-account-transaction-type-create             = [9, 0]
-account-transaction-type-set-description    = [9, 1]
-account-transaction-type-add-roles          = [9, 2]
-account-transaction-type-remove-roles       = [9, 3]
-account-transaction-type-disable             = [9, 4]
-account-transaction-type-add-feature        = [9, 5]
+account-event-type-create             = [9, 0]
+account-event-type-set-description    = [9, 1]
+account-event-type-add-roles          = [9, 2]
+account-event-type-remove-roles       = [9, 3]
+account-event-type-disable            = [9, 4]
+account-event-type-add-feature        = [9, 5]
 
-account-transaction-create = {
-    0 => account-transaction-type-create,
+account-event-info-create = {
+    0 => event-type-create,
     1 => non-anonymous-identity,    ; Account identity
     ? 2 => tstr,                    ; Description
     3 => {
@@ -41,32 +41,32 @@ account-transaction-create = {
     },                              ; List of initial roles, including default ones.
     4 => [ 1* account-feature ],    ; Features
 }
-account-transaction-set-description = {
-    0 => account-transaction-type-set-description,
+account-event-info-set-description = {
+    0 => event-type-set-description,
     1 => non-anonymous-identity,    ; Account identity.
     2 => tstr,                      ; Description
 }
-account-transaction-add-roles = {
-    0 => account-transaction-type-add-roles,
+account-event-info-add-roles = {
+    0 => event-type-add-roles,
     1 => non-anonymous-identity,    ; Account identity.
     2 => {
         * non-anonymous-identity => [ * account-role ],
     },                              ; List of roles added.
 }
-account-transaction-remove-roles = {
-    0 => account-transaction-type-remove-roles,
+account-event-info-remove-roles = {
+    0 => event-type-remove-roles,
     1 => non-anonymous-identity,    ; Account identity.
     2 => {
         * non-anonymous-identity => [ * account-role ],
     },                              ; List of roles removed.
 }
-account-transaction-disable = {
-    0 => account-transaction-type-disable,
+account-event-info-disable = {
+    0 => event-type-disable,
     1 => non-anonymous-identity,    ; Account identity.
     ? 2 => reason<u64>,             ; The reason this was deleted/disabled.
 }
-account-transaction-add-features = {
-    0 => account-transaction-type-add-features,
+account-event-info-add-features = {
+    0 => event-type-add-features,
     1 => non-anonymous-identity,    ; Account identity.
     2 => {
         * non-anonymous-identity => [ * account-role ],

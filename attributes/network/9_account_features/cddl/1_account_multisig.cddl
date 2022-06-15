@@ -13,35 +13,35 @@ multisig-transaction-state /= 0  ; Pending
                             / 3  ; Withdrawn
                             / 4  ; Expired
 
-; List of transaction types added by this feature.
-; These should be listed in ledger.list.
-ledger-transaction-info /= account-multisig-transaction-submit
-                         / account-multisig-transaction-approve
-                         / account-multisig-transaction-revoke
-                         / account-multisig-transaction-execute
-                         / account-multisig-transaction-withdraw
-                         / account-multisig-transaction-set-defaults
-                         / account-multisig-transaction-expire
+; List of event log types added by this feature.
+; These should be listed in events.list.
+event-info /= account-multisig-event-info-submit
+           /  account-multisig-event-info-approve
+           /  account-multisig-event-info-revoke
+           /  account-multisig-event-info-execute
+           /  account-multisig-event-info-withdraw
+           /  account-multisig-event-info-set-defaults
+           /  account-multisig-event-info-expire
 
-; Set of indices for multisig transaction entries.
-account-transaction-type-multisig-submit        = [9, [1, 0]]
-account-transaction-type-multisig-approve       = [9, [1, 1]]
-account-transaction-type-multisig-revoke        = [9, [1, 2]]
-account-transaction-type-multisig-execute       = [9, [1, 3]]
-account-transaction-type-multisig-withdraw      = [9, [1, 4]]
-account-transaction-type-multisig-set-defaults  = [9, [1, 5]]
-account-transaction-type-multisig-expire        = [9, [1, 6]]
+; Set of indices for multisig event entries.
+account-event-type-multisig-submit        = [9, [1, 0]]
+account-event-type-multisig-approve       = [9, [1, 1]]
+account-event-type-multisig-revoke        = [9, [1, 2]]
+account-event-type-multisig-execute       = [9, [1, 3]]
+account-event-type-multisig-withdraw      = [9, [1, 4]]
+account-event-type-multisig-set-defaults  = [9, [1, 5]]
+account-event-type-multisig-expire        = [9, [1, 6]]
 
-ledger-transaction-type /= account-transaction-type-multisig-submit
-                         / account-transaction-type-multisig-approve
-                         / account-transaction-type-multisig-revoke
-                         / account-transaction-type-multisig-execute
-                         / account-transaction-type-multisig-withdraw
-                         / account-transaction-type-multisig-set-defaults
-                         / account-transaction-type-multisig-expire
+event-type /= account-event-type-multisig-submit
+           /  account-event-type-multisig-approve
+           /  account-event-type-multisig-revoke
+           /  account-event-type-multisig-execute
+           /  account-event-type-multisig-withdraw
+           /  account-event-type-multisig-set-defaults
+           /  account-event-type-multisig-expire
 
-account-multisig-transaction-submit = {
-    0 => account-transaction-type-multisig-submit,
+account-multisig-event-info-submit = {
+    0 => account-event-type-multisig-submit,
     1 => non-anonymous-identity,        ; Submitter
     2 => non-anonymous-identity,        ; Account source
     ? 3 => memo,                        ; Memo of the transaction
@@ -53,33 +53,33 @@ account-multisig-transaction-submit = {
     ? 9 => bstr .cbor any,              ; CBOR data associated with the
                                         ; transaction.
 }
-account-multisig-transaction-approve = {
-    0 => account-transaction-type-multisig-approve,
+account-multisig-event-info-approve = {
+    0 => account-event-type-multisig-approve,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Approver
 }
-account-multisig-transaction-revoke = {
-    0 => account-transaction-type-multisig-revoke,
+account-multisig-event-info-revoke = {
+    0 => account-event-type-multisig-revoke,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Revoker
 }
-account-multisig-transaction-execute = {
-    0 => account-transaction-type-multisig-execute,
+account-multisig-event-info-execute = {
+    0 => account-event-type-multisig-execute,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     ? 3 => identity,                    ; Executer. This is omitted if the execution was automatic.
     4 => response,                      ; The response message from executing this transaction.
 }
-account-multisig-transaction-withdraw = {
-    0 => account-transaction-type-multisig-withdraw,
+account-multisig-event-info-withdraw = {
+    0 => account-event-type-multisig-withdraw,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => non-anonymous-identity,        ; Withdrawer
 }
-account-multisig-transaction-set-defaults = {
-    0 => account-transaction-type-multisig-set-defaults,
+account-multisig-event-info-set-defaults = {
+    0 => account-event-type-multisig-set-defaults,
     1 => non-anonymous-identity,        ; Instigator of the transaction.
     2 => non-anonymous-identity,        ; Account to change the multisig defaults.
     ? 3 => null / uint,                 ; The number of approvals needed. Use null to reset
@@ -89,8 +89,8 @@ account-multisig-transaction-set-defaults = {
     ? 5 => null / bool,                 ; Whether to automatically execute. Use null to reset
                                         ; this default to its default value.
 }
-account-multisig-transaction-expire = {
-    0 => account-transaction-type-multisig-expire,
+account-multisig-event-info-expire = {
+    0 => account-event-type-multisig-expire,
     1 => non-anonymous-identity,        ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => time,                          ; The time this transaction expired.
@@ -101,19 +101,19 @@ account-multisig-transaction-expire = {
 ; TODO: find a better place for these to live. We cannot just keep updating this file everytime
 ; we have a new transaction type.
 account-multisig-transaction /=
-       { 0 => ledger-transaction-type-send, 1 => ledger.send@param }
-    /  { 0 => account-transaction-type-create, 1 => account.create@param }
-    /  { 0 => account-transaction-type-set-description, 1 => account.setDescription@param }
-    /  { 0 => account-transaction-type-add-roles, 1 => account.addRoles@param }
-    /  { 0 => account-transaction-type-remove-roles, 1 => account.removeRoles@param }
-    /  { 0 => account-transaction-type-disable, 1 => account.disable@param }
-    /  { 0 => account-transaction-type-add-features, 1 => account.addFeatures@param }
-    /  { 0 => account-transaction-type-multisig-submit, 1 => account.multisigSubmitTransaction@param }
-    /  { 0 => account-transaction-type-multisig-approve, 1 => account.multisigApprove@param }
-    /  { 0 => account-transaction-type-multisig-revoke, 1 => account.multisigRevoke@param }
-    /  { 0 => account-transaction-type-multisig-execute, 1 => account.multisigExecute@param }
-    /  { 0 => account-transaction-type-multisig-withdraw, 1 => account.multisigWithdraw@param }
-    /  { 0 => account-transaction-type-multisig-set-defaults, 1 => account.multisigSetDefaults@param }
+       { 0 => event-type-send, 1 => ledger.send@param }
+    /  { 0 => account-event-type-create, 1 => account.create@param }
+    /  { 0 => account-event-type-set-description, 1 => account.setDescription@param }
+    /  { 0 => account-event-type-add-roles, 1 => account.addRoles@param }
+    /  { 0 => account-event-type-remove-roles, 1 => account.removeRoles@param }
+    /  { 0 => account-event-type-disable, 1 => account.disable@param }
+    /  { 0 => account-event-type-add-features, 1 => account.addFeatures@param }
+    /  { 0 => account-event-type-multisig-submit, 1 => account.multisigSubmitTransaction@param }
+    /  { 0 => account-event-type-multisig-approve, 1 => account.multisigApprove@param }
+    /  { 0 => account-event-type-multisig-revoke, 1 => account.multisigRevoke@param }
+    /  { 0 => account-event-type-multisig-execute, 1 => account.multisigExecute@param }
+    /  { 0 => account-event-type-multisig-withdraw, 1 => account.multisigWithdraw@param }
+    /  { 0 => account-event-type-multisig-set-defaults, 1 => account.multisigSetDefaults@param }
 ; end::types[]
 
 ; tag::feature[]

@@ -1,0 +1,40 @@
+= Event Log Attribute (#4)
+:cddl: ./cddl/
+
+This attribute is used by servers that implements an event log interface which keeps a list of events performed on it.
+This can be a list of transactions for a ledger server, for example.
+It does not have to be backed by a blockchain (but it MAY be if it implements attribute #1).
+
+It exposes the following endpoints:
+
+- <<_info, `events.info`>>. Returns information about this server's event log.
+- <<_list, `events.list`>>. List event logs.
+
+== Addresses
+Servers MAY recognize identities as part of their logs and allow filtering by address.
+
+== Errors
+The following error codes are reserved for event logs:
+
+== Types
+[sources,cddl]
+----
+include::{cddl}/4_events.cddl[tag=types]
+----
+
+== Info
+The `events.info` endpoint adds new informations to the returned map.
+
+[sources,cddl]
+----
+include::{cddl}/4_events.cddl[tag=info]
+----
+
+== List
+List event logs, potentially filtered and sorted by id.
+
+[sources,cddl]
+----
+include::{cddl}/4_events.cddl[tag=list]
+----
+
