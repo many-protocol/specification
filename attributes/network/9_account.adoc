@@ -55,9 +55,12 @@ A new namespace is created through this attribute; `account`, which contains the
     Remove roles from an identity.
 * `account.info`.
     Retrieves information related to an account.
-* `account.delete`.
-    Deletes an account.
-    The identity may not be reusable.
+* `account.disable`.
+    Disables an account.
+    The server MAY delete the account from its database.
+    The identity MUST not be reusable.
+    The server MAY still return the info using `account.info`, with the disabled field filled, or return an error.
+    The server MUST error on all endpoints that would change the account.
 * `account.addFeatures`
     Add features to an account.
 
@@ -92,7 +95,7 @@ To list the roles of an identity, call the `account.getRoles`. To add roles to a
 An account MUST have at least one owners, with their role set including `"owner"`.
 Removing the `"owner"` role from the last `"owner"` identity on an account MUST result in an error.
 
-By default, only an owner can set roles of identities on an account, or delete it.
+By default, only an owner can set roles of identities on an account, or disable it.
 Some additional access control might be provided to account owners by features.
 
 `"owner"`s have all other roles implicitly, as they can add any roles to themselves.
@@ -159,10 +162,10 @@ include::{cddl}/9_account.cddl[tag=removeRoles]
 include::{cddl}/9_account.cddl[tag=info]
 ----
 
-=== `delete`
+=== `disable`
 [sources,cddl]
 ----
-include::{cddl}/9_account.cddl[tag=delete]
+include::{cddl}/9_account.cddl[tag=disable]
 ----
 
 === `addFeatures`
