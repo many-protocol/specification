@@ -30,7 +30,6 @@ Some example of dripping wallet's use cases include;
 
 == Requirements
 *   An account MUST own itself.
-*   Every account MUST have at least one owner. 
     See the <<_owner_role>> section.
 *   Accounts are referred to by their identities.
 *   A server creating an account MUST use a subresource identity of its own identity for the identity of the account, or a public key it owns.
@@ -93,10 +92,8 @@ To list roles available for an account (depending on its features), call the `ac
 To list the roles of an identity, call the `account.getRoles`. To add roles to an identity, use the `account.addRoles` endpoint, and `account.removeRoles` to remove one or multiple roles.
 
 ==== Owner Role
-An account MUST own itself. Removing the `"owner"` role from the account MUST result in an error.
-
-An account MUST have at least one owners, with their role set including `"owner"`.
-Removing the `"owner"` role from the last `"owner"` identity on an account MUST result in an error.
+An account MUST own itself.
+Removing the `"owner"` role from the account MUST result in an error.
 
 By default, only an owner can set roles of identities on an account, or disable it.
 Some additional access control might be provided to account owners by features.
