@@ -1,0 +1,89 @@
+; tag::types[]
+; A filter argument for event types.
+events-filter = {
+    ; Filter by account affected.
+    ? 0 => identity / [ * identity ],
+
+    ; Filter by event type.
+    ? 1 => event-type / [ * event-type ],
+
+    ; Filter by symbol if affected.
+    ? 2 => ledger-symbol / [ * ledger-symbol ],
+
+    ; Filter by event ID range.
+    ? 3 => range<event-id>,
+
+    ; Filter by date range.
+    ? 4 => range<time>,
+}
+
+; An ID that is unique for all events in the log. This must be monotonically
+; incrementing between when events are logged.
+; The system can consider this to be a `biguint` and add 1 to the last byte to gather
+; the next item, for example.
+; Gaps between IDs can exist (they don't have to be continuous).
+event-id = bstr
+
+; Event types. This can be extended and the server MUST provide a list of
+; those types.
+event-info /= event-info-send
+event-type /= event-type-send
+
+event-type-send = [6, 0]
+
+event-info-send = {
+    0 => event-type-send,
+    1 => identity,      ; Source
+    2 => identity,      ; Destination
+    3 => ledger-symbol, ; Symbol
+    4 => ledger-amount, ; Amount
+}
+
+event-log = {
+    ; Event ID
+    0 => event-id,
+
+    ; Log time.
+    1 => time,
+
+    ; Depends on the event log type.
+    2 => event-info,
+}
+; end::types[]
+
+; tag::info[]
+; `events.info` endpoint.
+events.info@param = ()
+events.info@return = {
+    ; Total number of events.
+    0 => uint,
+
+    ; Supported list of event types.
+    1 => [ * event-type ],
+}
+; end::info[]
+
+; tag::list[]
+; `events.list` endpoint for listing, filtering and sorting events.
+events.list@param = {
+    ; Maximum number of events to return. The server can still limit the number of
+    ; events it returns if this number is high.
+    ? 0 => uint,
+
+    ; Whether or not to show the last events or the first ones found (ordering).
+    ; The default behaviour is left to the server implementation.
+    ; Ordering is done by event ID (which are monotonically incrementing).
+    ? 1 => order,
+
+    ; Event filter criteria.
+    ? 2 => events-filter,
+}
+events.list@return = {
+    ; Total number of events (currently). This is the same number that info
+    ; would give, but it's atomic to this call.
+    0 => uint,
+
+    ; Event log list.
+    1 => [ * event-log ]
+}
+; end::list[]
