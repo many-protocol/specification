@@ -56,8 +56,10 @@ A new namespace is created through this attribute; `account`, which contains the
 * `account.info`.
     Retrieves information related to an account.
 * `account.delete`.
-    Deletes an account.
+    Deletes or disables an account.
     The identity may not be reusable.
+    The server MAY still return the info using `account.info`, with the disabled field filled.
+    For all other endpoints, there is no functional differences between a deleted or disabled account.
 * `account.addFeatures`
     Add features to an account.
 

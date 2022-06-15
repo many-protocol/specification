@@ -63,6 +63,7 @@ account-transaction-remove-roles = {
 account-transaction-delete = {
     0 => account-transaction-type-delete,
     1 => non-anonymous-identity,    ; Account identity.
+    ? 2 => reason<u64>,             ; The reason this was deleted/disabled.
 }
 account-transaction-add-features = {
     0 => account-transaction-type-add-features,
@@ -214,6 +215,8 @@ account.info@return = {
 ; Delete an account. Its identity cannot be reused.
 ; The server MUST return an error if the sender does not have the `"owner"` role
 ; for this account.
+; The server MAY choose to fully delete the account (in which case other calls
+; like `info` will return an error), or disable the account using a flag.
 account.delete@param = {
     0 => account-identity,
 }
