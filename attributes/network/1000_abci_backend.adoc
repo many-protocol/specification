@@ -16,5 +16,52 @@ It exposes the following endpoints:
 - `abci.endBlock`.
 - `abci.init`.
 - `abci.info`.
+- `abci.checkTx`.
+    Method controls what transactions get added to a new block
+- `abci.manyStatus`.
+    Includes nodes, sync and validator info.
+- `abci.validators`.
+    Get validator set at a block height.
+- `abci.genesis`.
+    Get the genesis file.
+- `abci.consensusParams`.
+    Get the consensus parameters.
+- `abci.consensusState`.
+    Indicated the current consensus state, likd start-time, proposal block hash, block proposer info.
+- `abci.unconfirmedTx`.
+    Retrieves list of unconfirmed transactions.
 
+== ManyStatus
+The `manystatus` endpoint returns information about the node, sync status and validators
+
+[sources,cddl]
+----
+include::{cddl}/1000_abci_backend.cddl[tag=many-status]
+----
+
+== Validators
+Validators endpoint returns the validator set at a given block height.
+
+[sources,cddl]
+----
+include::{cddl}/1000_abci_backend.cddl[tag=validators]
+----
+
+== ConsensusParams
+Consensus params endpoint returns the consensus parameters at a given block height.
+It will return the requested block's parameters, evidence and validator public key
+types accepted.
+
+[sources,cddl]
+----
+include::{cddl}/1000_abci_backend.cddl[tag=consensus-params]
+----
+
+== Genesis
+Genesis endpoint returns the genesis file, which includes genesis time, chainID, initial height, consensus params, validator set, apphash and ?[app state].
+
+[sources,cddl]
+----
+include::{cddl}/1000_abci_backend.cddl[tag=genesis]
+----
 
