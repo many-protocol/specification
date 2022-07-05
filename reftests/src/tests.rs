@@ -22,7 +22,7 @@ pub struct TestConfig {
 }
 
 pub struct TestCaseFn(
-    pub fn(TestConfig) -> Pin<Box<dyn Future<Output = TestCaseResult> + Send + UnwindSafe>>,
+    fn(TestConfig) -> Pin<Box<dyn Future<Output = TestCaseResult> + Send + UnwindSafe>>,
 );
 impl UnwindSafe for TestCaseFn {}
 
