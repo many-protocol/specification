@@ -24,14 +24,14 @@ async fn can_send(registry: TestConfig) -> TestCaseResult {
     let symbol = config.symbol;
     let faucet = config.faucet;
 
-    assert!(client.balance(faucet, symbol) >= 10000);
-    client.send(faucet, id1, symbol, 10000);
-    assert_eq!(client.balance(id1, symbol), 10000);
-    assert_eq!(client.balance(id2, symbol), 0);
-    client.send(id1, id2, symbol, 10000);
-    assert_eq!(client.balance(id1, symbol), 0);
-    assert_eq!(client.balance(id2, symbol), 10000);
-    client.send(id2, faucent, symbol, 10000);
+    assert!(client.balance(faucet, symbol).await >= 10000);
+    client.send(faucet, id1, symbol, 10000).await;
+    assert_eq!(client.balance(id1, symbol).await, 10000);
+    assert_eq!(client.balance(id2, symbol).await, 0);
+    client.send(id1, id2, symbol, 10000).await;
+    assert_eq!(client.balance(id1, symbol).await, 0);
+    assert_eq!(client.balance(id2, symbol).await, 10000);
+    client.send(id2, faucent, symbol, 10000).await;
 
     TestCaseResult::Success()
 }
