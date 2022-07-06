@@ -1,5 +1,6 @@
 use futures::FutureExt;
 use reqwest::Url;
+use std::collections::BTreeMap;
 use std::fmt::{Debug, Formatter};
 use std::future::Future;
 use std::io::Read;
@@ -19,6 +20,7 @@ pub enum TestCaseResult {
 #[derive(Debug, Clone)]
 pub struct TestConfig {
     pub url: Url,
+    // all_configs: BTreeMap<String, PathBuf>,
 }
 
 pub struct TestCaseFn(

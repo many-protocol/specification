@@ -3,6 +3,7 @@ use reqwest::Url;
 
 mod helpers;
 mod tests;
+mod types;
 
 use crate::tests::{TestCase, TestCaseResult, TestConfig};
 use tests::TEST_CASES;
