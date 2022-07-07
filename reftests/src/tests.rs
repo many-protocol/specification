@@ -1,5 +1,7 @@
+use self::attributes::_2_ledger::LedgerConfig;
 use futures::FutureExt;
 use reqwest::Url;
+use std::collections::BTreeMap;
 use std::fmt::{Debug, Formatter};
 use std::future::Future;
 use std::io::Read;
@@ -19,10 +21,22 @@ pub enum TestCaseResult {
 #[derive(Debug, Clone)]
 pub struct TestConfig {
     pub url: Url,
+    pub config: BTreeMap<String, PathBuf>,
+}
+
+pub trait ReadConfig {
+    fn read_config(&self, key: String) -> LedgerConfig;
+}
+
+impl ReadConfig for TestConfig {
+    fn read_config(&self, key: String) -> LedgerConfig {
+        let content = std::fs::read_to_string(&self.config[&key]).unwrap();
+        serde_json::from_str(&content).unwrap()
+    }
 }
 
 pub struct TestCaseFn(
-    pub fn(TestConfig) -> Pin<Box<dyn Future<Output = TestCaseResult> + Send + UnwindSafe>>,
+    fn(TestConfig) -> Pin<Box<dyn Future<Output = TestCaseResult> + Send + UnwindSafe>>,
 );
 impl UnwindSafe for TestCaseFn {}
 

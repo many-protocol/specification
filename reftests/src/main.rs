@@ -3,8 +3,12 @@ use reqwest::Url;
 
 mod helpers;
 mod tests;
+mod types;
 
-use crate::tests::{TestCase, TestCaseResult, TestConfig};
+use crate::{
+    helpers::parse_config_paths,
+    tests::{TestCase, TestCaseResult, TestConfig},
+};
 use tests::TEST_CASES;
 
 #[derive(Debug, Parser)]
@@ -16,13 +20,26 @@ struct Opts {
     #[clap(long)]
     /// Only run the tests which name contains the pattern (regex).
     filter: Option<regex::Regex>,
+
+    /// Paths to config files. (eg: --config=ledger=/path/to/config/ledger.json)
+    /// Separated by : (eg: --config=ledger=/ledger.json:kvstore=/kvstore.json)
+    #[clap(long)]
+    config: Option<String>,
 }
 
 #[tokio::main]
 async fn main() {
-    let Opts { server, filter } = Opts::parse();
+    let Opts {
+        server,
+        filter,
+        config,
+    } = Opts::parse();
 
-    let config = TestConfig { url: server };
+    let config = TestConfig {
+        url: server,
+        config: parse_config_paths(config),
+    };
+
     let mut succeeded = 0;
     let mut skipped = 0;
     let mut failed = 0;

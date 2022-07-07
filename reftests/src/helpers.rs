@@ -1,12 +1,14 @@
 use crate::TestConfig;
 use ciborium::value::{Integer, Value};
 use coset::{AsCborValue, CborSerializable, CoseSign1, Header, TaggedCborSerializable};
-use ed25519_dalek::Signer;
+use ed25519_dalek::{PublicKey, Signer};
+use pkcs8::der::Document;
 use rand::SeedableRng;
 use reqwest::StatusCode;
 use sha3::{Digest, Sha3_224};
 use std::{
     collections::BTreeMap,
+    path::PathBuf,
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -125,12 +127,32 @@ impl coset::TaggedCborSerializable for Payload {
 }
 
 /// Returns the key pair, KID and the header for a key seed.
-pub fn generate_key(key_seed: u8) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
-    let mut seed = [0u8; 32];
-    seed[31] = key_seed;
+pub fn generate_key(
+    key_seed: Option<u8>,
+    pem: Option<String>,
+) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
+    let ed25519_key = if let Some(pem) = pem {
+        let doc = pkcs8::PrivateKeyDocument::from_pem(&pem).unwrap();
+        let decoded = doc.decode();
 
-    let mut prng = rand::rngs::StdRng::from_seed(seed);
-    let ed25519_key = ed25519_dalek::Keypair::generate(&mut prng);
+        let sk = ed25519_dalek::SecretKey::from_bytes(&decoded.private_key[2..])
+            .map_err(|e| e.to_string())
+            .unwrap();
+        let pk: PublicKey = (&sk).into();
+        let keypair: ed25519_dalek::Keypair = ed25519_dalek::Keypair {
+            secret: sk,
+            public: pk,
+        };
+        ed25519_dalek::Keypair::from_bytes(&keypair.to_bytes()).unwrap()
+    } else if let Some(key_seed) = key_seed {
+        let mut seed = [0u8; 32];
+        seed[31] = key_seed;
+
+        let mut prng = rand::rngs::StdRng::from_seed(seed);
+        ed25519_dalek::Keypair::generate(&mut prng)
+    } else {
+        panic!("No input for function");
+    };
 
     let mut pkey = coset::CoseKeyBuilder::new()
         .algorithm(coset::iana::Algorithm::EdDSA)
@@ -169,11 +191,16 @@ pub fn generate_key(key_seed: u8) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
 
 /// Create an envelope with a message and an optional key_seed. If the key_seed is
 /// specified, the protected headers and signatures will be filled.
-pub fn envelope<M: AsRef<[u8]>>(key_seed: Option<u8>, message: M) -> CoseSign1 {
+pub fn envelope<M: AsRef<[u8]>>(
+    key_seed: Option<u8>,
+    message: M,
+    pem: Option<String>,
+) -> CoseSign1 {
     let builder = coset::CoseSign1Builder::new().payload(message.as_ref().to_vec());
 
-    let builder = if let Some(key_seed) = key_seed {
-        let (ed25519_key, _kid, protected) = generate_key(key_seed);
+    let builder = if key_seed.is_some() || pem.is_some() {
+        let (ed25519_key, _kid, protected) = generate_key(key_seed, pem);
+
         builder
             .protected(protected)
             .create_signature(&[], |bytes| ed25519_key.sign(bytes).to_bytes().to_vec())
@@ -208,16 +235,22 @@ pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    envelope(None, message)
+    envelope(None, message, None)
 }
 
 /// Create a signed message envelope.
-pub fn message<P: AsRef<str>>(key_seed: u8, endpoint: &str, payload: P) -> CoseSign1 {
+pub fn message<P: AsRef<str>>(
+    key_seed: Option<u8>,
+    endpoint: &str,
+    payload: P,
+    pem: Option<String>,
+) -> CoseSign1 {
     let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
         .expect("Could not parse CBOR.")
         .to_bytes();
 
-    let (_, kid, _) = generate_key(key_seed);
+    let (_, kid, _) = generate_key(key_seed, pem.clone());
+
     let message = Payload {
         version: Some(Value::from(1)),
         from: Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec())))),
@@ -237,5 +270,34 @@ pub fn message<P: AsRef<str>>(key_seed: u8, endpoint: &str, payload: P) -> CoseS
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    envelope(Some(key_seed), message)
+    envelope(key_seed, message, pem)
+}
+
+const PATH_SEPARATOR: char = ':';
+const CONFIG_SEPARATOR: char = '=';
+
+pub fn parse_config_paths(config: Option<String>) -> BTreeMap<String, PathBuf> {
+    let mut config_paths = BTreeMap::new();
+
+    if let Some(config) = config {
+        let split = config.split(PATH_SEPARATOR);
+        for s in split {
+            let key_path: Vec<&str> = s.split(CONFIG_SEPARATOR).collect();
+            let path = PathBuf::from(key_path[1].to_string());
+            if path.exists() {
+                config_paths.insert(
+                    key_path[0].to_string(),
+                    PathBuf::from(key_path[1].to_string()),
+                );
+            } else {
+                panic!(
+                    "Path for {} does not exist ({})",
+                    key_path[0],
+                    path.to_string_lossy()
+                );
+            }
+        }
+    }
+
+    config_paths
 }
