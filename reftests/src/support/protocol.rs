@@ -1,11 +1,11 @@
-use crate::types::identity::cbor::CborAny;
+use crate::support::cbor::CborAny;
 use minicbor::data::Type;
 use minicbor::encode::{Error, Write};
 use minicbor::{Decode, Decoder, Encode, Encoder};
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
-use crate::types::identity::message::ManyError;
+use crate::support::message::ManyError;
 use std::collections::BTreeSet;
 
 #[derive(Encode, Decode, Clone, Debug, Default, Ord, PartialOrd, Eq, PartialEq)]
@@ -118,7 +118,7 @@ impl<'d, C> Decode<'d, C> for Attribute {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::identity::cbor::tests::arb_cbor;
+    use crate::support::cbor::tests::arb_cbor;
     use proptest::prelude::*;
 
     prop_compose! {

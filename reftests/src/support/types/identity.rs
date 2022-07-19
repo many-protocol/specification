@@ -11,15 +11,9 @@ use sha3::{Digest, Sha3_224};
 use std::convert::TryFrom;
 use std::fmt::{Debug, Formatter};
 use std::str::FromStr;
-pub mod cbor;
-pub mod cose;
-pub mod cose_helpers;
-pub mod message;
-pub mod percent;
-pub mod protocol;
-pub use cose::CoseKeyIdentity;
-pub use cose_helpers::public_key;
-use message::ManyError;
+
+use crate::support::cose_helpers::public_key;
+use crate::support::message::ManyError;
 
 /// Subresource IDs are 31 bit integers.
 pub const MAX_SUBRESOURCE_ID: u32 = 0x7FFF_FFFF;
@@ -703,10 +697,11 @@ pub mod testing {
 
 #[cfg(test)]
 pub mod tests {
-    use super::testing::identity;
-    use crate::types::Identity;
     use serde_test::{assert_tokens, Configure, Token};
     use std::str::FromStr;
+
+    use super::testing::identity;
+    use crate::support::types::Identity;
 
     #[test]
     fn can_read_anonymous() {
