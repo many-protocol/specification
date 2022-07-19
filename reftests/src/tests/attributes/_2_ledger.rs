@@ -1,20 +1,18 @@
 use crate::helpers::{anonymous_message, generate_key, has_attribute, message, send};
+use crate::support::token_amount::{self, Symbol, TokenAmount};
+use crate::support::types::Identity;
 use crate::tests::{ReadConfig, TestCaseResult, TestConfig};
-use crate::types::Identity;
 use ciborium::value::Value;
 use minicbor::{Decode, Encode};
 use reftests_macros::test_case;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-use self::ledger::{Symbol, TokenAmount};
-
-pub mod ledger;
 #[derive(Clone, Encode, Decode)]
 #[cbor(map)]
 pub struct BalanceReturns {
     #[n(0)]
-    pub balances: BTreeMap<ledger::Symbol, ledger::TokenAmount>,
+    pub balances: BTreeMap<token_amount::Symbol, token_amount::TokenAmount>,
 }
 
 #[derive(Serialize, Deserialize)]

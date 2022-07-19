@@ -1,12 +1,12 @@
-// use crate::types::identity::protocol::Attribute;
-use crate::types::identity::protocol::AttributeSet;
-use crate::types::identity::Identity;
 use derive_builder::Builder;
 use minicbor::data::{Tag, Type};
 use minicbor::encode::{Error, Write};
 use minicbor::{Decode, Decoder, Encode, Encoder};
 use num_derive::{FromPrimitive, ToPrimitive};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+use crate::support::protocol::AttributeSet;
+use crate::support::types::Identity;
 
 #[derive(FromPrimitive, ToPrimitive)]
 #[repr(i8)]

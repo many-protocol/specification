@@ -170,7 +170,7 @@ account.addRoles@return = ()
 ; tag::removeRoles[]
 ; Remove roles from an identity. If the role isn't set, this will do nothing.
 account.removeRoles@param = {
-    ; The account to add the role to.
+    ; The account to remove the roles from.
     0 => account-identity,
 
     ; A map of identity with roles to remove from them.

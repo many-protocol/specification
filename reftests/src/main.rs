@@ -2,8 +2,8 @@ use clap::Parser;
 use reqwest::Url;
 
 mod helpers;
+mod support;
 mod tests;
-mod types;
 
 use crate::{
     helpers::parse_config_paths,

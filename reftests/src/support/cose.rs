@@ -1,4 +1,3 @@
-use crate::types::Identity;
 use coset::iana::{self, Ec2KeyParameter, EnumI64, OkpKeyParameter};
 use coset::{Algorithm, CoseKey, KeyOperation, Label};
 use signature::{Error, Signature, Signer, Verifier};
@@ -6,6 +5,8 @@ use std::collections::BTreeMap;
 use std::convert::TryFrom;
 use std::fmt::{Debug, Formatter};
 use tracing::error;
+
+use super::types::Identity;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct CoseKeyIdentitySignature {

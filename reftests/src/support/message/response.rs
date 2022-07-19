@@ -1,5 +1,5 @@
-use crate::types::identity::protocol::AttributeSet;
-use crate::types::Identity;
+use crate::support::{protocol::AttributeSet, types::Identity};
+
 use derive_builder::Builder;
 use num_derive::{FromPrimitive, ToPrimitive};
 use std::time::SystemTime;

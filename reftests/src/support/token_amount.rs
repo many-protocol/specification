@@ -1,5 +1,3 @@
-use crate::types::identity::percent::Percent;
-use crate::types::Identity;
 use minicbor::data::{Tag, Type};
 use minicbor::{encode, Decode, Decoder, Encode, Encoder};
 use num_bigint::{BigInt, BigUint};
@@ -9,9 +7,12 @@ use serde::Deserialize;
 use std::fmt::{Display, Formatter};
 use std::ops::Shr;
 
+use super::percent::Percent;
+use super::types::Identity;
+
 /// A Symbol is represented by a non-anonymous identity.
 pub type Symbol = Identity;
-type TokenAmountStorage = BigUint;
+pub type TokenAmountStorage = BigUint;
 
 #[repr(transparent)]
 #[derive(Debug, Default, Hash, Clone, Ord, PartialOrd, Eq, PartialEq)]

@@ -485,7 +485,7 @@ impl<'b, C> Decode<'b, C> for ManyError {
 #[cfg(test)]
 mod tests {
     use super::ManyError;
-    use crate::types::identity::message::error::ManyErrorCode as ErrorCode;
+    use crate::support::message::error::ManyErrorCode as ErrorCode;
     use std::collections::BTreeMap;
 
     #[test]
