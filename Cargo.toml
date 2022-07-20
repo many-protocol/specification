@@ -1,5 +1,6 @@
 [workspace]
 members = [
-    "reftests",
-    "reftests/procmacros"
+    "src/rust/docgen",
+    "src/rust/reftests",
+    "src/rust/reftests/procmacros"
 ]
