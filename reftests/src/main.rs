@@ -2,7 +2,6 @@ use clap::Parser;
 use reqwest::Url;
 
 mod helpers;
-mod support;
 mod tests;
 
 use crate::{

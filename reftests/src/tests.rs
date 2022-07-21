@@ -1,4 +1,4 @@
-use self::attributes::_2_ledger::LedgerConfig;
+use self::attributes::LedgerConfig;
 use futures::FutureExt;
 use reqwest::Url;
 use std::collections::BTreeMap;
@@ -24,14 +24,13 @@ pub struct TestConfig {
     pub config: BTreeMap<String, PathBuf>,
 }
 
-pub trait ReadConfig {
-    fn read_config(&self, key: String) -> LedgerConfig;
+pub trait ReadConfig<T> {
+    fn read_config(&self, key: String) -> T;
 }
 
-impl ReadConfig for TestConfig {
+impl ReadConfig<LedgerConfig> for TestConfig {
     fn read_config(&self, key: String) -> LedgerConfig {
-        let content = std::fs::read_to_string(&self.config[&key]).unwrap();
-        serde_json::from_str(&content).unwrap()
+        serde_json::from_str(&std::fs::read_to_string(&self.config[&key]).unwrap()).unwrap()
     }
 }
 

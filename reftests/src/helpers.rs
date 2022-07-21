@@ -13,7 +13,7 @@ use std::{
 };
 
 pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
-    let result = send(config, anonymous_message("status", "null")).await;
+    let result = send(config, message("status", "null", None, None)).await;
 
     let payload = result.payload.expect("No payload from status");
 
@@ -126,30 +126,41 @@ impl coset::TaggedCborSerializable for Payload {
     const TAG: u64 = 10001;
 }
 
+fn key_from_pem(pem: String) -> Result<ed25519_dalek::Keypair, String> {
+    let doc = pkcs8::PrivateKeyDocument::from_pem(&pem)
+    .map_err(|e| {
+        format!("{}. Can't read PEM. Did you update the config.json for your leadger with a valid faucet_pk string? ", e)
+    })?;
+    let decoded = doc.decode();
+
+    let sk = ed25519_dalek::SecretKey::from_bytes(&decoded.private_key[2..])
+        .map_err(|e| e.to_string())
+        .unwrap();
+    let pk: PublicKey = (&sk).into();
+    let keypair: ed25519_dalek::Keypair = ed25519_dalek::Keypair {
+        secret: sk,
+        public: pk,
+    };
+    Ok(ed25519_dalek::Keypair::from_bytes(&keypair.to_bytes()).unwrap())
+}
+
+fn key_from_seed(key_seed: u8) -> ed25519_dalek::Keypair {
+    let mut seed = [0u8; 32];
+    seed[31] = key_seed;
+
+    let mut prng = rand::rngs::StdRng::from_seed(seed);
+    ed25519_dalek::Keypair::generate(&mut prng)
+}
+
 /// Returns the key pair, KID and the header for a key seed.
 pub fn generate_key(
     key_seed: Option<u8>,
     pem: Option<String>,
 ) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
     let ed25519_key = if let Some(pem) = pem {
-        let doc = pkcs8::PrivateKeyDocument::from_pem(&pem).unwrap();
-        let decoded = doc.decode();
-
-        let sk = ed25519_dalek::SecretKey::from_bytes(&decoded.private_key[2..])
-            .map_err(|e| e.to_string())
-            .unwrap();
-        let pk: PublicKey = (&sk).into();
-        let keypair: ed25519_dalek::Keypair = ed25519_dalek::Keypair {
-            secret: sk,
-            public: pk,
-        };
-        ed25519_dalek::Keypair::from_bytes(&keypair.to_bytes()).unwrap()
+        key_from_pem(pem).unwrap()
     } else if let Some(key_seed) = key_seed {
-        let mut seed = [0u8; 32];
-        seed[31] = key_seed;
-
-        let mut prng = rand::rngs::StdRng::from_seed(seed);
-        ed25519_dalek::Keypair::generate(&mut prng)
+        key_from_seed(key_seed)
     } else {
         panic!("No input for function");
     };
@@ -192,18 +203,19 @@ pub fn generate_key(
 /// Create an envelope with a message and an optional key_seed. If the key_seed is
 /// specified, the protected headers and signatures will be filled.
 pub fn envelope<M: AsRef<[u8]>>(
-    key_seed: Option<u8>,
     message: M,
-    pem: Option<String>,
+    (ed25519_key, _kid, protected): (
+        Option<ed25519_dalek::Keypair>,
+        Option<Vec<u8>>,
+        Option<Header>,
+    ),
 ) -> CoseSign1 {
     let builder = coset::CoseSign1Builder::new().payload(message.as_ref().to_vec());
 
-    let builder = if key_seed.is_some() || pem.is_some() {
-        let (ed25519_key, _kid, protected) = generate_key(key_seed, pem);
-
-        builder
-            .protected(protected)
-            .create_signature(&[], |bytes| ed25519_key.sign(bytes).to_bytes().to_vec())
+    let builder = if let Some(protected) = protected {
+        builder.protected(protected).create_signature(&[], |bytes| {
+            ed25519_key.unwrap().sign(bytes).to_bytes().to_vec()
+        })
     } else {
         builder
     };
@@ -211,13 +223,13 @@ pub fn envelope<M: AsRef<[u8]>>(
     builder.build()
 }
 
-/// Create an anonymous message envelope.
-pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
+/// Create message
+pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec<u8>>) -> Vec<u8> {
     let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
         .expect("Could not parse CBOR.")
         .to_bytes();
 
-    let message = Payload {
+    let mut message = Payload {
         version: Some(Value::from(1)),
         endpoint: Some(Value::Text(endpoint.to_string())),
         arguments: Some(Value::Bytes(arg_bytes)),
@@ -231,46 +243,37 @@ pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1
             )),
         )),
         ..Default::default()
-    }
-    .to_tagged_vec()
-    .expect("Could not serialize payload");
+    };
 
-    envelope(None, message, None)
+    if let Some(kid) = kid {
+        message.from = Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec()))));
+    }
+
+    message
+        .to_tagged_vec()
+        .expect("Could not serialize payload")
 }
 
-/// Create a signed message envelope.
+/// Create a message envelope.
 pub fn message<P: AsRef<str>>(
-    key_seed: Option<u8>,
     endpoint: &str,
     payload: P,
+    key_seed: Option<u8>,
     pem: Option<String>,
 ) -> CoseSign1 {
-    let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
-        .expect("Could not parse CBOR.")
-        .to_bytes();
+    let mut ed25519_key: Option<ed25519_dalek::Keypair> = None;
+    let mut kid: Option<Vec<u8>> = None;
+    let mut protected: Option<Header> = None;
 
-    let (_, kid, _) = generate_key(key_seed, pem.clone());
-
-    let message = Payload {
-        version: Some(Value::from(1)),
-        from: Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec())))),
-        endpoint: Some(Value::Text(endpoint.to_string())),
-        arguments: Some(Value::Bytes(arg_bytes)),
-        time: Some(Value::Tag(
-            1,
-            Box::new(Value::from(
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs(),
-            )),
-        )),
-        ..Default::default()
+    if key_seed.is_some() || pem.is_some() {
+        let (_ed25519_key, _kid, _protected) = generate_key(key_seed, pem);
+        ed25519_key = Some(_ed25519_key);
+        kid = Some(_kid);
+        protected = Some(_protected);
     }
-    .to_tagged_vec()
-    .expect("Could not serialize payload");
+    let message = create_message(endpoint, payload, kid.clone());
 
-    envelope(key_seed, message, pem)
+    envelope(message, (ed25519_key, kid, protected))
 }
 
 const PATH_SEPARATOR: char = ':';
