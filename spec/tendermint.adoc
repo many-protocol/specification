@@ -1,12 +1,11 @@
 = ABCI Architecture
-Layer 1 Labs, LLC
 // Metadata
 :toc:
 :hide-uri-scheme:
 
 == Abstract
 The Manifest Network currently uses ABCI for its blockchain implementation.
-Most modules developed by L-1 Labs can run behind a blockchain, provided that blockchain is implemented using tendermint and a pair of special modules to integrate with it.
+Most modules developed by The Lifted Initiative can run behind a blockchain, provided that blockchain is implemented using tendermint and a pair of special modules to integrate with it.
 The goal of this document is to describe the interaction between the blockchain module (#1), the two ABCI modules (#1000 and #1001), and Tendermint itself.
 
 == Background

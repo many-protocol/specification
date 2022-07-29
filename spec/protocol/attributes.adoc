@@ -1,5 +1,4 @@
 = MANY Attributes
-L-1 Labs
 :cddl-dir: ../cddl
 
 == Attribute Format
