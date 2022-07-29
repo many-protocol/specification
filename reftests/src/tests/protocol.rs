@@ -1,4 +1,4 @@
-use crate::helpers::{envelope, message, send, Payload};
+use crate::helpers::{anonymous_message, envelope, message, send, KeyType, Payload};
 use crate::tests::{TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use coset::{CborSerializable, TaggedCborSerializable};
@@ -9,7 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 #[test_case]
 async fn signature_works(config: TestConfig) -> TestCaseResult {
-    let envelope = message("heartbeat", "null", Some(0), None);
+    let envelope = anonymous_message("heartbeat", "null");
     let response = send(&config, envelope).await;
 
     let payload = response.payload.expect("No payload");
@@ -22,7 +22,7 @@ async fn signature_works(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn anonymous(config: TestConfig) -> TestCaseResult {
-    let envelope = message("heartbeat", "null", None, None);
+    let envelope = anonymous_message("heartbeat", "null");
     let response = send(&config, envelope).await;
 
     let payload = response.payload.expect("No payload");
@@ -35,7 +35,7 @@ async fn anonymous(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn requires_tag(config: TestConfig) -> TestCaseResult {
-    let envelope = message("heartbeat", "null", None, None);
+    let envelope = anonymous_message("heartbeat", "null");
     let client = reqwest::Client::new();
     // Uses the `to_vec()` serializer instead of `to_tagged_vec()`.
     let r = client
@@ -55,7 +55,7 @@ async fn requires_tag(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn invalid_signature(config: TestConfig) -> TestCaseResult {
-    let mut envelope = message("heartbeat", "null", Some(0), None);
+    let mut envelope = message("heartbeat", "null", KeyType::KeySeed(0));
     // Override the first 4 bytes with zeros to invalidate the signature.
     envelope.signature[0..4].copy_from_slice(&[0u8; 4]);
     let response = send(&config, envelope).await;
@@ -90,7 +90,7 @@ async fn accept_no_version(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None, None))).await;
+    let response = send(&config, envelope(message, (None, None))).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -119,7 +119,7 @@ async fn refuse_non_numerical_version(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None, None))).await;
+    let response = send(&config, envelope(message, (None, None))).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -148,7 +148,7 @@ async fn refuse_future_version(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None, None))).await;
+    let response = send(&config, envelope(message, (None, None))).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -177,7 +177,7 @@ async fn refuse_version_zero(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None, None))).await;
+    let response = send(&config, envelope(message, (None, None))).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -207,7 +207,7 @@ async fn id_on_success(config: TestConfig) -> TestCaseResult {
         .to_tagged_vec()
         .expect("Could not serialize payload");
 
-        let response = send(&config, envelope(message, (None, None, None))).await;
+        let response = send(&config, envelope(message, (None, None))).await;
         let payload = response.payload.expect("No payload");
         let value: BTreeMap<u8, Value> =
             ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -228,7 +228,7 @@ async fn id_on_error(config: TestConfig) -> TestCaseResult {
         .to_tagged_vec()
         .expect("Could not serialize payload");
 
-        let response = send(&config, envelope(message, (None, None, None))).await;
+        let response = send(&config, envelope(message, (None, None))).await;
         let payload = response.payload.expect("No payload");
         let value: BTreeMap<u8, Value> =
             ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -248,7 +248,7 @@ async fn missing_id(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None, None))).await;
+    let response = send(&config, envelope(message, (None, None))).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");

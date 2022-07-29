@@ -12,8 +12,15 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+#[derive(PartialEq)]
+pub enum KeyType {
+    KeySeed(u8),
+    PrivateKey(String),
+    None,
+}
+
 pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
-    let result = send(config, message("status", "null", None, None)).await;
+    let result = send(config, anonymous_message("status", "null")).await;
 
     let payload = result.payload.expect("No payload from status");
 
@@ -153,16 +160,11 @@ fn key_from_seed(key_seed: u8) -> ed25519_dalek::Keypair {
 }
 
 /// Returns the key pair, KID and the header for a key seed.
-pub fn generate_key(
-    key_seed: Option<u8>,
-    pem: Option<String>,
-) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
-    let ed25519_key = if let Some(pem) = pem {
-        key_from_pem(pem).unwrap()
-    } else if let Some(key_seed) = key_seed {
-        key_from_seed(key_seed)
-    } else {
-        panic!("No input for function");
+pub fn generate_key(key: KeyType) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
+    let ed25519_key = match key {
+        KeyType::PrivateKey(pem) => key_from_pem(pem).unwrap(),
+        KeyType::KeySeed(key_seed) => key_from_seed(key_seed),
+        _ => panic!("No input for function"),
     };
 
     let mut pkey = coset::CoseKeyBuilder::new()
@@ -204,11 +206,7 @@ pub fn generate_key(
 /// specified, the protected headers and signatures will be filled.
 pub fn envelope<M: AsRef<[u8]>>(
     message: M,
-    (ed25519_key, _kid, protected): (
-        Option<ed25519_dalek::Keypair>,
-        Option<Vec<u8>>,
-        Option<Header>,
-    ),
+    (ed25519_key, protected): (Option<ed25519_dalek::Keypair>, Option<Header>),
 ) -> CoseSign1 {
     let builder = coset::CoseSign1Builder::new().payload(message.as_ref().to_vec());
 
@@ -254,26 +252,26 @@ pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec
         .expect("Could not serialize payload")
 }
 
+/// Create an anonymous message envelope.
+pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
+    message(endpoint, payload, KeyType::None)
+}
+
 /// Create a message envelope.
-pub fn message<P: AsRef<str>>(
-    endpoint: &str,
-    payload: P,
-    key_seed: Option<u8>,
-    pem: Option<String>,
-) -> CoseSign1 {
+pub fn message<P: AsRef<str>>(endpoint: &str, payload: P, key: KeyType) -> CoseSign1 {
     let mut ed25519_key: Option<ed25519_dalek::Keypair> = None;
     let mut kid: Option<Vec<u8>> = None;
     let mut protected: Option<Header> = None;
 
-    if key_seed.is_some() || pem.is_some() {
-        let (_ed25519_key, _kid, _protected) = generate_key(key_seed, pem);
+    if !(KeyType::None == key) {
+        let (_ed25519_key, _kid, _protected) = generate_key(key);
         ed25519_key = Some(_ed25519_key);
         kid = Some(_kid);
         protected = Some(_protected);
     }
-    let message = create_message(endpoint, payload, kid.clone());
+    let message = create_message(endpoint, payload, kid);
 
-    envelope(message, (ed25519_key, kid, protected))
+    envelope(message, (ed25519_key, protected))
 }
 
 const PATH_SEPARATOR: char = ':';

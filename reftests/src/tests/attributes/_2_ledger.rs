@@ -1,5 +1,5 @@
 use super::LedgerConfig;
-use crate::helpers::{generate_key, has_attribute, message, send};
+use crate::helpers::{anonymous_message, generate_key, has_attribute, message, send, KeyType};
 use crate::tests::{ReadConfig, TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use many_identity::Address;
@@ -25,7 +25,7 @@ impl LedgerClient {
         test_config: TestConfig,
         attributes: Option<Vec<u32>>,
     ) -> Result<Self, String> {
-        let envelope = message("status", "null", None, None);
+        let envelope = anonymous_message("status", "null");
         let _response = send(&test_config, envelope).await;
 
         if attributes.is_some() {
@@ -45,13 +45,13 @@ impl LedgerClient {
     }
 
     pub fn get_identity(&self, key_seed: u8) -> Address {
-        let (_, kid, _) = generate_key(Some(key_seed), None);
+        let (_, kid, _) = generate_key(KeyType::KeySeed(key_seed));
         Address::from_bytes(&kid).unwrap()
     }
 
     pub async fn balance(&self, account: String, symbol: Address) -> Result<u128, String> {
         let payload = format!("{{0:\"{}\", 1:\"{}\"}}", account, symbol);
-        let envelope = message("ledger.balance", payload, None, None);
+        let envelope = anonymous_message("ledger.balance", payload);
         let response = send(&self.test_config, envelope).await;
 
         let payload = response.payload.expect("No payload from status");
@@ -83,12 +83,12 @@ impl LedgerClient {
 
     pub async fn send(
         &self,
-        key_seed: Option<u8>,
+        // key_seed: Option<u8>,
         from: String,
         to: String,
         amount: u64,
         symbol: Symbol,
-        pem: Option<String>,
+        key: KeyType, // pem: Option<String>,
     ) -> Result<(), String> {
         let payload = format!(
             "{{0:\"{}\", 1:\"{}\", 2:{}, 3:\"{}\"}}",
@@ -98,11 +98,12 @@ impl LedgerClient {
             symbol
         );
 
-        let envelope = if let Some(pem) = pem {
-            message("ledger.send", payload, None, Some(pem))
-        } else {
-            message("ledger.send", payload, key_seed, None)
-        };
+        let envelope = message("ledger.send", payload, key);
+        // let envelope = if let Some(pem) = pem {
+        //     message("ledger.send", payload, KeyType::PrivateKey(pem))
+        // } else {
+        //     message("ledger.send", payload, KeyType::KeySeed(key_seed.unwrap()))
+        // };
 
         let response = send(&self.test_config, envelope).await;
 
@@ -125,117 +126,115 @@ impl LedgerClient {
     }
 }
 
-// #[test_case]
-// async fn send_to_bad_identity(test_config: TestConfig) -> TestCaseResult {
-//     let client = LedgerClient::new(test_config, Some(vec![2, 6]))
-//         .await
-//         .unwrap();
+#[test_case]
+async fn send_to_bad_identity(test_config: TestConfig) -> TestCaseResult {
+    let client = LedgerClient::new(test_config, Some(vec![2, 6]))
+        .await
+        .unwrap();
 
-//     async fn send_test(client: LedgerClient) -> Result<(), String> {
-//         let akward_identity = "some_akward_impossible_identity".to_string();
+    async fn send_test(client: LedgerClient) -> Result<(), String> {
+        let akward_identity = "some_akward_impossible_identity".to_string();
 
-//         // Checking faucet has enough funds for following tests.
-//         assert!(
-//             client
-//                 .balance(
-//                     client.ledger_config.faucet.to_string(),
-//                     client.ledger_config.symbol
-//                 )
-//                 .await
-//                 .unwrap()
-//                 > 10000
-//         );
+        // Checking faucet has enough funds for following tests.
+        assert!(
+            client
+                .balance(
+                    client.ledger_config.faucet.to_string(),
+                    client.ledger_config.symbol
+                )
+                .await
+                .unwrap()
+                > 10000
+        );
 
-//         client
-//             .send(
-//                 None,
-//                 client.ledger_config.faucet.to_string(),
-//                 akward_identity.to_owned(),
-//                 10000,
-//                 client.ledger_config.symbol,
-//                 Some(client.ledger_config.faucet_pk.to_owned()),
-//             )
-//             .await
-//             .map_or(Ok(()), |_| {
-//                 Err("Was able to send from faucet to odd identity".to_string())
-//             })
-//     }
+        client
+            .send(
+                client.ledger_config.faucet.to_string(),
+                akward_identity.to_owned(),
+                10000,
+                client.ledger_config.symbol,
+                KeyType::PrivateKey(client.ledger_config.faucet_pk.to_owned()),
+            )
+            .await
+            .map_or(Ok(()), |_| {
+                Err("Was able to send from faucet to odd identity".to_string())
+            })
+    }
 
-//     match send_test(client).await {
-//         Ok(_) => TestCaseResult::Success(),
-//         Err(s) => TestCaseResult::Skip(s),
-//     }
-// }
-
-// // #[test_case]
-// // async fn cant_send_with_bad_private_key(test_config: TestConfig) -> TestCaseResult {}
-// // Skipped because the helper will panic if it can decode the PEM string
+    match send_test(client).await {
+        Ok(_) => TestCaseResult::Success(),
+        Err(s) => TestCaseResult::Skip(s),
+    }
+}
 
 // #[test_case]
-// async fn cant_send_without_funds(test_config: TestConfig) -> TestCaseResult {
-//     let client = LedgerClient::new(test_config, Some(vec![2, 6]))
-//         .await
-//         .unwrap();
+// async fn cant_send_with_bad_private_key(test_config: TestConfig) -> TestCaseResult {}
+// Skipped because the helper will panic if it can decode the PEM string
 
-//     async fn send_test(client: LedgerClient) -> Result<(), String> {
-//         // Checking faucet has enough funds for following tests.
-//         assert!(
-//             client
-//                 .balance(
-//                     client.ledger_config.faucet.to_string(),
-//                     client.ledger_config.symbol
-//                 )
-//                 .await
-//                 .unwrap()
-//                 > 10000
-//         );
+#[test_case]
+async fn cant_send_without_funds(test_config: TestConfig) -> TestCaseResult {
+    let client = LedgerClient::new(test_config, Some(vec![2, 6]))
+        .await
+        .unwrap();
 
-//         // Getting Identity for seed: 1
-//         let id1 = client.get_identity(1);
+    async fn send_test(client: LedgerClient) -> Result<(), String> {
+        // Checking faucet has enough funds for following tests.
+        assert!(
+            client
+                .balance(
+                    client.ledger_config.faucet.to_string(),
+                    client.ledger_config.symbol
+                )
+                .await
+                .unwrap()
+                > 10000
+        );
 
-//         // Checking balance is 0
-//         assert_eq!(
-//             client
-//                 .balance(id1.to_string(), client.ledger_config.symbol)
-//                 .await
-//                 .unwrap(),
-//             0
-//         );
+        // Getting Identity for seed: 1
+        let id1 = client.get_identity(1);
 
-//         // Getting Identity for seed: 2
-//         let id2 = client.get_identity(2);
+        // Checking balance is 0
+        assert_eq!(
+            client
+                .balance(id1.to_string(), client.ledger_config.symbol)
+                .await
+                .unwrap(),
+            0
+        );
 
-//         // Checking balance on Identity:2
-//         assert!(
-//             client
-//                 .balance(id2.to_string(), client.ledger_config.symbol)
-//                 .await
-//                 .unwrap()
-//                 == 0
-//         );
+        // Getting Identity for seed: 2
+        let id2 = client.get_identity(2);
 
-//         // Sending 10000 from Identity:1 to Identity:2
-//         client
-//             .send(
-//                 Some(1),
-//                 id1.to_string(),
-//                 id2.to_string(),
-//                 10000,
-//                 client.ledger_config.symbol,
-//                 None,
-//             )
-//             .await
-//             .map_or(
-//                 Ok(()),
-//                 |_| Err("Was able to send without funds".to_string()),
-//             )
-//     }
+        // Checking balance on Identity:2
+        assert!(
+            client
+                .balance(id2.to_string(), client.ledger_config.symbol)
+                .await
+                .unwrap()
+                == 0
+        );
 
-//     match send_test(client).await {
-//         Ok(_) => TestCaseResult::Success(),
-//         Err(s) => TestCaseResult::Skip(s),
-//     }
-// }
+        // Sending 10000 from Identity:1 to Identity:2
+        client
+            .send(
+                id1.to_string(),
+                id2.to_string(),
+                10000,
+                client.ledger_config.symbol,
+                KeyType::KeySeed(1),
+            )
+            .await
+            .map_or(
+                Ok(()),
+                |_| Err("Was able to send without funds".to_string()),
+            )
+    }
+
+    match send_test(client).await {
+        Ok(_) => TestCaseResult::Success(),
+        Err(s) => TestCaseResult::Skip(s),
+    }
+}
 
 #[test_case]
 async fn can_send_with_funds(test_config: TestConfig) -> TestCaseResult {
@@ -271,12 +270,11 @@ async fn can_send_with_funds(test_config: TestConfig) -> TestCaseResult {
         // Sending 10000 from faucet to Identity:1
         client
             .send(
-                None,
                 client.ledger_config.faucet.to_string(),
                 id1.to_string(),
                 10000,
                 client.ledger_config.symbol,
-                Some(client.ledger_config.faucet_pk.to_owned()),
+                KeyType::PrivateKey(client.ledger_config.faucet_pk.to_owned()),
             )
             .await
             .map_err(|e| format!("Was not able to send from faucet to id1: {}", e))?;
@@ -305,12 +303,11 @@ async fn can_send_with_funds(test_config: TestConfig) -> TestCaseResult {
         // Sending 10000 from Identity:1 to Identity:2
         client
             .send(
-                Some(1),
                 id1.to_string(),
                 id2.to_string(),
                 10000,
                 client.ledger_config.symbol,
-                None,
+                KeyType::KeySeed(1),
             )
             .await
             .map_err(|e| format!("Was not able to send from id1 to id2: {}", e))?;
@@ -336,12 +333,11 @@ async fn can_send_with_funds(test_config: TestConfig) -> TestCaseResult {
         // Sending funds from Identity:2 back to faucet
         client
             .send(
-                Some(2),
                 id2.to_string(),
                 client.ledger_config.faucet.to_string(),
                 10000,
                 client.ledger_config.symbol,
-                None,
+                KeyType::KeySeed(2),
             )
             .await
             .map_err(|e| format!("Was not able to send from identity2 to faucet: {}", e))?;
@@ -354,6 +350,35 @@ async fn can_send_with_funds(test_config: TestConfig) -> TestCaseResult {
                 .unwrap()
                 == 0
         );
+        Ok(())
+    }
+
+    match send_test(client).await {
+        Ok(_) => TestCaseResult::Success(),
+        Err(s) => TestCaseResult::Skip(s),
+    }
+}
+
+#[test_case]
+async fn cant_send_to_anonymous(test_config: TestConfig) -> TestCaseResult {
+    let client = LedgerClient::new(test_config, Some(vec![2, 6]))
+        .await
+        .unwrap();
+
+    async fn send_test(client: LedgerClient) -> Result<(), String> {
+        client
+            .send(
+                client.ledger_config.faucet.to_string(),
+                "maaaa".to_string(),
+                10000,
+                client.ledger_config.symbol,
+                KeyType::PrivateKey(client.ledger_config.faucet_pk.to_owned()),
+            )
+            .await
+            .map_or(Ok(()), |_| {
+                Err("Was able to send from faucet to anonymous".to_string())
+            })?;
+
         Ok(())
     }
 
