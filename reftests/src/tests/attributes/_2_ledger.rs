@@ -3,6 +3,7 @@ use crate::helpers::{anonymous_message, generate_key, has_attribute, message, se
 use crate::tests::{ReadConfig, TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use many_identity::Address;
+use many_types::attributes::AttributeId;
 use many_types::ledger::{Symbol, TokenAmount};
 use minicbor::{Decode, Encode};
 use reftests_macros::test_case;
@@ -23,7 +24,7 @@ pub struct BalanceReturns {
 impl LedgerClient {
     pub async fn new(
         test_config: TestConfig,
-        attributes: Option<Vec<u32>>,
+        attributes: Option<Vec<AttributeId>>,
     ) -> Result<Self, String> {
         let envelope = anonymous_message("status", "null");
         let _response = send(&test_config, envelope).await;

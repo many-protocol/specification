@@ -2,6 +2,7 @@ use crate::TestConfig;
 use ciborium::value::{Integer, Value};
 use coset::{AsCborValue, CborSerializable, CoseSign1, Header, TaggedCborSerializable};
 use ed25519_dalek::{PublicKey, Signer};
+use many_types::attributes::AttributeId;
 use pkcs8::der::Document;
 use rand::SeedableRng;
 use reqwest::StatusCode;
@@ -19,7 +20,7 @@ pub enum KeyType {
     None,
 }
 
-pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
+pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
     let result = send(config, anonymous_message("status", "null")).await;
 
     let payload = result.payload.expect("No payload from status");
