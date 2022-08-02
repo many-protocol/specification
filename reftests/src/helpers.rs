@@ -1,16 +1,32 @@
 use crate::TestConfig;
 use ciborium::value::{Integer, Value};
 use coset::{AsCborValue, CborSerializable, CoseSign1, Header, TaggedCborSerializable};
-use ed25519_dalek::Signer;
+use ed25519_dalek::{PublicKey, Signer};
+use many_types::attributes::AttributeId;
+use pkcs8::der::Document;
 use rand::SeedableRng;
 use reqwest::StatusCode;
 use sha3::{Digest, Sha3_224};
 use std::{
     collections::BTreeMap,
+    path::PathBuf,
     time::{SystemTime, UNIX_EPOCH},
 };
 
-pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
+#[derive(Default)]
+pub struct MessageKey {
+    pub ed25519_key: Option<ed25519_dalek::Keypair>,
+    pub kid: Option<Vec<u8>>,
+    pub protected: Option<Header>,
+}
+
+#[derive(PartialEq)]
+pub enum KeyType {
+    KeySeed(u8),
+    PrivateKey(String),
+}
+
+pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
     let result = send(config, anonymous_message("status", "null")).await;
 
     let payload = result.payload.expect("No payload from status");
@@ -26,13 +42,12 @@ pub async fn has_attribute(attr: u32, config: &TestConfig) -> bool {
     let status: Value =
         ciborium::de::from_reader(response_payload.as_slice()).expect("Invalid response payload");
 
-    let attrs = match status {
-        Value::Map(m) => {
-            // Find key 4 for attributes.
-            m.into_iter()
-                .find(|(key, _)| key.as_integer().map_or(false, |i| i == Integer::from(4)))
-        }
-        _ => panic!("Status was not a map."),
+    let attrs = if let Value::Map(m) = status {
+        // Find key 4 for attributes.
+        m.into_iter()
+            .find(|(key, _)| key.as_integer().map_or(false, |i| i == Integer::from(4)))
+    } else {
+        panic!("Status was not a map.")
     };
 
     let attr = Integer::from(attr);
@@ -124,13 +139,38 @@ impl coset::TaggedCborSerializable for Payload {
     const TAG: u64 = 10001;
 }
 
-/// Returns the key pair, KID and the header for a key seed.
-pub fn generate_key(key_seed: u8) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
+fn key_from_pem(pem: String) -> Result<ed25519_dalek::Keypair, String> {
+    let doc = pkcs8::PrivateKeyDocument::from_pem(&pem)
+    .map_err(|e| {
+        format!("{}. Can't read PEM. Did you update the config.json for your leadger with a valid faucet_pk string? ", e)
+    })?;
+    let decoded = doc.decode();
+
+    let sk = ed25519_dalek::SecretKey::from_bytes(&decoded.private_key[2..])
+        .map_err(|e| e.to_string())
+        .unwrap();
+    let pk: PublicKey = (&sk).into();
+    let keypair: ed25519_dalek::Keypair = ed25519_dalek::Keypair {
+        secret: sk,
+        public: pk,
+    };
+    Ok(ed25519_dalek::Keypair::from_bytes(&keypair.to_bytes()).unwrap())
+}
+
+fn key_from_seed(key_seed: u8) -> ed25519_dalek::Keypair {
     let mut seed = [0u8; 32];
     seed[31] = key_seed;
 
     let mut prng = rand::rngs::StdRng::from_seed(seed);
-    let ed25519_key = ed25519_dalek::Keypair::generate(&mut prng);
+    ed25519_dalek::Keypair::generate(&mut prng)
+}
+
+/// Returns the key pair, KID and the header for a key seed.
+pub fn generate_key(key: KeyType) -> MessageKey {
+    let ed25519_key = match key {
+        KeyType::PrivateKey(pem) => key_from_pem(pem).unwrap(),
+        KeyType::KeySeed(key_seed) => key_from_seed(key_seed),
+    };
 
     let mut pkey = coset::CoseKeyBuilder::new()
         .algorithm(coset::iana::Algorithm::EdDSA)
@@ -164,19 +204,25 @@ pub fn generate_key(key_seed: u8) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
         .text_value("keyset".to_string(), Value::Bytes(keyset_bytes))
         .build();
 
-    (ed25519_key, kid.to_vec(), protected)
+    MessageKey {
+        ed25519_key: Some(ed25519_key),
+        kid: Some(kid.to_vec()),
+        protected: Some(protected),
+    }
 }
 
 /// Create an envelope with a message and an optional key_seed. If the key_seed is
 /// specified, the protected headers and signatures will be filled.
-pub fn envelope<M: AsRef<[u8]>>(key_seed: Option<u8>, message: M) -> CoseSign1 {
+pub fn envelope<M: AsRef<[u8]>>(
+    message: M,
+    (ed25519_key, protected): (Option<ed25519_dalek::Keypair>, Option<Header>),
+) -> CoseSign1 {
     let builder = coset::CoseSign1Builder::new().payload(message.as_ref().to_vec());
 
-    let builder = if let Some(key_seed) = key_seed {
-        let (ed25519_key, _kid, protected) = generate_key(key_seed);
-        builder
-            .protected(protected)
-            .create_signature(&[], |bytes| ed25519_key.sign(bytes).to_bytes().to_vec())
+    let builder = if let Some(protected) = protected {
+        builder.protected(protected).create_signature(&[], |bytes| {
+            ed25519_key.unwrap().sign(bytes).to_bytes().to_vec()
+        })
     } else {
         builder
     };
@@ -184,13 +230,13 @@ pub fn envelope<M: AsRef<[u8]>>(key_seed: Option<u8>, message: M) -> CoseSign1 {
     builder.build()
 }
 
-/// Create an anonymous message envelope.
-pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
+/// Create message
+pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec<u8>>) -> Vec<u8> {
     let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
         .expect("Could not parse CBOR.")
         .to_bytes();
 
-    let message = Payload {
+    let mut message = Payload {
         version: Some(Value::from(1)),
         endpoint: Some(Value::Text(endpoint.to_string())),
         arguments: Some(Value::Bytes(arg_bytes)),
@@ -204,38 +250,53 @@ pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1
             )),
         )),
         ..Default::default()
-    }
-    .to_tagged_vec()
-    .expect("Could not serialize payload");
+    };
 
-    envelope(None, message)
+    if let Some(kid) = kid {
+        message.from = Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec()))));
+    }
+
+    message
+        .to_tagged_vec()
+        .expect("Could not serialize payload")
 }
 
-/// Create a signed message envelope.
-pub fn message<P: AsRef<str>>(key_seed: u8, endpoint: &str, payload: P) -> CoseSign1 {
-    let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
-        .expect("Could not parse CBOR.")
-        .to_bytes();
+/// Create an anonymous message envelope.
+pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
+    message(endpoint, payload, MessageKey::default())
+}
 
-    let (_, kid, _) = generate_key(key_seed);
-    let message = Payload {
-        version: Some(Value::from(1)),
-        from: Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec())))),
-        endpoint: Some(Value::Text(endpoint.to_string())),
-        arguments: Some(Value::Bytes(arg_bytes)),
-        time: Some(Value::Tag(
-            1,
-            Box::new(Value::from(
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs(),
-            )),
-        )),
-        ..Default::default()
+/// Create a message envelope.
+pub fn message<P: AsRef<str>>(endpoint: &str, payload: P, key: MessageKey) -> CoseSign1 {
+    let message = create_message(endpoint, payload, key.kid);
+    envelope(message, (key.ed25519_key, key.protected))
+}
+
+const PATH_SEPARATOR: char = ':';
+const CONFIG_SEPARATOR: char = '=';
+
+pub fn parse_config_paths(config: Option<String>) -> BTreeMap<String, PathBuf> {
+    let mut config_paths = BTreeMap::new();
+
+    if let Some(config) = config {
+        let split = config.split(PATH_SEPARATOR);
+        for s in split {
+            let key_path: Vec<&str> = s.split(CONFIG_SEPARATOR).collect();
+            let path = PathBuf::from(key_path[1].to_string());
+            if path.exists() {
+                config_paths.insert(
+                    key_path[0].to_string(),
+                    PathBuf::from(key_path[1].to_string()),
+                );
+            } else {
+                panic!(
+                    "Path for {} does not exist ({})",
+                    key_path[0],
+                    path.to_string_lossy()
+                );
+            }
+        }
     }
-    .to_tagged_vec()
-    .expect("Could not serialize payload");
 
-    envelope(Some(key_seed), message)
+    config_paths
 }

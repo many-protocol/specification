@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build CDDL
-        run: find * -iname \*.cddl | xargs cat > temp.cddl
+        run: rm -f temp.cddl && find * -iname \*.cddl | xargs cat > temp.cddl
       - uses: docker://ghcr.io/anweiss/cddl-cli:latest
         with:
           args: compile-cddl --cddl /github/workspace/temp.cddl
