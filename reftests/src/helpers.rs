@@ -13,11 +13,17 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+#[derive(Default)]
+pub struct MessageKey {
+    pub ed25519_key: Option<ed25519_dalek::Keypair>,
+    pub kid: Option<Vec<u8>>,
+    pub protected: Option<Header>,
+}
+
 #[derive(PartialEq)]
 pub enum KeyType {
     KeySeed(u8),
     PrivateKey(String),
-    None,
 }
 
 pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
@@ -36,13 +42,12 @@ pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
     let status: Value =
         ciborium::de::from_reader(response_payload.as_slice()).expect("Invalid response payload");
 
-    let attrs = match status {
-        Value::Map(m) => {
-            // Find key 4 for attributes.
-            m.into_iter()
-                .find(|(key, _)| key.as_integer().map_or(false, |i| i == Integer::from(4)))
-        }
-        _ => panic!("Status was not a map."),
+    let attrs = if let Value::Map(m) = status {
+        // Find key 4 for attributes.
+        m.into_iter()
+            .find(|(key, _)| key.as_integer().map_or(false, |i| i == Integer::from(4)))
+    } else {
+        panic!("Status was not a map.")
     };
 
     let attr = Integer::from(attr);
@@ -161,11 +166,10 @@ fn key_from_seed(key_seed: u8) -> ed25519_dalek::Keypair {
 }
 
 /// Returns the key pair, KID and the header for a key seed.
-pub fn generate_key(key: KeyType) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
+pub fn generate_key(key: KeyType) -> MessageKey {
     let ed25519_key = match key {
         KeyType::PrivateKey(pem) => key_from_pem(pem).unwrap(),
         KeyType::KeySeed(key_seed) => key_from_seed(key_seed),
-        _ => panic!("No input for function"),
     };
 
     let mut pkey = coset::CoseKeyBuilder::new()
@@ -200,7 +204,11 @@ pub fn generate_key(key: KeyType) -> (ed25519_dalek::Keypair, Vec<u8>, Header) {
         .text_value("keyset".to_string(), Value::Bytes(keyset_bytes))
         .build();
 
-    (ed25519_key, kid.to_vec(), protected)
+    MessageKey {
+        ed25519_key: Some(ed25519_key),
+        kid: Some(kid.to_vec()),
+        protected: Some(protected),
+    }
 }
 
 /// Create an envelope with a message and an optional key_seed. If the key_seed is
@@ -255,24 +263,13 @@ pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec
 
 /// Create an anonymous message envelope.
 pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
-    message(endpoint, payload, KeyType::None)
+    message(endpoint, payload, MessageKey::default())
 }
 
 /// Create a message envelope.
-pub fn message<P: AsRef<str>>(endpoint: &str, payload: P, key: KeyType) -> CoseSign1 {
-    let mut ed25519_key: Option<ed25519_dalek::Keypair> = None;
-    let mut kid: Option<Vec<u8>> = None;
-    let mut protected: Option<Header> = None;
-
-    if !(KeyType::None == key) {
-        let (_ed25519_key, _kid, _protected) = generate_key(key);
-        ed25519_key = Some(_ed25519_key);
-        kid = Some(_kid);
-        protected = Some(_protected);
-    }
-    let message = create_message(endpoint, payload, kid);
-
-    envelope(message, (ed25519_key, protected))
+pub fn message<P: AsRef<str>>(endpoint: &str, payload: P, key: MessageKey) -> CoseSign1 {
+    let message = create_message(endpoint, payload, key.kid);
+    envelope(message, (key.ed25519_key, key.protected))
 }
 
 const PATH_SEPARATOR: char = ':';

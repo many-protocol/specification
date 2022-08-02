@@ -1,5 +1,7 @@
 use super::LedgerConfig;
-use crate::helpers::{anonymous_message, generate_key, has_attribute, message, send, KeyType};
+use crate::helpers::{
+    anonymous_message, generate_key, has_attribute, message, send, KeyType, MessageKey,
+};
 use crate::tests::{ReadConfig, TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use many_identity::Address;
@@ -9,16 +11,16 @@ use minicbor::{Decode, Encode};
 use reftests_macros::test_case;
 use std::collections::BTreeMap;
 
-pub struct LedgerClient {
-    pub test_config: TestConfig,
-    pub ledger_config: LedgerConfig,
-}
-
 #[derive(Clone, Encode, Decode)]
 #[cbor(map)]
 pub struct BalanceReturns {
     #[n(0)]
     pub balances: BTreeMap<Symbol, TokenAmount>,
+}
+
+pub struct LedgerClient {
+    pub test_config: TestConfig,
+    pub ledger_config: LedgerConfig,
 }
 
 impl LedgerClient {
@@ -46,8 +48,8 @@ impl LedgerClient {
     }
 
     pub fn get_identity(&self, key_seed: u8) -> Address {
-        let (_, kid, _) = generate_key(KeyType::KeySeed(key_seed));
-        Address::from_bytes(&kid).unwrap()
+        let message_key = generate_key(KeyType::KeySeed(key_seed));
+        Address::from_bytes(&message_key.kid.unwrap()).unwrap()
     }
 
     pub async fn balance(&self, account: String, symbol: Address) -> Result<u128, String> {
@@ -84,12 +86,11 @@ impl LedgerClient {
 
     pub async fn send(
         &self,
-        // key_seed: Option<u8>,
         from: String,
         to: String,
         amount: u64,
         symbol: Symbol,
-        key: KeyType, // pem: Option<String>,
+        key: KeyType,
     ) -> Result<(), String> {
         let payload = format!(
             "{{0:\"{}\", 1:\"{}\", 2:{}, 3:\"{}\"}}",
@@ -99,13 +100,8 @@ impl LedgerClient {
             symbol
         );
 
-        let envelope = message("ledger.send", payload, key);
-        // let envelope = if let Some(pem) = pem {
-        //     message("ledger.send", payload, KeyType::PrivateKey(pem))
-        // } else {
-        //     message("ledger.send", payload, KeyType::KeySeed(key_seed.unwrap()))
-        // };
-
+        let message_key: MessageKey = generate_key(key);
+        let envelope = message("ledger.send", payload, message_key);
         let response = send(&self.test_config, envelope).await;
 
         let payload = response.payload.expect("No payload from status");

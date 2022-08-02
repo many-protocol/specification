@@ -1,4 +1,4 @@
-use crate::helpers::{anonymous_message, envelope, message, send, KeyType, Payload};
+use crate::helpers::{anonymous_message, envelope, message, send, MessageKey, Payload};
 use crate::tests::{TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use coset::{CborSerializable, TaggedCborSerializable};
@@ -55,9 +55,10 @@ async fn requires_tag(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn invalid_signature(config: TestConfig) -> TestCaseResult {
-    let mut envelope = message("heartbeat", "null", KeyType::KeySeed(0));
+    let mut envelope = message("heartbeat", "null", MessageKey::default());
+
     // Override the first 4 bytes with zeros to invalidate the signature.
-    envelope.signature[0..4].copy_from_slice(&[0u8; 4]);
+    envelope.signature = [0u8; 29].as_slice().to_vec();
     let response = send(&config, envelope).await;
 
     let payload = response.payload.expect("No payload");
