@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 base32 = "0.4.0"
+base64 = "0.13.0"
 cbor-diag = "0.1.8"
 ciborium = { version = "0.2.0", features = ["std"] }
 clap = { version = "3.1.1", features = ["derive"] }

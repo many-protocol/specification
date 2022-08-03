@@ -155,9 +155,8 @@ impl coset::TaggedCborSerializable for Payload {
 
 fn key_from_pem(pem: String) -> Result<ed25519_dalek::Keypair, String> {
     let doc = pkcs8::PrivateKeyDocument::from_pem(&pem)
-    .map_err(|e| {
-        format!("{}. Can't read PEM. Did you update the config.json for your leadger with a valid faucet_pk string? ", e)
-    })?;
+    .map_err(|e| e.to_string())?;
+    
     let decoded = doc.decode();
 
     let sk = ed25519_dalek::SecretKey::from_bytes(&decoded.private_key[2..])

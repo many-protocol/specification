@@ -1,4 +1,5 @@
 use self::attributes::LedgerConfig;
+use base64::decode;
 use futures::FutureExt;
 use reqwest::Url;
 use std::collections::BTreeMap;
@@ -30,7 +31,12 @@ pub trait ReadConfig<T> {
 
 impl ReadConfig<LedgerConfig> for TestConfig {
     fn read_config(&self, key: String) -> LedgerConfig {
-        serde_json::from_str(&std::fs::read_to_string(&self.config[&key]).unwrap()).unwrap()
+        let mut ledger_config: LedgerConfig = serde_json::from_str(&std::fs::read_to_string(&self.config[&key]).unwrap()).unwrap();
+        let encoded_faucet_pk = ledger_config.faucet_pk;
+        let decoded_faucet_pk = decode(encoded_faucet_pk).unwrap();
+        let pem = std::str::from_utf8(&decoded_faucet_pk).unwrap();
+        ledger_config.faucet_pk = pem.to_string();
+        ledger_config
     }
 }
 
