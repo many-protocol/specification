@@ -1,11 +1,10 @@
-use std::collections::BTreeMap;
-
-use crate::helpers::{anonymous_message, has_attribute, send};
+use crate::helpers::{anonymous_message, has_attributes, send};
 use crate::tests::{TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use many_types::attributes::AttributeId;
 use minicbor::{Decode, Encode};
 use reftests_macros::test_case;
+use std::collections::BTreeMap;
 
 #[derive(Decode, Encode)]
 #[cbor(map)]
@@ -27,7 +26,6 @@ pub struct ListReturns {
 
 pub struct EventClient {
     pub test_config: TestConfig,
-    // pub ledger_config: LedgerConfig,
 }
 
 impl EventClient {
@@ -38,20 +36,11 @@ impl EventClient {
         let envelope = anonymous_message("status", "null");
         let _response = send(&test_config, envelope).await;
 
-        if attributes.is_some() {
-            for a in attributes.unwrap().into_iter() {
-                if !has_attribute(a, &test_config).await {
-                    return Err("Server does not support ledger attribute.".to_string());
-                }
-            }
-        }
+        has_attributes(attributes, &test_config)
+            .await
+            .map_err(|e| format!("{}", e))?;
 
-        // let ledger_config = test_config.read_config("ledger".to_string());
-
-        Ok(Self {
-            test_config,
-            // ledger_config,
-        })
+        Ok(Self { test_config })
     }
 
     pub async fn events_info(&self) -> Result<u128, String> {
@@ -114,12 +103,6 @@ async fn can_get_events_list(test_config: TestConfig) -> TestCaseResult {
     let client = EventClient::new(test_config, Some(vec![4])).await.unwrap();
 
     async fn events_list_test(client: EventClient) -> Result<(), String> {
-        // Test balance query
-        // Balance should verify that the server has the attribute `2`.
-        if !has_attribute(4, &client.test_config).await {
-            return Err("Server does not support events attribute.".to_string());
-        }
-
         // Getting events list from endpoint
         match client.events_list().await {
             Ok(_) => Ok(()),
@@ -135,22 +118,9 @@ async fn can_get_events_list(test_config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn can_get_events_info(test_config: TestConfig) -> TestCaseResult {
-    // // If the config file is not present, it should skip the test.
-    // // This should return something that skips
-    // let ledger_config = test_config.read_config("ledger".to_string());
-
-    // // This should probably make a call to `status` endpoint of the server,
-    // // but should definitely cache the result (avoid calling it everytime).
-    // let client = EventClient::new(test_config, ledger_config).await;
     let client = EventClient::new(test_config, Some(vec![4])).await.unwrap();
 
     async fn events_info_test(client: EventClient) -> Result<(), String> {
-        // Test balance query
-        // Balance should verify that the server has the attribute `2`.
-        if !has_attribute(4, &client.test_config).await {
-            return Err("Server does not support events attribute.".to_string());
-        }
-
         // Checking available events from endpoint
         match client.events_info().await {
             Ok(_) => Ok(()),

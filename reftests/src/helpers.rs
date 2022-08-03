@@ -26,6 +26,20 @@ pub enum KeyType {
     PrivateKey(String),
 }
 
+pub async fn has_attributes(
+    attrs: Option<Vec<AttributeId>>,
+    config: &TestConfig,
+) -> Result<(), String> {
+    if attrs.is_some() {
+        for a in attrs.unwrap_or_default().into_iter() {
+            if !has_attribute(a, &config).await {
+                return Err(format!("Server does not support attribute: {}", a));
+            }
+        }
+    }
+    Ok(())
+}
+
 pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
     let result = send(config, anonymous_message("status", "null")).await;
 

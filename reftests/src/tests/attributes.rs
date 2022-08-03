@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod _2_ledger;
 pub mod _4_events;
+pub mod _9_account;
 
 #[test_case]
 async fn status_works(config: TestConfig) -> TestCaseResult {

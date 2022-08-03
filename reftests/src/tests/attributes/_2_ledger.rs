@@ -1,6 +1,6 @@
 use super::LedgerConfig;
 use crate::helpers::{
-    anonymous_message, generate_key, has_attribute, message, send, KeyType, MessageKey,
+    anonymous_message, generate_key, has_attributes, message, send, KeyType, MessageKey,
 };
 use crate::tests::{ReadConfig, TestCaseResult, TestConfig};
 use ciborium::value::Value;
@@ -31,13 +31,9 @@ impl LedgerClient {
         let envelope = anonymous_message("status", "null");
         let _response = send(&test_config, envelope).await;
 
-        if attributes.is_some() {
-            for a in attributes.unwrap().into_iter() {
-                if !has_attribute(a, &test_config).await {
-                    return Err("Server does not support ledger attribute.".to_string());
-                }
-            }
-        }
+        has_attributes(attributes, &test_config)
+            .await
+            .map_err(|e| format!("{}", e))?;
 
         let ledger_config = test_config.read_config("ledger".to_string());
 
