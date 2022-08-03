@@ -1,4 +1,4 @@
-use crate::helpers::{anonymous_message, envelope, message, send, MessageKey, Payload};
+use crate::helpers::{anonymous_message, envelope, message, send, KeyType, Payload};
 use crate::tests::{TestCaseResult, TestConfig};
 use ciborium::value::Value;
 use coset::{CborSerializable, TaggedCborSerializable};
@@ -55,7 +55,7 @@ async fn requires_tag(config: TestConfig) -> TestCaseResult {
 
 #[test_case]
 async fn invalid_signature(config: TestConfig) -> TestCaseResult {
-    let mut envelope = message("heartbeat", "null", MessageKey::default());
+    let mut envelope = message("heartbeat", "null", KeyType::None);
 
     // Override the first 4 bytes with zeros to invalidate the signature.
     envelope.signature = [0u8; 29].as_slice().to_vec();
@@ -91,7 +91,7 @@ async fn accept_no_version(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None))).await;
+    let response = send(&config, envelope(message)).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -120,7 +120,7 @@ async fn refuse_non_numerical_version(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None))).await;
+    let response = send(&config, envelope(message)).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -149,7 +149,7 @@ async fn refuse_future_version(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None))).await;
+    let response = send(&config, envelope(message)).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -178,7 +178,7 @@ async fn refuse_version_zero(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None))).await;
+    let response = send(&config, envelope(message)).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -208,7 +208,7 @@ async fn id_on_success(config: TestConfig) -> TestCaseResult {
         .to_tagged_vec()
         .expect("Could not serialize payload");
 
-        let response = send(&config, envelope(message, (None, None))).await;
+        let response = send(&config, envelope(message)).await;
         let payload = response.payload.expect("No payload");
         let value: BTreeMap<u8, Value> =
             ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -229,7 +229,7 @@ async fn id_on_error(config: TestConfig) -> TestCaseResult {
         .to_tagged_vec()
         .expect("Could not serialize payload");
 
-        let response = send(&config, envelope(message, (None, None))).await;
+        let response = send(&config, envelope(message)).await;
         let payload = response.payload.expect("No payload");
         let value: BTreeMap<u8, Value> =
             ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");
@@ -249,7 +249,7 @@ async fn missing_id(config: TestConfig) -> TestCaseResult {
     .to_tagged_vec()
     .expect("Could not serialize payload");
 
-    let response = send(&config, envelope(message, (None, None))).await;
+    let response = send(&config, envelope(message)).await;
     let payload = response.payload.expect("No payload");
     let value: BTreeMap<u8, Value> =
         ciborium::de::from_reader(payload.as_slice()).expect("Not a CBOR encoded payload.");

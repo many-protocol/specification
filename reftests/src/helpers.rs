@@ -1,6 +1,6 @@
 use crate::TestConfig;
 use ciborium::value::{Integer, Value};
-use coset::{AsCborValue, CborSerializable, CoseSign1, Header, TaggedCborSerializable};
+use coset::{AsCborValue, CborSerializable, CoseKey, CoseSign1, Header, TaggedCborSerializable};
 use ed25519_dalek::{PublicKey, Signer};
 use many_types::attributes::AttributeId;
 use pkcs8::der::Document;
@@ -13,36 +13,18 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-#[derive(Default)]
-pub struct MessageKey {
-    pub ed25519_key: Option<ed25519_dalek::Keypair>,
-    pub kid: Option<Vec<u8>>,
-    pub protected: Option<Header>,
-}
-
 #[derive(PartialEq)]
 pub enum KeyType {
     KeySeed(u8),
     PrivateKey(String),
+    None,
 }
 
 pub async fn has_attributes(
-    attrs: Option<Vec<AttributeId>>,
+    find_attributes: Vec<AttributeId>,
     config: &TestConfig,
 ) -> Result<(), String> {
-    if attrs.is_some() {
-        for a in attrs.unwrap_or_default().into_iter() {
-            if !has_attribute(a, config).await {
-                return Err(format!("Server does not support attribute: {}", a));
-            }
-        }
-    }
-    Ok(())
-}
-
-pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
     let result = send(config, anonymous_message("status", "null")).await;
-
     let payload = result.payload.expect("No payload from status");
 
     let response: BTreeMap<u8, Value> =
@@ -64,21 +46,30 @@ pub async fn has_attribute(attr: AttributeId, config: &TestConfig) -> bool {
         panic!("Status was not a map.")
     };
 
-    let attr = Integer::from(attr);
-    match attrs {
-        Some((_, Value::Array(attr_list))) => attr_list.iter().any(|v| match v {
-            Value::Integer(i) => i == &attr,
-            Value::Array(v) => {
-                if let Some(Value::Integer(a)) = v.first() {
-                    a == &attr
-                } else {
-                    false
+    for find_attribute in find_attributes.clone().into_iter() {
+        let find_attr = Integer::from(find_attribute);
+        let result = match attrs {
+            Some((_, Value::Array(ref attr_list))) => attr_list.iter().any(|v| match v {
+                Value::Integer(i) => i == &find_attr,
+                Value::Array(v) => {
+                    if let Some(Value::Integer(a)) = v.first() {
+                        a == &find_attr
+                    } else {
+                        false
+                    }
                 }
-            }
-            _ => false,
-        }),
-        _ => false,
+                _ => false,
+            }),
+            other => return Err(format!("Server does not support attributes: {:?}", other)),
+        };
+        if !result {
+            return Err(format!(
+                "Server does not support attribute: {:?}",
+                find_attribute
+            ));
+        }
     }
+    Ok(())
 }
 
 /// Send an envelope, and return the response envelope. Assert that the HTTP endpoint
@@ -153,6 +144,7 @@ impl coset::TaggedCborSerializable for Payload {
     const TAG: u64 = 10001;
 }
 
+/// Create Keypair from read PEM
 fn key_from_pem(pem: String) -> Result<ed25519_dalek::Keypair, String> {
     let doc = pkcs8::PrivateKeyDocument::from_pem(&pem).map_err(|e| e.to_string())?;
 
@@ -169,6 +161,7 @@ fn key_from_pem(pem: String) -> Result<ed25519_dalek::Keypair, String> {
     Ok(ed25519_dalek::Keypair::from_bytes(&keypair.to_bytes()).unwrap())
 }
 
+/// Create Keypair from seed
 fn key_from_seed(key_seed: u8) -> ed25519_dalek::Keypair {
     let mut seed = [0u8; 32];
     seed[31] = key_seed;
@@ -177,14 +170,18 @@ fn key_from_seed(key_seed: u8) -> ed25519_dalek::Keypair {
     ed25519_dalek::Keypair::generate(&mut prng)
 }
 
-/// Returns the key pair, KID and the header for a key seed.
-pub fn generate_key(key: KeyType) -> MessageKey {
-    let ed25519_key = match key {
+/// Create Keypair
+pub fn generate_key(key: KeyType) -> ed25519_dalek::Keypair {
+    match key {
         KeyType::PrivateKey(pem) => key_from_pem(pem).unwrap(),
         KeyType::KeySeed(key_seed) => key_from_seed(key_seed),
-    };
+        KeyType::None => key_from_seed(0),
+    }
+}
 
-    let mut pkey = coset::CoseKeyBuilder::new()
+/// Create CoseKey used by other helper functions.
+fn generate_cose_key(key: &ed25519_dalek::Keypair) -> CoseKey {
+    coset::CoseKeyBuilder::new()
         .algorithm(coset::iana::Algorithm::EdDSA)
         .param(
             coset::iana::Ec2KeyParameter::Crv as i64,
@@ -192,66 +189,54 @@ pub fn generate_key(key: KeyType) -> MessageKey {
         )
         .param(
             coset::iana::Ec2KeyParameter::X as i64,
-            Value::Bytes(ed25519_key.public.as_bytes().to_vec()),
+            Value::Bytes(key.public.as_bytes().to_vec()),
         )
         .add_key_op(coset::iana::KeyOperation::Verify)
-        .build();
+        .build()
+}
+
+/// Create kid
+pub fn generate_kid(key: &ed25519_dalek::Keypair) -> Vec<u8> {
+    let mut pkey = generate_cose_key(key);
     pkey.kty = coset::KeyType::Assigned(coset::iana::KeyType::OKP);
 
     let mut kid = [0u8; 29];
     kid[0] = 1;
     let mut hasher = Sha3_224::default();
-    hasher.update(&pkey.clone().to_vec().unwrap());
+    hasher.update(&pkey.to_vec().unwrap());
     kid[1..29].copy_from_slice(&hasher.finalize());
+    kid.to_vec()
+}
 
-    pkey.key_id = kid.clone().to_vec();
+/// Create protected Header
+pub fn generate_header(key: &ed25519_dalek::Keypair, kid: &Vec<u8>) -> Header {
+    let mut pkey = generate_cose_key(key);
+    pkey.kty = coset::KeyType::Assigned(coset::iana::KeyType::OKP);
+
+    pkey.key_id = kid.to_owned().to_vec();
 
     let keyset = Value::Array(vec![pkey.to_cbor_value().unwrap()]);
     let mut keyset_bytes = Vec::new();
     ciborium::ser::into_writer(&keyset, &mut keyset_bytes).unwrap();
 
-    let protected = coset::HeaderBuilder::new()
+    coset::HeaderBuilder::new()
         .key_id(kid.clone().to_vec())
         .content_type("application/cbor".to_string())
         .text_value("keyset".to_string(), Value::Bytes(keyset_bytes))
-        .build();
-
-    MessageKey {
-        ed25519_key: Some(ed25519_key),
-        kid: Some(kid.to_vec()),
-        protected: Some(protected),
-    }
+        .build()
 }
 
-/// Create an envelope with a message and an optional key_seed. If the key_seed is
-/// specified, the protected headers and signatures will be filled.
-pub fn envelope<M: AsRef<[u8]>>(
-    message: M,
-    (ed25519_key, protected): (Option<ed25519_dalek::Keypair>, Option<Header>),
-) -> CoseSign1 {
-    let builder = coset::CoseSign1Builder::new().payload(message.as_ref().to_vec());
-
-    let builder = if let Some(protected) = protected {
-        builder.protected(protected).create_signature(&[], |bytes| {
-            ed25519_key.unwrap().sign(bytes).to_bytes().to_vec()
-        })
-    } else {
-        builder
-    };
-
-    builder.build()
-}
-
-/// Create message
-pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec<u8>>) -> Vec<u8> {
+/// Create content
+pub fn generate_content<P: AsRef<str>>(endpoint: &str, payload: P, kid: Vec<u8>) -> Vec<u8> {
     let arg_bytes = cbor_diag::parse_diag(payload.as_ref())
         .expect("Could not parse CBOR.")
         .to_bytes();
 
-    let mut message = Payload {
+    let message = Payload {
         version: Some(Value::from(1)),
         endpoint: Some(Value::Text(endpoint.to_string())),
         arguments: Some(Value::Bytes(arg_bytes)),
+        from: Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec())))),
         time: Some(Value::Tag(
             1,
             Box::new(Value::from(
@@ -264,10 +249,6 @@ pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec
         ..Default::default()
     };
 
-    if let Some(kid) = kid {
-        message.from = Some(Value::Tag(10000, Box::new(Value::Bytes(kid.to_vec()))));
-    }
-
     message
         .to_tagged_vec()
         .expect("Could not serialize payload")
@@ -275,13 +256,27 @@ pub fn create_message<P: AsRef<str>>(endpoint: &str, payload: P, kid: Option<Vec
 
 /// Create an anonymous message envelope.
 pub fn anonymous_message<P: AsRef<str>>(endpoint: &str, payload: P) -> CoseSign1 {
-    message(endpoint, payload, MessageKey::default())
+    message(endpoint, payload, KeyType::None)
 }
 
 /// Create a message envelope.
-pub fn message<P: AsRef<str>>(endpoint: &str, payload: P, key: MessageKey) -> CoseSign1 {
-    let message = create_message(endpoint, payload, key.kid);
-    envelope(message, (key.ed25519_key, key.protected))
+pub fn message<P: AsRef<str>>(endpoint: &str, payload: P, key: KeyType) -> CoseSign1 {
+    let key = generate_key(key);
+    let kid: Vec<u8> = generate_kid(&key);
+    let header = generate_header(&key, &kid);
+    let content = generate_content(endpoint, payload, kid);
+    coset::CoseSign1Builder::new()
+        .payload(content.to_vec())
+        .protected(header)
+        .create_signature(&[], |bytes| key.sign(bytes).to_bytes().to_vec())
+        .build()
+}
+
+/// Create an envelope with a message.
+pub fn envelope<M: AsRef<[u8]>>(message: M) -> CoseSign1 {
+    coset::CoseSign1Builder::new()
+        .payload(message.as_ref().to_vec())
+        .build()
 }
 
 const PATH_SEPARATOR: char = ':';

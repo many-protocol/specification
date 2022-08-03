@@ -1,6 +1,6 @@
 use super::LedgerConfig;
 use crate::helpers::{
-    anonymous_message, generate_key, has_attributes, message, send, KeyType, MessageKey,
+    anonymous_message, generate_key, generate_kid, has_attributes, message, send, KeyType,
 };
 use crate::tests::{ReadConfig, TestCaseResult, TestConfig};
 use ciborium::value::Value;
@@ -31,7 +31,7 @@ impl LedgerClient {
         let envelope = anonymous_message("status", "null");
         let _response = send(&test_config, envelope).await;
 
-        has_attributes(attributes, &test_config)
+        has_attributes(attributes.unwrap_or_default(), &test_config)
             .await
             .map_err(|e| format!("{:?}", e))?;
 
@@ -44,8 +44,9 @@ impl LedgerClient {
     }
 
     pub fn get_identity(&self, key_seed: u8) -> Address {
-        let message_key = generate_key(KeyType::KeySeed(key_seed));
-        Address::from_bytes(&message_key.kid.unwrap()).unwrap()
+        let key = generate_key(KeyType::KeySeed(key_seed));
+        let kid: Vec<u8> = generate_kid(&key);
+        Address::from_bytes(&kid).unwrap()
     }
 
     pub async fn balance(&self, account: String, symbol: Address) -> Result<u128, String> {
@@ -96,8 +97,7 @@ impl LedgerClient {
             symbol
         );
 
-        let message_key: MessageKey = generate_key(key);
-        let envelope = message("ledger.send", payload, message_key);
+        let envelope = message("ledger.send", payload, key);
         let response = send(&self.test_config, envelope).await;
 
         let payload = response.payload.expect("No payload from status");
