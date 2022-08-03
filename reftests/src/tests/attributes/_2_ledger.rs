@@ -33,7 +33,7 @@ impl LedgerClient {
 
         has_attributes(attributes, &test_config)
             .await
-            .map_err(|e| format!("{}", e))?;
+            .map_err(|e| format!("{:?}", e))?;
 
         let ledger_config = test_config.read_config("ledger".to_string());
 

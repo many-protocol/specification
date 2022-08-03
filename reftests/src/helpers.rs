@@ -32,7 +32,7 @@ pub async fn has_attributes(
 ) -> Result<(), String> {
     if attrs.is_some() {
         for a in attrs.unwrap_or_default().into_iter() {
-            if !has_attribute(a, &config).await {
+            if !has_attribute(a, config).await {
                 return Err(format!("Server does not support attribute: {}", a));
             }
         }
@@ -154,9 +154,8 @@ impl coset::TaggedCborSerializable for Payload {
 }
 
 fn key_from_pem(pem: String) -> Result<ed25519_dalek::Keypair, String> {
-    let doc = pkcs8::PrivateKeyDocument::from_pem(&pem)
-    .map_err(|e| e.to_string())?;
-    
+    let doc = pkcs8::PrivateKeyDocument::from_pem(&pem).map_err(|e| e.to_string())?;
+
     let decoded = doc.decode();
 
     let sk = ed25519_dalek::SecretKey::from_bytes(&decoded.private_key[2..])
