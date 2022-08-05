@@ -1,6 +1,5 @@
 = MANY Protocol Specification
 :cddl: ./cddl/
-Layer One Labs, LLC
 // Metadata
 :toc:
 :hide-uri-scheme:
@@ -44,7 +43,70 @@ The ManyVerse thus allows for a heterogeneous global network of decentralized pu
 The ManyVerse is a global actor-model based network where actors live as federated <<network,networks>>, and receive and send messages within or across those networks.
 Each network MUST advertize its set of attributes (e.g. whether it implements a ledger interface), and its connections and agreements with other networks (though it may not ex)
 
+[#network]
+=== Network
+
+A network is a collection of 0 or more servers that;
+
+1. can receive and send <<messages>>,
+2. has 1 or more message recipients that can receive messages using its <<http-interface>>,
+3. has a single public key that can validate its signature,
+
+The resolution of a network recipients is left to clients.
+There is a plan for a global decentralized registry of networks for the FBF, but it is an implementation detail and should not be considered officially part of the {doctitle}.
+
+=== Transports
+
+Servers must implement two transports; an HTTP/s and a TCP transports (with `http://`, `https://` and `tcp://` URL schemes respectively).
+
+==== HTTP Transport
+
+In the HTTP transport, the correct `Content-Type` header is `application/cbor`.
+
+[#http-interface]
+==== HTTP Interface
+
+A server that can receive messages must listen to a HTTPS (TLSv3) call with at least a few routes:
+
+|===
+| Path | Description
+
+| `/rpc` | Main entry point for the RPC endpoint.
+
+|===
+
+Other paths might need implementation depending on Network attributes.
+
+* HTTP Method MUST BE `POST`.
+* `Content-Type` MUST BE the string `application/cbor`.
+* Body must be a CBOR that follows the CBOR-RPC specification.
+See <<http-interface-cbor-rpc>>.
+
+
+[#messages]
 === Messages
+
+A message is a signed data envelope sent to networks (or inside a <<network>>) containing the following information:
+
+- A source <<identity>>.
+- A destination <<identity>>.
+- An optional endpoint name.
+- An optional nonce to distinguish multiple requests with the same other fields as separate.
+- An optional list of attributes for this message.
+- An optional binary payload.
+
+A message is always sent through a network's recipient's <<http-interface>>.
+A network's recipient can refuse or proxy messages that aren't addressed to it.
+
+The response to receiving a message is a signed data envelope containing the following information:
+
+- A success code, OR an error code and description (see <<api-error>>)
+- A monotonically increasing scalar that can be served as a timestamp and validation that the message was recorded.
+This can be, e.g., a blockheight where this message is queued for (or the current blockheight).
+It could also be an actual timestamp if the network does not have a blockchain.
+- An optional answer if the message has a synchronous answer (see TODO).
+
+==== Messages encoding
 
 All messages are encoded using https://cbor.io[CBOR] (https://datatracker.ietf.org/doc/html/rfc8949[RFC 8949]).
 
@@ -76,77 +138,8 @@ To share keys with the recipient of a message, a map of `kid` to COSE Key must b
 The Key ID provided for signing the message MUST BE an identity.
 There MAY be more than one signature, and each one MUST be accompanied by the identity representing them.
 
-=== Transports
-
-Servers must implement two transports; an HTTP/s and a TCP transports (with `http://`, `https://` and `tcp://` URL schemes respectively).
-
-==== HTTP Transport
-
-In the HTTP transport, the correct `Content-Type` header is `application/cbor`.
-
-[#network]
-=== Network
-
-A network is a collection of 1 or more servers that;
-
-1. can receive and send <<messages>>,
-2. has 1 or more message recipients that can receive messages using its <<http-interface>>,
-3. has a single public key that can validate its signature,
-
-The resolution of a network recipients is left to clients.
-There is a plan for a global decentralized registry of networks for the FBF, but it is an implementation detail and should not be considered officially part of the {doctitle}.
-
-[#messages]
-=== Messages
-
-A message is a signed data envelope sent to networks (or inside a <<network>>) containing the following information:
-
-- A source <<identity>>.
-- A destination <<identity>>.
-- An optional endpoint name.
-- An optional nonce to distinguish multiple requests with the same other fields as separate.
-- An optional list of attributes for this message.
-- An optional binary payload.
-
-A message is always sent through a network's recipient's <<http-interface>>.
-A network's recipient can refuse or proxy messages that aren't addressed to it.
-
-The response to receiving a message is a signed data envelope containing the following information:
-
-- A success code, OR an error code and description (see <<api-error>>)
-- A monotonically increasing scalar that can be served as a timestamp and validation that the message was recorded.
-    This can be, e.g., a blockheight where this message is queued for (or the current blockheight).
-    It could also be an actual timestamp if the network does not have a blockchain.
-- An optional answer if the message has a synchronous answer (see TODO).
-
-[#http-interface]
-=== HTTP Interface
-
-A server that can receive messages must listen to a HTTPS (TLSv3) call with at least a few routes:
-
-|===
-| Path | Description
-
-| `/rpc` | Main entry point for the RPC endpoint.
-
-|===
-
-Other paths might need implementation depending on Network attributes.
-
-* HTTP Method MUST BE `POST`.
-* `Content-Type` MUST BE the string `application/cbor`.
-* Body must be a CBOR that follows the CBOR-RPC specification.
-  See <<http-interface-cbor-rpc>>.
-
-==== CBOR Best Practices
-
-
-[#api-error]
-==== Message Errors
-
-=== Messages
-
-==== Encoding
+[#identity]
+include::protocol/identity.adoc[leveloffset=2]
 
 === Attributes
 A core tenet of the ManyVerse is that networks can vary in size, decentralization, governance, capabilities, etc.
@@ -176,9 +169,6 @@ Since each networks is federated and self-governed, it isn't fully enforceable a
 
 However, a network MUST sign every response and support at least secp256k1.
 An unsigned response from a message is considered an error and the message can be safely resent (or sent to a different destination).
-
-[#identity]
-include::protocol/identity.adoc[leveloffset=2]
 
 == CDDL
 The CBOR definition for the types described in this document is:
