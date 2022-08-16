@@ -1,6 +1,4 @@
 [workspace]
 members = [
-    "reftests",
-    "reftests/procmacros",
     "gherkin-tests"
 ]
