@@ -11,4 +11,8 @@ cbor-diag = "0.1"
 clap = "3.2"
 cucumber = "0.13"
 futures = "0.3"
-tokio = { version = "1.20", features = [ "macros", "rt-multi-thread" ] }
+serde = "1.0"
+tokio = { version = "1.20", features = [ "macros", "rt-multi-thread", "fs" ] }
+toml = "0.5"
+
+many-identity = { git = "http://github.com/liftedinit/many-rs", branch = "main", features = [ "testing" ] }
