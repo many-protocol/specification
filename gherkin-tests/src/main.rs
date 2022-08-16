@@ -1,14 +1,18 @@
-use std::{convert::Infallible, sync::Arc};
+use std::{collections::BTreeMap, convert::Infallible, sync::Arc};
 
 use async_trait::async_trait;
+use cose::new_identity;
 use cucumber::{given, then, when, WorldInit};
+use many_identity::CoseKeyIdentity;
 use opts::{read_spec_config, CmdOpts, SpecConfig};
 
+mod cose;
 mod opts;
 
 #[derive(Debug, WorldInit)]
 struct World {
     spec_config: Option<Arc<SpecConfig>>,
+    identities: BTreeMap<String, CoseKeyIdentity>,
 }
 
 #[async_trait(?Send)]
@@ -16,7 +20,10 @@ impl cucumber::World for World {
     type Error = Infallible;
 
     async fn new() -> Result<Self, Self::Error> {
-        Ok(World { spec_config: None })
+        Ok(World {
+            spec_config: None,
+            identities: BTreeMap::new(),
+        })
     }
 }
 
@@ -25,7 +32,10 @@ impl Drop for World {
 }
 
 #[given(expr = "an identity {word}")]
-fn setup_identity(_world: &mut World, _id: String) {}
+fn setup_identity(world: &mut World, id: String) {
+    let identity = new_identity(&id).expect("Should have generated an identity");
+    world.identities.insert(id, identity);
+}
 
 #[given(expr = "a symbol {word}")]
 fn setup_symbol(_world: &mut World, _symbol: String) {}
