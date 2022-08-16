@@ -5,7 +5,6 @@ Scenario: Ledger can send tokens
   And an identity id2
   And a symbol MFX
   Given id1 has 100 MFX
-  And server is started
   When id1 sends 50 MFX to id2
   Then the balance of id1 should be 50 MFX
   Then the balance of id2 should be 50 MFX

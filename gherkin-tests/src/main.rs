@@ -33,9 +33,6 @@ fn setup_symbol(_world: &mut World, _symbol: String) {}
 #[given(expr = "{word} has {int} {word}")]
 fn id_has_x_symbols(_world: &mut World, _id: String, _amount: u32, _symbol: String) {}
 
-#[given(expr = "server is started")]
-fn start_server(_world: &mut World) {}
-
 #[when(expr = "{word} sends {int} {word} to {word}")]
 fn send_symbol(_world: &mut World, _id1: String, _amount: u32, _symbol: String, _id2: String) {}
 
