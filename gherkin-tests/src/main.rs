@@ -96,7 +96,7 @@ async fn main() {
         .before(move |_, _, _, world| {
             let spec_config = spec_config.clone();
             world.spec_config = Some(spec_config);
-            Box::pin(async { () })
+            Box::pin(async {})
         })
         .with_cli(opts)
         // Skips can be confusing
