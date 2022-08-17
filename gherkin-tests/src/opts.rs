@@ -1,4 +1,5 @@
-use serde::Deserialize;
+use many_identity::CoseKeyIdentity;
+use serde::{de::Visitor, Deserialize, Deserializer};
 use std::path::PathBuf;
 use url::Url;
 
@@ -12,7 +13,31 @@ pub struct CmdOpts {
 #[derive(Deserialize, Debug)]
 pub struct SpecConfig {
     pub server_url: Url,
-    pub faucet_pem: PathBuf,
+    #[serde(deserialize_with = "deserialize_identity")]
+    pub faucet_pem: CoseKeyIdentity,
+}
+
+fn deserialize_identity<'de, D>(d: D) -> Result<CoseKeyIdentity, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    struct InternalVisitor;
+    impl<'de> Visitor<'de> for InternalVisitor {
+        type Value = CoseKeyIdentity;
+
+        fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+            formatter.write_str("Expecting a path to a pem file")
+        }
+
+        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+        where
+            E: serde::de::Error,
+        {
+            let pem = std::fs::read_to_string(v).map_err(|e| E::custom(e))?;
+            CoseKeyIdentity::from_pem(&pem).map_err(|e| E::custom(e))
+        }
+    }
+    d.deserialize_any(InternalVisitor)
 }
 
 pub async fn read_spec_config(path: &PathBuf) -> std::io::Result<SpecConfig> {
