@@ -95,9 +95,8 @@ async fn main() {
     World::cucumber()
         .before(move |_, _, _, world| {
             let spec_config = spec_config.clone();
-            Box::pin(async move {
-                world.spec_config = Some(spec_config);
-            })
+            world.spec_config = Some(spec_config);
+            Box::pin(async { () })
         })
         .with_cli(opts)
         // Skips can be confusing
