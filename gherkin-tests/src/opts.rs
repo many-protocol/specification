@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use std::path::PathBuf;
+use url::Url;
 
 #[derive(clap::Args)]
 pub struct CmdOpts {
@@ -10,7 +11,7 @@ pub struct CmdOpts {
 
 #[derive(Deserialize, Debug)]
 pub struct SpecConfig {
-    pub server_url: String,
+    pub server_url: Url,
     pub faucet_pem: PathBuf,
 }
 
