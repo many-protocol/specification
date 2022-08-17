@@ -17,3 +17,5 @@ toml = "0.5"
 url = { version = "2.2", features = [ "serde" ] }
 
 many-identity = { git = "http://github.com/liftedinit/many-rs", branch = "main", features = [ "testing" ] }
+
+many-async-client = { path = "../many-async-client", version = "0.1.0" }

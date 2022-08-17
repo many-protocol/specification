@@ -13,8 +13,8 @@ pub struct CmdOpts {
 #[derive(Deserialize, Debug)]
 pub struct SpecConfig {
     pub server_url: Url,
-    #[serde(deserialize_with = "deserialize_identity")]
-    pub faucet_pem: CoseKeyIdentity,
+    #[serde(rename = "faucet_pem", deserialize_with = "deserialize_identity")]
+    pub faucet_identity: CoseKeyIdentity,
 }
 
 fn deserialize_identity<'de, D>(d: D) -> Result<CoseKeyIdentity, D::Error>

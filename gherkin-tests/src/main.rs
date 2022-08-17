@@ -40,6 +40,7 @@ impl From<&IdentityName> for u32 {
 struct World {
     spec_config: Option<Arc<SpecConfig>>,
     identities: BTreeMap<IdentityName, CoseKeyIdentity>,
+    symbols: Vec<String>,
 }
 
 #[async_trait(?Send)]
@@ -50,6 +51,7 @@ impl cucumber::World for World {
         Ok(World {
             spec_config: None,
             identities: BTreeMap::new(),
+            symbols: vec![],
         })
     }
 }
@@ -65,7 +67,9 @@ fn setup_identity(world: &mut World, id: IdentityName) {
 }
 
 #[given(expr = "a symbol {word}")]
-fn setup_symbol(_world: &mut World, _symbol: String) {}
+fn setup_symbol(world: &mut World, symbol: String) {
+    assert!(world.symbols.contains(&symbol));
+}
 
 #[given(expr = "{identity} has {int} {word}")]
 fn id_has_x_symbols(_world: &mut World, _id: IdentityName, _amount: u32, _symbol: String) {}
@@ -95,8 +99,14 @@ async fn main() {
     World::cucumber()
         .before(move |_, _, _, world| {
             let spec_config = spec_config.clone();
+            let url = spec_config.server_url.clone();
+            let faucet_identity = spec_config.faucet_identity.clone();
             world.spec_config = Some(spec_config);
-            Box::pin(async {})
+            Box::pin(async {
+                world.symbols = many_async_client::symbols(url, faucet_identity)
+                    .await
+                    .unwrap();
+            })
         })
         .with_cli(opts)
         // Skips can be confusing

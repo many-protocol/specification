@@ -1,4 +1,5 @@
 [workspace]
 members = [
-    "gherkin-tests"
+    "gherkin-tests",
+    "many-async-client"
 ]
