@@ -1,0 +1,20 @@
+= Account Count Data
+
+This specification defines
+
+[stripes=odd,cols="1,1,1,6"]
+|===
+| Shortname | Name | Type | Description
+
+| `accountTotalCount`
+| `[0, 0]`
+| `uint`
+| The amount of addresses or accounts which ever contained any token symbols or participated in transactions.
+  This is the count of all addresses seen by the ledger or reported in its event log, even in transactions that resulted in no token transfer (e.g. multisig approvals).
+
+| `nonZeroAccountTotalCount`
+| `[0, 1]`
+| `uint`
+| The amount of addresses or accounts which currently contains a non-zero balance of tokens of any symbol.
+
+|===

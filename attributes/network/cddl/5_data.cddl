@@ -1,0 +1,55 @@
+; tag::types[]
+; A data name. Currently custom data names are not accepted.
+data-name = std-attribute-related-index
+
+; A data value.
+data-value = data-value-type-counter
+           / data-value-type-gauge
+
+; The type of a data.
+data-type = data-type-counter
+          / data-type-gauge
+
+; A monotonically incrementing unsigned integer.
+data-type-counter = 0
+data-value-type-counter = uint
+
+; An integer, float or big integer.
+data-type-gauge = 1
+data-value-type-gauge = int / float / bigint
+
+data-info = {
+    ; Type.
+    0 => data-type,
+}
+; end::types[]
+
+; tag::info[]
+data.info@param = ()
+
+data.info@return = {
+    ; List of supported data.
+    0 => [ * data-name ],
+}
+; end::info[]
+
+; tag::getInfo[]
+data.getInfo@param = {
+    0 => data-name // [ * data-name ],
+}
+
+data.getInfo@return = {
+    * data-name => data-info,
+}
+; end::description[]
+
+; tag::query[]
+; Query one or more data.
+data.query@param = {
+    ; The name of the data to query.
+    0 => data-name // [ * data-name ],
+}
+data.query@return = {
+    * data-name => data-value,
+}
+; end::query[]

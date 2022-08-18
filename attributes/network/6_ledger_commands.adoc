@@ -1,0 +1,9 @@
+= Ledger Commands Attribute (#6)
+:cddl: ./cddl/
+
+This attribute is used by servers that supports commands related to ledger.
+
+== Endpoints
+
+=== Send
+Send tokens from one account to another.
