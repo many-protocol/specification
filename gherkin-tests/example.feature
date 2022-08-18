@@ -8,4 +8,4 @@ Scenario: Ledger can send tokens
   And id2 has 0 MFX
   When id1 sends 50 MFX to id2
   Then the balance of id1 should be 50 MFX
-  Then the balance of id2 should be 50 MFX
+  And the balance of id2 should be 50 MFX
