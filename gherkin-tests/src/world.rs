@@ -9,28 +9,12 @@ use crate::{cose::new_identity, opts::SpecConfig};
 
 #[derive(Parameter, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
 #[param(regex = r"[\w\d]+", name = "identity")]
-pub struct IdentityName([u8; 4]);
+pub struct IdentityName(String);
 
 impl FromStr for IdentityName {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = s.as_bytes();
-        let len = bytes.len();
-        if len > 4 {
-            return Err("Identity name is too big".into());
-        }
-        let v: Vec<u8> = std::iter::repeat(&0u8)
-            .take(4 - len)
-            .chain(bytes)
-            .copied()
-            .collect();
-        Ok(IdentityName([v[0], v[1], v[2], v[3]]))
-    }
-}
-
-impl From<&IdentityName> for u32 {
-    fn from(name: &IdentityName) -> u32 {
-        u32::from_be_bytes(name.0)
+        Ok(IdentityName(s.to_string()))
     }
 }
 
@@ -73,7 +57,7 @@ impl World {
     }
 
     pub fn insert_identity(&mut self, id: IdentityName) {
-        let identity = new_identity(&id).expect("Should have generated an identity");
+        let identity = new_identity().expect("Should have generated an identity");
         self.identities.insert(id, identity);
     }
 

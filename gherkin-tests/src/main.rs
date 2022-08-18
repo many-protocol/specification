@@ -70,17 +70,30 @@ async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, 
 }
 
 #[when(expr = "{identity} sends {int} {word} to {identity}")]
-fn send_symbol(
-    _world: &mut World,
-    _id1: IdentityName,
-    _amount: u32,
-    _symbol: String,
-    _id2: IdentityName,
+async fn send_symbol(
+    world: &mut World,
+    id1: IdentityName,
+    amount: u32,
+    symbol: String,
+    id2: IdentityName,
 ) {
+    let symbol = *world.symbol(&symbol).unwrap();
+    let identity1 = world.identity(&id1).unwrap().clone();
+    let identity2 = world.identity(&id2).unwrap().identity;
+    world
+        .client()
+        .send(identity1, identity2, amount.into(), symbol)
+        .await
+        .unwrap();
 }
 
 #[then(expr = "the balance of {identity} should be {int} {word}")]
-fn balance_should_be(_world: &mut World, _id: IdentityName, _amount: u32, _symbol: String) {}
+async fn balance_should_be(world: &mut World, id: IdentityName, amount: u32, symbol: String) {
+    let identity = world.identity(&id).unwrap().identity;
+    let symbol = *world.symbol(&symbol).unwrap();
+    let balance = world.client().balance(identity, symbol).await.unwrap();
+    assert_eq!(balance, amount.into());
+}
 
 #[tokio::main]
 async fn main() {
