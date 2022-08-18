@@ -2,14 +2,20 @@ use many_error::ManyError;
 use many_identity::{Address, CoseKeyIdentity};
 
 use coset::{CoseSign1, TaggedCborSerializable};
-use many_modules::{base::Status, ledger::InfoReturns};
+use many_modules::{
+    base::Status,
+    ledger::{BalanceArgs, BalanceReturns, InfoReturns, SendArgs},
+};
 use many_protocol::{
     decode_response_from_cose_sign1, encode_cose_sign1_from_request, RequestMessage,
     RequestMessageBuilder, ResponseMessage,
 };
+pub use many_types::ledger::Symbol;
+use many_types::VecOrSingle;
 use minicbor::Encode;
+use num_bigint::BigUint;
 use reqwest::{IntoUrl, Url};
-use std::fmt::Formatter;
+use std::{collections::BTreeMap, fmt::Formatter};
 
 #[derive(Clone)]
 pub struct ManyClient {
@@ -118,13 +124,57 @@ impl ManyClient {
             .map_err(|e| ManyError::deserialization_error(e.to_string()))?;
         Ok(status)
     }
-}
 
-pub async fn symbols(url: Url, identity: CoseKeyIdentity) -> Result<Vec<String>, ManyError> {
-    let client = ManyClient::new(url, identity.identity, identity)
+    pub async fn symbols(&self) -> Result<BTreeMap<String, Symbol>, ManyError> {
+        let response = self.call_("ledger.info", ()).await?;
+        let decoded: InfoReturns =
+            minicbor::decode(&response).map_err(ManyError::deserialization_error)?;
+        Ok(decoded
+            .local_names
+            .into_iter()
+            .map(|(k, v)| (v, k))
+            .collect())
+    }
+
+    pub async fn balance(&self, account: Address, symbol: Symbol) -> Result<BigUint, ManyError> {
+        let symbols = VecOrSingle::from(vec![symbol]);
+        let argument = BalanceArgs {
+            account: Some(account),
+            symbols: Some(symbols),
+        };
+        let data = self.call_("ledger.balance", argument).await?;
+        let response: BalanceReturns =
+            minicbor::decode(&data).map_err(ManyError::deserialization_error)?;
+        let balance = BigUint::from_bytes_be(
+            &response
+                .balances
+                .get(&symbol)
+                .map(|x| x.to_vec())
+                .unwrap_or_default(),
+        );
+        Ok(balance)
+    }
+
+    pub async fn send(
+        &self,
+        from: CoseKeyIdentity,
+        to: Address,
+        amount: BigUint,
+        symbol: Symbol,
+    ) -> Result<(), ManyError> {
+        let client = ManyClient::new(
+            self.url.clone(),
+            CoseKeyIdentity::anonymous().identity,
+            from.clone(),
+        )
         .map_err(|_| ManyError::could_not_route_message())?;
-    let response = client.call_("ledger.info", ()).await?;
-    let decoded: InfoReturns =
-        minicbor::decode(&response).map_err(ManyError::deserialization_error)?;
-    Ok(decoded.local_names.into_iter().map(|(_, v)| v).collect())
+        let argument = SendArgs {
+            from: Some(from.identity),
+            to,
+            amount: amount.into(),
+            symbol,
+        };
+        client.call_("ledger.send", argument).await?;
+        Ok(())
+    }
 }

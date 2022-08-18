@@ -15,6 +15,8 @@ pub struct SpecConfig {
     pub server_url: Url,
     #[serde(rename = "faucet_pem", deserialize_with = "deserialize_identity")]
     pub faucet_identity: CoseKeyIdentity,
+    #[serde(rename = "ledger_pem", deserialize_with = "deserialize_identity")]
+    pub ledger_identity: CoseKeyIdentity,
 }
 
 fn deserialize_identity<'de, D>(d: D) -> Result<CoseKeyIdentity, D::Error>
@@ -33,8 +35,8 @@ where
         where
             E: serde::de::Error,
         {
-            let pem = std::fs::read_to_string(v).map_err(|e| E::custom(e))?;
-            CoseKeyIdentity::from_pem(&pem).map_err(|e| E::custom(e))
+            let pem = std::fs::read_to_string(v).map_err(E::custom)?;
+            CoseKeyIdentity::from_pem(&pem).map_err(E::custom)
         }
     }
     d.deserialize_any(InternalVisitor)
