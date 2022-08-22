@@ -48,11 +48,11 @@ impl World {
         self.spec_config.as_ref().unwrap()
     }
 
-    pub fn symbols(&mut self) -> &BTreeMap<String, Symbol> {
+    pub fn symbols(&self) -> &BTreeMap<String, Symbol> {
         &self.symbols
     }
 
-    pub fn symbol(&mut self, symbol: &str) -> Option<&Symbol> {
+    pub fn symbol(&self, symbol: &str) -> Option<&Symbol> {
         self.symbols().get(symbol)
     }
 
