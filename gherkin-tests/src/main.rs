@@ -102,7 +102,6 @@ async fn main() {
         .with_cli(opts)
         // Skips can be confusing
         .fail_on_skipped()
-        .max_concurrent_scenarios(1)
         .run(".")
         .await;
 }
