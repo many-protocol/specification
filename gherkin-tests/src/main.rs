@@ -1,6 +1,7 @@
 use std::{cmp::Ordering, sync::Arc};
 
 use cucumber::{given, then, when, WorldInit};
+use many_client::client::ledger::TokenAmount;
 use num_bigint::BigUint;
 use opts::{read_spec_config, CmdOpts};
 use world::{IdentityName, World};
@@ -21,25 +22,18 @@ fn setup_symbol(world: &mut World, symbol: String) {
 
 #[given(expr = "{identity} has {int} {word}")]
 async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, symbol: String) {
+    let amount: TokenAmount = amount.into();
     let faucet = world.spec_config().faucet_identity.clone();
     let identity = world.identity(&id).unwrap().clone();
     let symbol = *world.symbol(&symbol).unwrap();
-    let current_balance = world
-        .client()
-        .balance(identity.identity, symbol)
-        .await
-        .unwrap();
+    let current_balance = world.balance(identity.identity, symbol).await;
 
-    let faucet_balance = world
-        .client()
-        .balance(faucet.identity, symbol)
-        .await
-        .unwrap();
-    assert_ne!(faucet_balance, 0u32.into());
+    let faucet_balance = world.balance(faucet.identity, symbol).await;
+    assert_ne!(faucet_balance, TokenAmount::zero());
 
     match amount.cmp(&current_balance) {
         Ordering::Greater => world
-            .client()
+            .ledger_client()
             .send(
                 faucet,
                 identity.identity,
@@ -49,7 +43,7 @@ async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, 
             .await
             .expect("Should have sent"),
         Ordering::Less => world
-            .client()
+            .ledger_client()
             .send(
                 identity.clone(),
                 faucet.identity,
@@ -61,11 +55,7 @@ async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, 
         _ => {}
     }
 
-    let new_balance = world
-        .client()
-        .balance(identity.identity, symbol)
-        .await
-        .unwrap();
+    let new_balance = world.balance(identity.identity, symbol).await;
     assert_eq!(new_balance, amount);
 }
 
@@ -81,18 +71,18 @@ async fn send_symbol(
     let identity1 = world.identity(&id1).unwrap().clone();
     let identity2 = world.identity(&id2).unwrap().identity;
     world
-        .client()
+        .ledger_client()
         .send(identity1, identity2, amount.into(), symbol)
         .await
         .unwrap();
 }
 
 #[then(expr = "the balance of {identity} should be {int} {word}")]
-async fn balance_should_be(world: &mut World, id: IdentityName, amount: u32, symbol: String) {
+async fn balance_should_be(world: &mut World, id: IdentityName, amount: BigUint, symbol: String) {
     let identity = world.identity(&id).unwrap().identity;
     let symbol = *world.symbol(&symbol).unwrap();
-    let balance = world.client().balance(identity, symbol).await.unwrap();
-    assert_eq!(balance, amount.into());
+    let balance = world.balance(identity, symbol).await;
+    assert_eq!(balance, TokenAmount::from(amount));
 }
 
 #[tokio::main]

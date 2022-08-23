@@ -2,8 +2,9 @@ use std::{collections::BTreeMap, convert::Infallible, str::FromStr, sync::Arc};
 
 use async_trait::async_trait;
 use cucumber::{Parameter, WorldInit};
-use many_async_client::{ManyClient, Symbol};
-use many_identity::CoseKeyIdentity;
+use many_client::client::ledger::{LedgerClient, Symbol, TokenAmount};
+use many_client::ManyClient;
+use many_identity::{Address, CoseKeyIdentity};
 
 use crate::{cose::new_identity, opts::SpecConfig};
 
@@ -24,11 +25,16 @@ pub struct World {
     identities: BTreeMap<IdentityName, CoseKeyIdentity>,
     symbols: BTreeMap<String, Symbol>,
     client: Option<ManyClient>,
+    ledger_client: Option<LedgerClient>,
 }
 
 impl World {
-    pub fn client(&mut self) -> &ManyClient {
+    pub fn client(&self) -> &ManyClient {
         self.client.as_ref().unwrap()
+    }
+
+    pub fn ledger_client(&self) -> &LedgerClient {
+        self.ledger_client.as_ref().unwrap()
     }
 
     pub async fn init_config(&mut self, spec_config: Arc<SpecConfig>) {
@@ -41,7 +47,8 @@ impl World {
             .unwrap(),
         );
         self.spec_config = Some(spec_config);
-        self.symbols = self.client().symbols().await.unwrap();
+        self.ledger_client = Some(LedgerClient::new(self.client().clone()));
+        self.symbols = self.ledger_client().symbols().await.unwrap();
     }
 
     pub fn spec_config(&self) -> &SpecConfig {
@@ -64,6 +71,16 @@ impl World {
     pub fn identity(&self, id: &IdentityName) -> Option<&CoseKeyIdentity> {
         self.identities.get(id)
     }
+
+    pub async fn balance(&self, identity: Address, symbol: Symbol) -> TokenAmount {
+        self.ledger_client()
+            .balance(identity, vec![symbol])
+            .await
+            .unwrap()
+            // Remove gets by ownership
+            .remove(&symbol)
+            .unwrap_or_default()
+    }
 }
 
 #[async_trait(?Send)]
@@ -76,6 +93,7 @@ impl cucumber::World for World {
             identities: BTreeMap::new(),
             symbols: BTreeMap::new(),
             client: None,
+            ledger_client: None,
         })
     }
 }
