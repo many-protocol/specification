@@ -48,7 +48,15 @@ impl World {
         );
         self.spec_config = Some(spec_config);
         self.ledger_client = Some(LedgerClient::new(self.client().clone()));
-        self.symbols = self.ledger_client().symbols().await.unwrap();
+        self.symbols = self
+            .ledger_client()
+            .info()
+            .await
+            .unwrap()
+            .local_names
+            .into_iter()
+            .map(|(k, v)| (v, k))
+            .collect();
     }
 
     pub fn spec_config(&self) -> &SpecConfig {
@@ -73,10 +81,13 @@ impl World {
     }
 
     pub async fn balance(&self, identity: Address, symbol: Symbol) -> TokenAmount {
-        self.ledger_client()
-            .balance(identity, vec![symbol])
+        let mut response = self
+            .ledger_client()
+            .balance(Some(identity), Some(vec![symbol]))
             .await
-            .unwrap()
+            .unwrap();
+        response
+            .balances
             // Remove gets by ownership
             .remove(&symbol)
             .unwrap_or_default()
