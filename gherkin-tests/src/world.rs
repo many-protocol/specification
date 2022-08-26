@@ -2,13 +2,13 @@ use std::{collections::BTreeMap, convert::Infallible, str::FromStr, sync::Arc};
 
 use async_trait::async_trait;
 use cucumber::{Parameter, WorldInit};
-use many_client::client::ledger::{LedgerClient, Symbol, TokenAmount};
+use many_client::client::ledger::{BalanceArgs, LedgerClient, Symbol, TokenAmount};
 use many_client::ManyClient;
 use many_identity::{Address, CoseKeyIdentity};
 
 use crate::{cose::new_identity, opts::SpecConfig};
 
-#[derive(Parameter, Debug, Hash, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Parameter, Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Clone)]
 #[param(regex = r"[\w\d]+", name = "identity")]
 pub struct IdentityName(String);
 
@@ -24,32 +24,31 @@ pub struct World {
     spec_config: Option<Arc<SpecConfig>>,
     identities: BTreeMap<IdentityName, CoseKeyIdentity>,
     symbols: BTreeMap<String, Symbol>,
-    client: Option<ManyClient>,
-    ledger_client: Option<LedgerClient>,
+    ledger_clients: BTreeMap<Address, LedgerClient>,
 }
 
 impl World {
-    pub fn client(&self) -> &ManyClient {
-        self.client.as_ref().unwrap()
-    }
-
-    pub fn ledger_client(&self) -> &LedgerClient {
-        self.ledger_client.as_ref().unwrap()
+    pub fn faucet_ledger_client(&self) -> &LedgerClient {
+        self.ledger_client(self.spec_config().faucet_identity.identity)
     }
 
     pub async fn init_config(&mut self, spec_config: Arc<SpecConfig>) {
-        self.client = Some(
-            ManyClient::new(
-                spec_config.server_url.clone(),
-                spec_config.ledger_identity.identity,
-                spec_config.ledger_identity.clone(),
-            )
-            .unwrap(),
-        );
         self.spec_config = Some(spec_config);
-        self.ledger_client = Some(LedgerClient::new(self.client().clone()));
+
+        let faucet_identity = self.spec_config().faucet_identity.clone();
+
+        let faucet_client = ManyClient::new(
+            self.spec_config().server_url.clone(),
+            CoseKeyIdentity::anonymous().identity,
+            faucet_identity.clone(),
+        )
+        .unwrap();
+
+        self.ledger_clients
+            .insert(faucet_identity.identity, LedgerClient::new(faucet_client));
+
         self.symbols = self
-            .ledger_client()
+            .faucet_ledger_client()
             .info()
             .await
             .unwrap()
@@ -73,17 +72,32 @@ impl World {
 
     pub fn insert_identity(&mut self, id: IdentityName) {
         let identity = new_identity().expect("Should have generated an identity");
-        self.identities.insert(id, identity);
+        self.identities.insert(id, identity.clone());
+        let many_client = ManyClient::new(
+            self.spec_config().server_url.clone(),
+            CoseKeyIdentity::anonymous().identity,
+            identity.clone(),
+        )
+        .unwrap();
+        let ledger_client = LedgerClient::new(many_client);
+        self.ledger_clients.insert(identity.identity, ledger_client);
     }
 
     pub fn identity(&self, id: &IdentityName) -> Option<&CoseKeyIdentity> {
         self.identities.get(id)
     }
 
+    pub fn ledger_client(&self, id: Address) -> &LedgerClient {
+        self.ledger_clients.get(&id).unwrap()
+    }
+
     pub async fn balance(&self, identity: Address, symbol: Symbol) -> TokenAmount {
         let mut response = self
-            .ledger_client()
-            .balance(Some(identity), Some(vec![symbol]))
+            .ledger_client(identity)
+            .balance(BalanceArgs {
+                account: Some(identity),
+                symbols: Some(vec![symbol].into()),
+            })
             .await
             .unwrap();
         response
@@ -103,8 +117,7 @@ impl cucumber::World for World {
             spec_config: None,
             identities: BTreeMap::new(),
             symbols: BTreeMap::new(),
-            client: None,
-            ledger_client: None,
+            ledger_clients: BTreeMap::new(),
         })
     }
 }

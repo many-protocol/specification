@@ -15,8 +15,6 @@ pub struct SpecConfig {
     pub server_url: Url,
     #[serde(rename = "faucet_pem", deserialize_with = "deserialize_identity")]
     pub faucet_identity: CoseKeyIdentity,
-    #[serde(rename = "ledger_pem", deserialize_with = "deserialize_identity")]
-    pub ledger_identity: CoseKeyIdentity,
 }
 
 fn deserialize_identity<'de, D>(d: D) -> Result<CoseKeyIdentity, D::Error>

@@ -1,7 +1,7 @@
 use std::{cmp::Ordering, sync::Arc};
 
 use cucumber::{given, then, when, WorldInit};
-use many_client::client::ledger::TokenAmount;
+use many_client::client::ledger::{SendArgs, TokenAmount};
 use num_bigint::BigUint;
 use opts::{read_spec_config, CmdOpts};
 use world::{IdentityName, World};
@@ -27,31 +27,35 @@ async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, 
     let identity = world.identity(&id).unwrap().clone();
     let symbol = *world.symbol(&symbol).unwrap();
     let current_balance = world.balance(identity.identity, symbol).await;
-
     let faucet_balance = world.balance(faucet.identity, symbol).await;
+
     assert_ne!(faucet_balance, TokenAmount::zero());
 
     match amount.cmp(&current_balance) {
-        Ordering::Greater => world
-            .ledger_client()
-            .send(
-                faucet,
-                identity.identity,
-                amount.clone() - current_balance,
-                symbol,
-            )
-            .await
-            .expect("Should have sent"),
-        Ordering::Less => world
-            .ledger_client()
-            .send(
-                identity.clone(),
-                faucet.identity,
-                current_balance - amount.clone(),
-                symbol,
-            )
-            .await
-            .expect("Should have sent"),
+        Ordering::Greater => {
+            world
+                .faucet_ledger_client()
+                .send(SendArgs {
+                    from: Some(faucet.identity),
+                    to: identity.identity,
+                    amount: amount.clone() - current_balance,
+                    symbol,
+                })
+                .await
+                .expect("Should have sent");
+        }
+        Ordering::Less => {
+            world
+                .ledger_client(identity.identity)
+                .send(SendArgs {
+                    from: Some(identity.identity),
+                    to: faucet.identity,
+                    amount: current_balance - amount.clone(),
+                    symbol,
+                })
+                .await
+                .expect("Should have sent");
+        }
         _ => {}
     }
 
@@ -62,17 +66,22 @@ async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, 
 #[when(expr = "{identity} sends {int} {word} to {identity}")]
 async fn send_symbol(
     world: &mut World,
-    id1: IdentityName,
+    sender_id: IdentityName,
     amount: u32,
     symbol: String,
-    id2: IdentityName,
+    receiver_id: IdentityName,
 ) {
     let symbol = *world.symbol(&symbol).unwrap();
-    let identity1 = world.identity(&id1).unwrap().clone();
-    let identity2 = world.identity(&id2).unwrap().identity;
+    let sender = world.identity(&sender_id).unwrap().identity;
+    let receiver = world.identity(&receiver_id).unwrap().identity;
     world
-        .ledger_client()
-        .send(identity1, identity2, amount.into(), symbol)
+        .ledger_client(sender)
+        .send(SendArgs {
+            from: Some(sender),
+            to: receiver,
+            amount: amount.into(),
+            symbol,
+        })
         .await
         .unwrap();
 }
