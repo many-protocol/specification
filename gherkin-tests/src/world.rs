@@ -2,6 +2,7 @@ use std::{collections::BTreeMap, convert::Infallible, str::FromStr, sync::Arc};
 
 use async_trait::async_trait;
 use cucumber::{Parameter, WorldInit};
+use many_client::client::base::BaseClient;
 use many_client::client::ledger::{BalanceArgs, LedgerClient, Symbol, TokenAmount};
 use many_client::ManyClient;
 use many_identity::{Address, CoseKeyIdentity};
@@ -25,11 +26,16 @@ pub struct World {
     identities: BTreeMap<IdentityName, CoseKeyIdentity>,
     symbols: BTreeMap<String, Symbol>,
     ledger_clients: BTreeMap<Address, LedgerClient>,
+    base_client: Option<BaseClient>,
 }
 
 impl World {
     pub fn faucet_ledger_client(&self) -> &LedgerClient {
         self.ledger_client(self.spec_config().faucet_identity.identity)
+    }
+
+    pub fn base_client(&self) -> &BaseClient {
+        self.base_client.as_ref().unwrap()
     }
 
     pub async fn init_config(&mut self, spec_config: Arc<SpecConfig>) {
@@ -44,6 +50,7 @@ impl World {
         )
         .unwrap();
 
+        self.base_client = Some(BaseClient::new(faucet_client.clone()));
         self.ledger_clients
             .insert(faucet_identity.identity, LedgerClient::new(faucet_client));
 
@@ -118,6 +125,7 @@ impl cucumber::World for World {
             identities: BTreeMap::new(),
             symbols: BTreeMap::new(),
             ledger_clients: BTreeMap::new(),
+            base_client: None,
         })
     }
 }
