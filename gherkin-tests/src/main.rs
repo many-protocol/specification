@@ -111,6 +111,6 @@ async fn main() {
         .with_cli(opts)
         // Skips can be confusing
         .fail_on_skipped()
-        .run(".")
+        .run("features")
         .await;
 }
