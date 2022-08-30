@@ -6,7 +6,7 @@ use url::Url;
 #[derive(clap::Args)]
 pub struct CmdOpts {
     /// Sets a custom configuration file
-    #[clap(long, short, default_value = "spec.toml", value_name = "FILE")]
+    #[clap(long, short, value_name = "FILE")]
     pub spec_config: PathBuf,
 }
 
