@@ -1,6 +1,6 @@
 ; tag::types[]
-; A data index. Currently, custom data indices are not accepted.
-data-index = std-attribute-related-index
+; A data index. Currently, custom data indices SHOULD NOT be accepted.
+data-index = attribute-related-index
 
 ; A data value.
 data-value = data-value-type-counter
