@@ -10,20 +10,20 @@ use many_identity::{Address, CoseKeyIdentity};
 use crate::{cose::new_identity, opts::SpecConfig};
 
 #[derive(Parameter, Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Clone)]
-#[param(regex = r"[\w\d]+", name = "identity")]
-pub struct IdentityName(String);
+#[param(regex = r"[\w\d]+", name = "identifier")]
+pub struct Identifier(String);
 
-impl FromStr for IdentityName {
+impl FromStr for Identifier {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(IdentityName(s.to_string()))
+        Ok(Identifier(s.to_string()))
     }
 }
 
 #[derive(Debug, WorldInit)]
 pub struct World {
     spec_config: Option<Arc<SpecConfig>>,
-    identities: BTreeMap<IdentityName, CoseKeyIdentity>,
+    identities: BTreeMap<Identifier, CoseKeyIdentity>,
     symbols: BTreeMap<String, Symbol>,
     ledger_clients: BTreeMap<Address, LedgerClient>,
     base_client: Option<BaseClient>,
@@ -77,7 +77,7 @@ impl World {
         self.symbols().get(symbol)
     }
 
-    pub fn insert_identity(&mut self, id: IdentityName) {
+    pub fn insert_identity(&mut self, id: Identifier) {
         let identity = new_identity().expect("Should have generated an identity");
         self.identities.insert(id, identity.clone());
         let many_client = ManyClient::new(
@@ -90,7 +90,7 @@ impl World {
         self.ledger_clients.insert(identity.identity, ledger_client);
     }
 
-    pub fn identity(&self, id: &IdentityName) -> Option<&CoseKeyIdentity> {
+    pub fn identity(&self, id: &Identifier) -> Option<&CoseKeyIdentity> {
         self.identities.get(id)
     }
 

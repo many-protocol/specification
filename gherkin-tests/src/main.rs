@@ -4,14 +4,14 @@ use cucumber::{given, then, when, WorldInit};
 use many_client::client::ledger::{SendArgs, TokenAmount};
 use num_bigint::BigUint;
 use opts::{read_spec_config, CmdOpts};
-use world::{IdentityName, World};
+use world::{Identifier, World};
 
 mod cose;
 mod opts;
 mod world;
 
-#[given(expr = "an identity {identity}")]
-fn setup_identity(world: &mut World, id: IdentityName) {
+#[given(expr = "an identity {identifier}")]
+fn setup_identity(world: &mut World, id: Identifier) {
     world.insert_identity(id);
 }
 
@@ -20,8 +20,8 @@ fn setup_symbol(world: &mut World, symbol: String) {
     assert!(world.symbols().contains_key(&symbol));
 }
 
-#[given(expr = "{identity} has {int} {word}")]
-async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, symbol: String) {
+#[given(expr = "{identifier} has {int} {word}")]
+async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, symbol: String) {
     let amount: TokenAmount = amount.into();
     let faucet = world.spec_config().faucet_identity.clone();
     let identity = world.identity(&id).unwrap().clone();
@@ -63,13 +63,13 @@ async fn id_has_x_symbols(world: &mut World, id: IdentityName, amount: BigUint, 
     assert_eq!(new_balance, amount);
 }
 
-#[when(expr = "{identity} sends {int} {word} to {identity}")]
+#[when(expr = "{identifier} sends {int} {word} to {identifier}")]
 async fn send_symbol(
     world: &mut World,
-    sender_id: IdentityName,
+    sender_id: Identifier,
     amount: u32,
     symbol: String,
-    receiver_id: IdentityName,
+    receiver_id: Identifier,
 ) {
     let symbol = *world.symbol(&symbol).unwrap();
     let sender = world.identity(&sender_id).unwrap().identity;
@@ -86,8 +86,8 @@ async fn send_symbol(
         .unwrap();
 }
 
-#[then(expr = "the balance of {identity} should be {int} {word}")]
-async fn balance_should_be(world: &mut World, id: IdentityName, amount: BigUint, symbol: String) {
+#[then(expr = "the balance of {identifier} should be {int} {word}")]
+async fn balance_should_be(world: &mut World, id: Identifier, amount: BigUint, symbol: String) {
     let identity = world.identity(&id).unwrap().identity;
     let symbol = *world.symbol(&symbol).unwrap();
     let balance = world.balance(identity, symbol).await;
