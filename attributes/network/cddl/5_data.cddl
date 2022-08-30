@@ -1,5 +1,5 @@
 ; tag::types[]
-; A data name. Currently custom data names are not accepted.
+; A data index. Currently, custom data indices are not accepted.
 data-index = std-attribute-related-index
 
 ; A data value.
