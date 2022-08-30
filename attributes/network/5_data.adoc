@@ -12,7 +12,7 @@ Servers MAY NOT create new data types without being a specification.
 
 == Examples
 
-A data index `[0, ...]` contains the number of identities or addresses the server has seen in a specific context.
+A data index space `[0, ...]` contains the number of identities or addresses the server has seen in a specific context.
 The server should disclose the `[5, [0]]` attribute with its argument.
 This data index has one sub-index for this example: `[0, [2, ...]]`, which is ledger specific.
 The server can skip the ledger-specific types if it does not implement the ledger attribute.
