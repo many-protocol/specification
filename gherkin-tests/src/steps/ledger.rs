@@ -4,8 +4,8 @@ use cucumber::{given, then, when};
 use many_client::client::ledger::{SendArgs, TokenAmount};
 use num_bigint::BigUint;
 
-use crate::world::World;
 use crate::params::Identifier;
+use crate::world::World;
 
 #[given(expr = "an identity {identifier}")]
 fn setup_identity(world: &mut World, id: Identifier) {
