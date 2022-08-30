@@ -31,14 +31,9 @@ range<T> = {
     ? 1 => bound<T>,
 }
 
+; An attribute related index, which can include sub-attributes or IDs recursively.
 attribute-related-index     = attribute-id / sub-attribute-related-index
 
-; An attribute related index, which can include sub-attributes or IDs recursively.
-std-attribute-related-index = std-attribute-id / std-sub-attribute-related-index
-
-; A sub-attribute related index.
+; A sub-attribute related index. Sub-indices can also be custom.
 sub-attribute-related-index = [attribute-id, uint]
-                            / [attribute-id, sub-attribute-related-index]
-
-; An attribute related index, custom to the network itself.
-custom-attribute-related-index = custom-attribute-id / custom-sub-attribute-related-index
+                            / [attribute-id, attribute-related-index]

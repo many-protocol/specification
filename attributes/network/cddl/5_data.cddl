@@ -1,6 +1,6 @@
 ; tag::types[]
 ; A data name. Currently custom data names are not accepted.
-data-name = std-attribute-related-index
+data-index = std-attribute-related-index
 
 ; A data value.
 data-value = data-value-type-counter
@@ -21,6 +21,9 @@ data-value-type-gauge = int / float / bigint
 data-info = {
     ; Type.
     0 => data-type,
+
+    ; Shortname. This is specified.
+    1 => tstr,
 }
 ; end::types[]
 
@@ -29,27 +32,27 @@ data.info@param = ()
 
 data.info@return = {
     ; List of supported data.
-    0 => [ * data-name ],
+    0 => [ * data-index ],
 }
 ; end::info[]
 
 ; tag::getInfo[]
 data.getInfo@param = {
-    0 => data-name // [ * data-name ],
+    0 => data-index // [ * data-index ],
 }
 
 data.getInfo@return = {
-    * data-name => data-info,
+    * data-index => data-info,
 }
-; end::description[]
+; end::getInfo[]
 
 ; tag::query[]
 ; Query one or more data.
 data.query@param = {
-    ; The name of the data to query.
-    0 => data-name // [ * data-name ],
+    ; The index of the data to query.
+    0 => data-index // [ * data-index ],
 }
 data.query@return = {
-    * data-name => data-value,
+    * data-index => data-value,
 }
 ; end::query[]
