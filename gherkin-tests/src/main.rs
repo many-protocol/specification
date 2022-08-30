@@ -6,6 +6,7 @@ use world::World;
 
 mod cose;
 mod opts;
+pub mod params;
 pub mod steps;
 mod world;
 

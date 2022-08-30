@@ -1,24 +1,14 @@
-use std::{collections::BTreeMap, convert::Infallible, str::FromStr, sync::Arc};
+use std::{collections::BTreeMap, convert::Infallible, sync::Arc};
 
 use async_trait::async_trait;
-use cucumber::{Parameter, WorldInit};
+use cucumber::WorldInit;
 use many_client::client::base::BaseClient;
 use many_client::client::ledger::{BalanceArgs, LedgerClient, Symbol, TokenAmount};
 use many_client::ManyClient;
 use many_identity::{Address, CoseKeyIdentity};
 
+use crate::params::Identifier;
 use crate::{cose::new_identity, opts::SpecConfig};
-
-#[derive(Parameter, Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Clone)]
-#[param(regex = r"[\w\d]+", name = "identifier")]
-pub struct Identifier(String);
-
-impl FromStr for Identifier {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Identifier(s.to_string()))
-    }
-}
 
 #[derive(Debug, WorldInit)]
 pub struct World {
