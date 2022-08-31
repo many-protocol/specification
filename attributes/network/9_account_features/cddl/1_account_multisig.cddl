@@ -5,8 +5,6 @@ account-role /= "canMultisigSubmit"
 
 account-multisig-token = bstr
 
-memo = tstr
-
 multisig-transaction-state /= 0  ; Pending
                             / 1  ; Executed automatically
                             / 2  ; Executed manually
@@ -50,8 +48,6 @@ account-multisig-event-info-submit = {
     6 => uint,                          ; The number of approvals needed.
     7 => time,                          ; Expiration date time.
     8 => bool,                          ; Whether to automatically execute.
-    ? 9 => bstr .cbor any,              ; CBOR data associated with the
-                                        ; transaction.
 }
 account-multisig-event-info-approve = {
     0 => account-event-type-multisig-approve,
@@ -173,8 +169,7 @@ account.multisigSubmitTransaction@param = {
     ; The account to submit the transaction to.
     0 => non-anonymous-identity,
 
-    ; A memo associated with the transaction. This is meant to be human readable
-    ; and can be used to explain the transaction to approvers.
+    ; A memo associated with the transaction.
     ? 1 => memo,
 
     ; The transaction to send. Must be a valid transaction understood by the
@@ -198,9 +193,6 @@ account.multisigSubmitTransaction@param = {
     ; The server MUST return an error if this value is passed but the submitter
     ; does not have the `owner` role, or if automatic execution is not supported.
     ? 5 => bool,
-
-    ; A CBOR associated data field.
-    ? 6 => bstr .cbor any,
 }
 account.multisigSubmitTransaction@return = {
     ; A token identifying this transaction. This is an implementation specific opaque
@@ -217,8 +209,7 @@ account.multisigInfo@param = {
 }
 
 account.multisigInfo@return = {
-    ; Memo sent when creating the transaction. This is meant to be human readable
-    ; and can be used to explain the transaction to approvers.
+    ; Memo sent when creating the transaction.
     ? 0 => memo,
 
     ; The transaction info.

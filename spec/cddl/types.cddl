@@ -35,3 +35,17 @@ range<T> = {
 attribute-related-index     = attribute-id / sub-attribute-related-index
 sub-attribute-related-index = [attribute-id, uint]
                             / [attribute-id, sub-attribute-related-index]
+
+; A memo contains a human readable portion and/or a machine readable portion.
+; The machine readable portion is expected to be CBOR, though it could be a
+; byte array. Both are optional.
+; A memo CANNOT be empty (both fields missing).
+memo = { human-readable-memo }
+     / { machine-readable-memo }
+     / { human-readable-memo, machine-readable-memo }
+
+; The human readable part of the memo.
+human-readable-memo = ( 0 => tstr )
+
+; The machine readable part of the memo.
+machine-readable-memo = ( 1 => bstr .cbor any )
