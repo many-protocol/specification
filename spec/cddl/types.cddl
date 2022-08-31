@@ -38,14 +38,8 @@ sub-attribute-related-index = [attribute-id, uint]
 
 ; A memo contains a human readable portion and/or a machine readable portion.
 ; The machine readable portion is expected to be CBOR, though it could be a
-; byte array. Both are optional.
-; A memo CANNOT be empty (both fields missing).
-memo = { human-readable-memo }
-     / { machine-readable-memo }
-     / { human-readable-memo, machine-readable-memo }
-
-; The human readable part of the memo.
-human-readable-memo = ( 0 => tstr )
-
-; The machine readable part of the memo.
-machine-readable-memo = ( 1 => bstr .cbor any )
+; byte array containing another format.
+; A memo can contain multiple entries, as some of them might be formatted in
+; different ways, or contain additional data.
+; The memo itself CANNOT be empty and MUST contain at least one entry.
+memo = [ + (tstr / (bstr .cbor any)) ]
