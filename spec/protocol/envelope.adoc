@@ -1,0 +1,30 @@
+= MANY Envelope Specification
+:cddl: ./cddl/
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+== Introduction
+
+The MANY protocol relies on digital signatures of messages to identify users and servers.
+Messages are tagged COSE Sign envelopes containing headers and a signature (and optionally counter signatures).
+
+== Identity
+
+The identity of a sender must be resolved with the following algorithm:
+
+1. If the signature is empty and there is no Key ID field in the protected headers, the resolved identity is Anonymous.
+
+2. If there is a signature and a Key ID;
+
+   a. The Key ID of the protected header matches a key in the `"keyset"` protected header.
+      If no key fits the Key ID, the server MUST return an error.
+   b. Use the key to try and validate the COSE signature.
+   c. The resolved identity is the one derived from the public key (see xref:identity.adoc#_cose_key[Identity – COSE Key]]).
+
+3. The resulting key is compared with the message's `from` field:
+   a. if the `from` address is anonymous and the resolved key is not, the server MUST return an error.
+   b. if the `from` address is a public key and it matches the resolved key, the address is used as the sender.
+   c. if the `from` address is a sub-resource identity and its public key matches the resolved key, use the subresource identity address as the sender.
+
+The final resolved address can be used to identify the sender where it makes sense (e.g. resolving ACLs).

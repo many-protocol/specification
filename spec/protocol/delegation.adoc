@@ -1,0 +1,37 @@
+= MANY Delegation Specification
+:cddl: ./cddl/
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+== Introduction
+
+The MANY protocol relies on digital signatures of messages to identify users and servers.
+The resolution of the address is defined in the xref:envelope.adoc#_identity[Envelope – Identity] section.
+
+This specification adds and describe an additional attribute and resolution step; delegation.
+Delegation happens when an identity signs a delegation certificate to another identity, allowing the private key of the latter one to sign messages where the sender is the first one.
+
+== Overview
+
+Given the identities `Alice` and `Bob`, assuming `Alice` would like to allow `Bob` to impersonate them in a message.
+`Alice` would sign a delegate certificate to `Bob`, which `Bob` would include in their messages.
+`Bob` is also allowed to send messages with his own identity by omitting the certificate.
+
+Multiple certificates can be included to allow for a chain of delegations.
+The root of the chain will be the final identity of the sender.
+For example, if `Bob` were to delegate his identity to `Charlie`, `Charlie` could include both `Alice -> Bob` delegate certificate and `Bob -> Charlie` certificate in a message to impersonate `Alice`.
+
+=== Attributes
+
+There are 3 attributes related to this specification:
+
+- xref:../../attributes/network/10_delegation.adoc[10 – Delegation] which allows network to sign delegations automatically.
+- xref:../../attributes/request/2_delegation.adoc[2 - Delegation (Request)] which allows requests to add delegation.
+- xref:../../attributes/response/2_delegation.adoc[2 - Delegation (Response)] which allows responses to have a delegation.
+
+The certificate is described in the spec CDDL and referred by the attributes above.
+
+=== Certification
+
+Certificates

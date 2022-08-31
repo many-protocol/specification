@@ -1,0 +1,8 @@
+= Delegation Attribute (#10)
+:cddl: ./cddl/
+
+This attribute allows server to verify and create delegation certificates.
+A server can refuse to create a certificate for any reason.
+For example, it could only allow delegations to safe listed identities.
+
+

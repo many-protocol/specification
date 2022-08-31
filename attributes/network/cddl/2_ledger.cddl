@@ -1,10 +1,10 @@
 ; tag::types[]
 ; A token symbol which is its name.
-; A symbol is an identity now, and CAN be the anonymous identity. It is
+; A symbol is an address, and CAN be an anonymous address. It is
 ; unique across all networks. The given string name of a symbol is not
 ; unique, though, and cannot be resolved using this attribute (a
 ; separate resolver attribute is necessary).
-ledger-symbol = identity
+ledger-symbol = address
 
 ; An amount of tokens can be either an infinite uint or a regular one
 ; for simplicity. The networks CAN use either when serializing, but
@@ -101,8 +101,8 @@ fixed-point-percent = uint
 
 ; tag::balance[]
 ledger.balance@param = {
-    ; Account's identity. If not specified, will use the message sender.
-    ? 0 => non-anonymous-identity,
+    ; Account's address. If not specified, will use the message sender.
+    ? 0 => non-anonymous-address,
 
     ; Symbol to check (or list of symbols). Symbols will be missing from
     ; the output if their balance is 0. If this is an empty array or

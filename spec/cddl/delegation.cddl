@@ -1,0 +1,24 @@
+; A delegation certificate. The resolution of the `From` identity must follow
+; the same rules as
+delegation-certificate = CoseSign1<{
+   ; From. The address of the delegated identity (`Alice` in the example).
+   0 => address,
+
+   ; To. The address of the identity that can use the above identity.
+   1 => address,
+
+   ; An expiration timestamp. If the system time is past this timestamp,
+   ; the certificate is invalid and the server MUST return an error without
+   ; opening the envelope further.
+   2 => time,
+
+   ; 
+
+   ; A description or message about this certificate. This is meant to be human
+   ; readable and is optional.
+   ? 7 => tstr,
+
+   ; A data message related to the certificate. This is meant to be machine
+   ; readable and optional.
+   ? 8 => bstr,
+}>

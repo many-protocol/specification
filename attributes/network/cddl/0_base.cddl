@@ -16,9 +16,9 @@ status = {
     ; The public key of this server, in cbor, if available.
     ? 2 => bstr .cbor any,
 
-    ; The identity of this server. This might be different from
+    ; The address of this server. This might be different from
     ; the public key published above, or a subresource of it.
-    3 => identity,
+    3 => address,
 
     ; A list of attributes supported by this server.
     4 => [ * attribute ],

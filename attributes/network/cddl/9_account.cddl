@@ -1,6 +1,6 @@
 ; tag::types[]
-; An account identity.
-account-identity = non-anonymous-identity
+; An account address.
+account-address = non-anonymous-address
 
 ; Features might extend this.
 account-role /= "owner"
@@ -34,42 +34,42 @@ account-event-type-add-feature        = [9, 5]
 
 account-event-info-create = {
     0 => event-type-create,
-    1 => non-anonymous-identity,    ; Account identity
+    1 => non-anonymous-address,     ; Account address
     ? 2 => tstr,                    ; Description
     3 => {
-        * non-anonymous-identity => [ * account-role ],
+        * non-anonymous-address => [ * account-role ],
     },                              ; List of initial roles, including default ones.
     4 => [ 1* account-feature ],    ; Features
 }
 account-event-info-set-description = {
     0 => event-type-set-description,
-    1 => non-anonymous-identity,    ; Account identity.
+    1 => non-anonymous-address,     ; Account address.
     2 => tstr,                      ; Description
 }
 account-event-info-add-roles = {
     0 => event-type-add-roles,
-    1 => non-anonymous-identity,    ; Account identity.
+    1 => non-anonymous-address,     ; Account address.
     2 => {
-        * non-anonymous-identity => [ * account-role ],
+        * non-anonymous-address => [ * account-role ],
     },                              ; List of roles added.
 }
 account-event-info-remove-roles = {
     0 => event-type-remove-roles,
-    1 => non-anonymous-identity,    ; Account identity.
+    1 => non-anonymous-address,     ; Account address.
     2 => {
-        * non-anonymous-identity => [ * account-role ],
+        * non-anonymous-address => [ * account-role ],
     },                              ; List of roles removed.
 }
 account-event-info-disable = {
     0 => event-type-disable,
-    1 => non-anonymous-identity,    ; Account identity.
+    1 => non-anonymous-address,     ; Account address.
     ? 2 => reason<u64>,             ; The reason this was deleted/disabled.
 }
 account-event-info-add-features = {
     0 => event-type-add-features,
-    1 => non-anonymous-identity,    ; Account identity.
+    1 => non-anonymous-address,     ; Account address.
     2 => {
-        * non-anonymous-identity => [ * account-role ],
+        * non-anonymous-address => [ * account-role ],
     },                              ; List of roles to add.
     3 => [ 1* account-feature ],    ; New features added.
 }
@@ -89,7 +89,7 @@ account.create@param = {
     ; The server MUST return an error if any role is not supported by any
     ; feature included in the account.
     ? 1 => {
-        * non-anonymous-identity => [ * account-role ],
+        * non-anonymous-address => [ * account-role ],
     },
 
     ; Required list of features and their arguments.
@@ -100,16 +100,16 @@ account.create@param = {
     2 => [ 1* account-feature ],
 }
 account.create@return = {
-    ; The account identity. Use this to contact the account directly.
-    0 => account-identity,
+    ; The account address. Use this to contact the account directly.
+    0 => account-address,
 }
 ; end::create[]
 
 ; tag::setDescription[]
 ; Sets the description of an account.
 account.setDescription@param = {
-    ; The identity of the account.
-    0 => account-identity,
+    ; The address of the account.
+    0 => account-address,
 
     ; The new name or description.
     1 => tstr,
@@ -122,7 +122,7 @@ account.setDescription@return = ()
 ; List all the roles available for an account, based on its features.
 account.listRoles@param = {
     ; The account to list identities available.
-    0 => account-identity,
+    0 => account-address,
 }
 
 account.listRoles@return = {
@@ -132,50 +132,50 @@ account.listRoles@return = {
 ; end::listRoles[]
 
 ; tag::getRoles[]
-; List the roles of an identity.
+; List the roles of an address for an account.
 account.getRoles@param = {
     ; The account to get the roles of.
-    0 => account-identity,
+    0 => account-address,
 
-    ; The identity to get the roles from.
-    1 => non-anonymous-identity / [ * non-anonymous-identity ],
+    ; The address to get the roles from.
+    1 => non-anonymous-address / [ * non-anonymous-address ],
 }
 
 account.getRoles@return = {
-    ; The list of roles, per identity.
+    ; The list of roles, per address.
     0 => {
-        identity => [ * account-role ],
+        address => [ * account-role ],
     }
 }
 ; end::getRoles[]
 
 ; tag::addRoles[]
-; Add roles to an identity related to the account. Adding a role that is already
-; set to an identity does nothing. The only role that must be defined all the
+; Add roles to an address related to the account. Adding a role that is already
+; set to an address does nothing. The only role that must be defined all the
 ; time is the "owner". Other roles can be added by features and can be listed by
 ; calling the `account.listRoles` endpoint.
 account.addRoles@param = {
     ; The account to add the role to.
-    0 => account-identity,
+    0 => account-address,
 
-    ; A map of identity with roles to add. These roles will be added to the
-    ; identity, not replacing the ones it currently have.
+    ; A map of address with roles to add. These roles will be added to the
+    ; address, not replacing the ones it currently have.
     1 => {
-        1* non-anonymous-identity => [ * account-role ],
+        1* non-anonymous-address => [ * account-role ],
     }
 }
 account.addRoles@return = ()
 ; end::addRoles[]
 
 ; tag::removeRoles[]
-; Remove roles from an identity. If the role isn't set, this will do nothing.
+; Remove roles from an address. If the role isn't set, this will do nothing.
 account.removeRoles@param = {
     ; The account to remove the roles from.
-    0 => account-identity,
+    0 => account-address,
 
-    ; A map of identity with roles to remove from them.
+    ; A map of address with roles to remove from them.
     1 => {
-        1* non-anonymous-identity => [ * account-role ],
+        1* non-anonymous-address => [ * account-role ],
     }
 }
 account.removeRoles@return = ()
@@ -186,8 +186,8 @@ account.removeRoles@return = ()
 ; server desires it. For example, the server might restrict which identities
 ; can have the list of owners.
 account.info@param = {
-    ; The identity of the account to request the information of.
-    0 => account-identity,
+    ; The address of the account to request the information of.
+    0 => account-address,
 }
 account.info@return = {
     ; The name or description of the account.
@@ -195,7 +195,7 @@ account.info@return = {
 
     ; The list of roles for the account.
     1 => {
-        1* non-anonymous-identity => [ * account-role ],
+        1* non-anonymous-address => [ * account-role ],
     },
 
     ; The list of features and their argument.
@@ -212,13 +212,13 @@ account.info@return = {
 ; end::info[]
 
 ; tag::disable[]
-; Disable or delete an account. Its identity cannot be reused.
+; Disable or delete an account. Its address cannot be reused.
 ; The server MUST return an error if the sender does not have the `"owner"` role
 ; for this account.
 ; The server MAY choose to fully delete the account (in which case any calls
 ; to `account.info` will return an error), or disable the account.
 account.disable@param = {
-    0 => account-identity,
+    0 => account-address,
 }
 account.disable@return = ()
 ; end::disable[]
@@ -233,11 +233,11 @@ account.disable@return = ()
 ; supported.
 account.addFeatures@param = {
     ; The account to add features to.
-    0 => account-identity,
+    0 => account-address,
 
     ; List of additional roles to add.
     ? 1 => {
-        * non-anonymous-identity => [ * account-role ],
+        * non-anonymous-address => [ * account-role ],
     }
 
     ; List of features to add and their arguments.

@@ -5,10 +5,10 @@ ledger.send@param = {
     ; If omitted, will use the message sender.
     ; The ledger may refuse to send from a different account than
     ; the message sender.
-    ? 0 => identity,
+    ? 0 => address,
 
     ; The account that will receive the tokens.
-    1 => identity,
+    1 => address,
 
     ; The amount of tokens to send.
     2 => ledger-amount,
