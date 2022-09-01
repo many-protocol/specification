@@ -11,9 +11,9 @@ cbor-diag = "0.1"
 clap = "3.2"
 cucumber = "0.13"
 futures = "0.3"
-many-identity = { git = "http://github.com/Denommus/many-rs", branch = "cucumber-adapt", features = [ "testing" ] }
-many-identity-dsa = { git = "http://github.com/Denommus/many-rs", branch = "cucumber-adapt", features = [ "testing", "ecdsa", "ed25519" ] }
-many-client = { git = "http://github.com/Denommus/many-rs", branch = "cucumber-adapt" }
+many-identity = { git = "http://github.com/liftedinit/many-rs", branch = "main", features = [ "testing" ] }
+many-identity-dsa = { git = "http://github.com/liftedinit/many-rs", branch = "main", features = [ "testing", "ecdsa", "ed25519" ] }
+many-client = { git = "http://github.com/liftedinit/many-rs", branch = "main" }
 num-bigint = "0.4"
 serde = "1.0"
 tokio = { version = "1.20", features = [ "macros", "rt-multi-thread", "fs" ] }
