@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 
 use cucumber::{given, then, when};
 use many_client::client::ledger::{SendArgs, TokenAmount};
+use many_identity::Identity;
 use num_bigint::BigUint;
 
 use crate::params::Identifier;
@@ -23,8 +24,8 @@ async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, sy
     let faucet = world.spec_config().faucet_identity.clone();
     let identity = world.identity(&id).unwrap().clone();
     let symbol = *world.symbol(&symbol).unwrap();
-    let current_balance = world.balance(identity.identity, symbol).await;
-    let faucet_balance = world.balance(faucet.identity, symbol).await;
+    let current_balance = world.balance(identity.address(), symbol).await;
+    let faucet_balance = world.balance(faucet.address(), symbol).await;
 
     assert_ne!(faucet_balance, TokenAmount::zero());
 
@@ -33,8 +34,8 @@ async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, sy
             world
                 .faucet_ledger_client()
                 .send(SendArgs {
-                    from: Some(faucet.identity),
-                    to: identity.identity,
+                    from: Some(faucet.address()),
+                    to: identity.address(),
                     amount: amount.clone() - current_balance,
                     symbol,
                 })
@@ -43,10 +44,10 @@ async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, sy
         }
         Ordering::Less => {
             world
-                .ledger_client(identity.identity)
+                .ledger_client(identity.address())
                 .send(SendArgs {
-                    from: Some(identity.identity),
-                    to: faucet.identity,
+                    from: Some(identity.address()),
+                    to: faucet.address(),
                     amount: current_balance - amount.clone(),
                     symbol,
                 })
@@ -56,7 +57,7 @@ async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, sy
         _ => {}
     }
 
-    let new_balance = world.balance(identity.identity, symbol).await;
+    let new_balance = world.balance(identity.address(), symbol).await;
     assert_eq!(new_balance, amount);
 }
 
@@ -69,8 +70,8 @@ async fn send_symbol(
     receiver_id: Identifier,
 ) {
     let symbol = *world.symbol(&symbol).unwrap();
-    let sender = world.identity(&sender_id).unwrap().identity;
-    let receiver = world.identity(&receiver_id).unwrap().identity;
+    let sender = world.identity(&sender_id).unwrap().address();
+    let receiver = world.identity(&receiver_id).unwrap().address();
     world
         .ledger_client(sender)
         .send(SendArgs {
@@ -85,7 +86,7 @@ async fn send_symbol(
 
 #[then(expr = "the balance of {identifier} should be {int} {word}")]
 async fn balance_should_be(world: &mut World, id: Identifier, amount: BigUint, symbol: String) {
-    let identity = world.identity(&id).unwrap().identity;
+    let identity = world.identity(&id).unwrap().address();
     let symbol = *world.symbol(&symbol).unwrap();
     let balance = world.balance(identity, symbol).await;
     assert_eq!(balance, TokenAmount::from(amount));

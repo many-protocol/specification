@@ -5,7 +5,8 @@ use cucumber::WorldInit;
 use many_client::client::base::BaseClient;
 use many_client::client::ledger::{BalanceArgs, LedgerClient, Symbol, TokenAmount};
 use many_client::ManyClient;
-use many_identity::{Address, CoseKeyIdentity};
+use many_identity::{Address, AnonymousIdentity, Identity};
+use many_identity_dsa::CoseKeyIdentity;
 
 use crate::params::Identifier;
 use crate::{cose::new_identity, opts::SpecConfig};
@@ -15,16 +16,16 @@ pub struct World {
     spec_config: Option<Arc<SpecConfig>>,
     identities: BTreeMap<Identifier, CoseKeyIdentity>,
     symbols: BTreeMap<String, Symbol>,
-    ledger_clients: BTreeMap<Address, LedgerClient>,
-    base_client: Option<BaseClient>,
+    ledger_clients: BTreeMap<Address, LedgerClient<CoseKeyIdentity>>,
+    base_client: Option<BaseClient<CoseKeyIdentity>>,
 }
 
 impl World {
-    pub fn faucet_ledger_client(&self) -> &LedgerClient {
-        self.ledger_client(self.spec_config().faucet_identity.identity)
+    pub fn faucet_ledger_client(&self) -> &LedgerClient<CoseKeyIdentity> {
+        self.ledger_client(self.spec_config().faucet_identity.address())
     }
 
-    pub fn base_client(&self) -> &BaseClient {
+    pub fn base_client(&self) -> &BaseClient<CoseKeyIdentity> {
         self.base_client.as_ref().unwrap()
     }
 
@@ -35,14 +36,14 @@ impl World {
 
         let faucet_client = ManyClient::new(
             self.spec_config().server_url.clone(),
-            CoseKeyIdentity::anonymous().identity,
+            AnonymousIdentity.address(),
             faucet_identity.clone(),
         )
         .unwrap();
 
         self.base_client = Some(BaseClient::new(faucet_client.clone()));
         self.ledger_clients
-            .insert(faucet_identity.identity, LedgerClient::new(faucet_client));
+            .insert(faucet_identity.address(), LedgerClient::new(faucet_client));
 
         self.symbols = self
             .faucet_ledger_client()
@@ -68,23 +69,24 @@ impl World {
     }
 
     pub fn insert_identity(&mut self, id: Identifier) {
-        let identity = new_identity().expect("Should have generated an identity");
+        let identity = new_identity();
         self.identities.insert(id, identity.clone());
         let many_client = ManyClient::new(
             self.spec_config().server_url.clone(),
-            CoseKeyIdentity::anonymous().identity,
+            AnonymousIdentity.address(),
             identity.clone(),
         )
         .unwrap();
         let ledger_client = LedgerClient::new(many_client);
-        self.ledger_clients.insert(identity.identity, ledger_client);
+        self.ledger_clients
+            .insert(identity.address(), ledger_client);
     }
 
     pub fn identity(&self, id: &Identifier) -> Option<&CoseKeyIdentity> {
         self.identities.get(id)
     }
 
-    pub fn ledger_client(&self, id: Address) -> &LedgerClient {
+    pub fn ledger_client(&self, id: Address) -> &LedgerClient<CoseKeyIdentity> {
         self.ledger_clients.get(&id).unwrap()
     }
 

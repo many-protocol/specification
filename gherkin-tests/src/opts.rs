@@ -1,4 +1,4 @@
-use many_identity::CoseKeyIdentity;
+use many_identity_dsa::CoseKeyIdentity;
 use serde::{de::Visitor, Deserialize, Deserializer};
 use std::path::PathBuf;
 use url::Url;

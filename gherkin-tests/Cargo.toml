@@ -12,6 +12,7 @@ clap = "3.2"
 cucumber = "0.13"
 futures = "0.3"
 many-identity = { git = "http://github.com/Denommus/many-rs", branch = "async-many-client", features = [ "testing" ] }
+many-identity-dsa = { git = "http://github.com/Denommus/many-rs", branch = "async-many-client", features = [ "testing", "ecdsa", "ed25519" ] }
 many-client = { git = "http://github.com/Denommus/many-rs", branch = "async-many-client" }
 num-bigint = "0.4"
 serde = "1.0"
