@@ -1,6 +1,6 @@
 ; A delegation certificate. The resolution of the `From` identity must follow
-; the same rules as
-delegation-certificate = CoseSign1<{
+; the same rules as a regular message, for this envelope.
+delegation-certificate = COSE_Sign<{
    ; From. The address of the delegated identity (`Alice` in the example).
    0 => address,
 
@@ -12,13 +12,6 @@ delegation-certificate = CoseSign1<{
    ; opening the envelope further.
    2 => time,
 
-   ; 
-
-   ; A description or message about this certificate. This is meant to be human
-   ; readable and is optional.
-   ? 7 => tstr,
-
-   ; A data message related to the certificate. This is meant to be machine
-   ; readable and optional.
-   ? 8 => bstr,
+   ; A description or message about this certificate.
+   ? 3 => memo,
 }>

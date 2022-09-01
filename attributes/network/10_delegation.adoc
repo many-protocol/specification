@@ -5,4 +5,7 @@ This attribute allows server to verify and create delegation certificates.
 A server can refuse to create a certificate for any reason.
 For example, it could only allow delegations to safe listed identities.
 
+== Endpoints
 
+There is only 1 endponit: `delegate.createCertificate()`.
+It takes an identity and delegate the server identity
