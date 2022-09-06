@@ -37,3 +37,11 @@ attribute-related-index     = attribute-id / sub-attribute-related-index
 ; A sub-attribute related index. Sub-indices can also be custom.
 sub-attribute-related-index = [attribute-id, uint]
                             / [attribute-id, attribute-related-index]
+
+; A memo contains a human readable portion and/or a machine readable portion.
+; The machine readable portion is expected to be CBOR, though it could be a
+; byte array containing another format.
+; A memo can contain multiple entries, as some of them might be formatted in
+; different ways, or contain additional data.
+; The memo itself CANNOT be empty and MUST contain at least one entry.
+memo = [ + (tstr / (bstr .cbor any)) ]

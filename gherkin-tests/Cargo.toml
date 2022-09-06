@@ -1,0 +1,21 @@
+[package]
+name = "gherkin-tests"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-trait = "0.1"
+cbor-diag = "0.1"
+clap = "3.2"
+cucumber = "0.13"
+futures = "0.3"
+many-identity = { git = "http://github.com/liftedinit/many-rs", branch = "main", features = [ "testing" ] }
+many-identity-dsa = { git = "http://github.com/liftedinit/many-rs", branch = "main", features = [ "testing", "ecdsa", "ed25519" ] }
+many-client = { git = "http://github.com/liftedinit/many-rs", branch = "main" }
+num-bigint = "0.4"
+serde = "1.0"
+tokio = { version = "1.20", features = [ "macros", "rt-multi-thread", "fs" ] }
+toml = "0.5"
+url = { version = "2.2", features = [ "serde" ] }
