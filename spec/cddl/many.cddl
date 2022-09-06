@@ -146,5 +146,16 @@ subresource-identity = bytes .cbor [ h'80'..h'FF', bytes .size 28, bytes .size 3
 
 ; An attribute can have one or many attribute arguments.
 attribute-arg = ()
-attribute-id = uint
+
+; An Attribute ID, which can be used and listed by a server.
+attribute-id = attribute-id-standard / attribute-id-custom
+
+; An Attribute ID is a well-defined, approved and specified attribute described in this specification.
+attribute-id-standard = uint
+
+; A custom attribute ID is a loosely-defined, unapproved and network-specific attribute. It uses negative
+; indices.
+attribute-id-custom = nint
+
+; An attribute contains an ID and arguments.
 attribute = attribute-id / [attribute-id, * attribute-arg]

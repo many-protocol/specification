@@ -1,0 +1,32 @@
+= Data Attribute (#6)
+:cddl: ./cddl/
+
+Any server that implements this attribute also provides a list of data points (either scalar or vectors) that can be queried by clients.
+The data attribute should be used to provide statistics, gauges and general queryable information about the server, its neighborhood and its network.
+
+Notably, those data aren't meant to be gathered and reduced in any way.
+They're information about the network, and not metrics for monitoring.
+
+All data are specified in this specification, and are considered informative on the node/neighborhood, rather than monitoring.
+Servers MAY NOT create new data types without being a specification.
+
+== Examples
+
+A data index space `[0, ...]` contains the number of identities or addresses the server has seen in a specific context.
+The server should disclose the `[5, [0]]` attribute with its argument.
+This data index has one sub-index for this example: `[0, [2, ...]]`, which is ledger specific.
+The server can skip the ledger-specific types if it does not implement the ledger attribute.
+
+These indices and types are specified in their own specification file in the `./5_data/` folder.
+
+== Design
+
+=== Alternatives
+
+One alternative was to add optional endpoints to existing attributes as new data was being added.
+This design was rejected as the goal of attributes is to be atomic, small, and immutable.
+As new data points are added, having a crosscutting extensible spec is simpler and more adaptable.
+Finally, the fact that a data point might be exposed without any attributes related to it was also considered as a con.
+
+Another alternative was to create new attributes when new data points were to be added.
+This would have probably been out of control over longer term and was rejected.
