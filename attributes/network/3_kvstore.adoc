@@ -9,22 +9,19 @@ It exposes the following endpoints:
 - <<_info, `kvstore.info`>>.
     Returns information about this kvstore.
 - <<_put, `kvstore.put`>>.
-    Returns the balance of the account specified (or the sender).
-- <<_get, `kvstore.get`>>. Creates new tokens and add them to an account.
+    Sets the value at the specific key.
+- <<_get, `kvstore.get`>>.
+    Returns the value stored at a specific key.
 
 == Errors
-The following error codes are reserved for ledger servers:
+The following error codes are reserved for kvstore servers:
 
-- 20001, `u(symbol)`.
-    A symbol name is unknown.
-- 20002, `unauthorized`.
-    A user is not authorized to make this transaction.
-- 20003, `insufficient_funds`.
-    An account does not have enough funds for a transaction.
+- 30001, `key_exists()`.
+An entry already exists at this location.
 
 == Keys
 Keys are any valid byte string, including NULL characters.
-Keys that don't exist should return
+Keys that don't exist should return an empty value.
 
 == Schema
 The store MUST NOT do any validation on the schema of values.
@@ -32,11 +29,8 @@ They MUST be considered opaque byte string.
 
 Other attributes might add this functionality.
 
-== ACLs
-Similarly, by default a kvstore is permission-less and should allow any identities to overwrite and read any keys.
-
 == Info
-The `kvstore.info` endpoint returns general information about the ledger.
+The `kvstore.info` endpoint returns general information about the kvstore.
 
 [sources,cddl]
 ----
@@ -57,12 +51,4 @@ The `kvstore.put` endpoint sets the value at a specific key.
 [sources,cddl]
 ----
 include::{cddl}/7_kvstore_commands.cddl[tag=put]
-----
-
-== Delete
-The `kvstore.delete` endpoint removes a value at a specific key.
-
-[sources,cddl]
-----
-include::{cddl}/7_kvstore_commands.cddl[tag=delete]
 ----
