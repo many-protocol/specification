@@ -1,9 +1,7 @@
 ; tag::info[]
-; Info endpoint.
 kvstore.info@param = ()
-kvstore.info@return = (info)
 
-info = {
+kvstore.info@return = {
     ; Hash value of the key value state. If two stores have the same hashes,
     ; chances are they have the same values on the same keys (with
     ; some risk of collision).
