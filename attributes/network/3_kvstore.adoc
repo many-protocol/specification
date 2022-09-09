@@ -31,6 +31,16 @@ They MUST be considered opaque byte string.
 
 Other attributes might add this functionality.
 
+== Permissions
+
+A kvstore MAY support the following permission schemes.
+
+- `public`: Anyone can read and write to any key.
+- `limited`:
+** Anyone can read any keys.
+** Anyone can write to a non-existing key.
+** An existing key can only be overwritten by its owner.
+
 == Info
 The `kvstore.info` endpoint returns general information about the kvstore.
 
