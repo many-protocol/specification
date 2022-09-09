@@ -9,3 +9,12 @@ kvstore.put@param = {
 
 kvstore.put@return = ()
 ; end::put[]
+
+; tag::delete[]
+kvstore.delete@param = {
+    ; Key.
+    0 => bstr,
+}
+
+kvstore.delete@return = ()
+; end::delete[]

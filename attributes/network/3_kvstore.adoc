@@ -8,10 +8,12 @@ It exposes the following endpoints:
 
 - <<_info, `kvstore.info`>>.
     Returns information about this kvstore.
-- <<_put, `kvstore.put`>>.
-    Sets the value at the specific key.
 - <<_get, `kvstore.get`>>.
     Returns the value stored at a specific key.
+- <<_put, `kvstore.put`>>.
+    Sets the value at the specific key.
+- <<_delete, `kvstore.delete`>>.
+    Delete the value stored at a specific key.
 
 == Errors
 The following error codes are reserved for kvstore servers:
@@ -52,3 +54,10 @@ The `kvstore.put` endpoint sets the value at a specific key.
 ----
 include::{cddl}/7_kvstore_commands.cddl[tag=put]
 ----
+
+== Delete
+The `kvstore.delete` endpoint removes a value at a specific key.
+
+[sources,cddl]
+----
+include::{cddl}/7_kvstore_commands.cddl[tag=delete]
