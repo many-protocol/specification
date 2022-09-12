@@ -36,13 +36,13 @@ Other attributes might add this functionality.
 A kvstore MAY support the following permission schemes.
 
 - `public`:
-** Anyone can read from a key
-** Anyone except `anonymous` can write to a key.
+** Anyone can read the VALUE located at KEY
+** Anyone except `anonymous` can write a VALUE to KEY.
 - `limited`:
-** Anyone can read from a key.
-** Anyone except `anonymous` can write to a key.
-** Only the owner of a key can overwrite it.
-** Only the owner of a key can delete it.
+** Anyone can read the VALUE located at KEY.
+** Anyone except `anonymous` can write a VALUE to KEY.
+** Only the owner of a KEY can overwrite its VALUE.
+** Only the owner of a KEY can delete its VALUE.
 
 == Info
 The `kvstore.info` endpoint returns general information about the kvstore.
