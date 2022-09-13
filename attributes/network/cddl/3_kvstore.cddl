@@ -1,12 +1,3 @@
-; tag::types[]
-permission = (
-    public /
-    limited
-)
-public = 0
-limited = 1
-; end::types[]
-
 ; tag::info[]
 kvstore.info@param = ()
 

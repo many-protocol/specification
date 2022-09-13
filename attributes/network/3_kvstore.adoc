@@ -18,9 +18,6 @@ It exposes the following endpoints:
 == Errors
 The following error codes are reserved for kvstore servers:
 
-- 30001, `key_exists()`.
-An entry already exists at this location.
-
 == Keys
 Keys are any valid byte string, including NULL characters.
 Keys that don't exist should return an empty value.
@@ -31,14 +28,8 @@ They MUST be considered opaque byte string.
 
 Other attributes might add this functionality.
 
-== Permissions
+== ACL
 
-A kvstore MAY support the following permission schemes.
-
-- `public`:
-** Anyone can read the VALUE located at KEY
-** Anyone except `anonymous` can write a VALUE to KEY.
-- `limited`:
 ** Anyone can read the VALUE located at KEY.
 ** Anyone except `anonymous` can write a VALUE to KEY.
 ** Only the owner of a KEY can overwrite its VALUE.
