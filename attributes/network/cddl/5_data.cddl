@@ -1,0 +1,58 @@
+; tag::types[]
+; A data index. Currently, custom data indices SHOULD NOT be accepted.
+data-index = attribute-related-index
+
+; A data value.
+data-value = data-value-type-counter
+           / data-value-type-gauge
+
+; The type of a data.
+data-type = data-type-counter
+          / data-type-gauge
+
+; A monotonically incrementing unsigned integer.
+data-type-counter = 0
+data-value-type-counter = uint
+
+; An integer, float or big integer.
+data-type-gauge = 1
+data-value-type-gauge = int / float / bigint
+
+data-info = {
+    ; Type.
+    0 => data-type,
+
+    ; Shortname. This is specified.
+    1 => tstr,
+}
+; end::types[]
+
+; tag::info[]
+data.info@param = ()
+
+data.info@return = {
+    ; List of supported data.
+    0 => [ * data-index ],
+}
+; end::info[]
+
+; tag::getInfo[]
+data.getInfo@param = {
+    0 => data-index // [ * data-index ],
+}
+
+data.getInfo@return = {
+    * data-index => data-info,
+}
+; end::getInfo[]
+
+; tag::query[]
+; Query one or more data.
+data.query@param = {
+    ; The index of the data to query.
+    0 => data-index // [ * data-index ],
+}
+data.query@return = {
+    * data-index => data-value,
+}
+; end::query[]

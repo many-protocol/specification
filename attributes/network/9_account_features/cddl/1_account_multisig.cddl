@@ -236,9 +236,6 @@ account.multisigInfo@return = {
     ; Unix EPOCH.
     6 => time,
 
-    ; A CBOR associated data field.
-    ? 7 => bstr .cbor any,
-
     ; A state of the transaction.
     8 => multisig-transaction-state,
 }

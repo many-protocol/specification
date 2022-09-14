@@ -1,0 +1,15 @@
+= KVStore Commands Attribute (#6)
+:cddl: ./cddl/
+
+This attribute is used by servers that supports commands related to KVStore.
+
+== Endpoints
+
+=== Put
+Insert a key into the store.
+The server MAY return an error if the identity does not have access to the key.
+The server MAY return an error if the key or the value are outside of constraints set by the server itself (e.g. size).
+
+=== Delete
+Deletes a key from the store.
+The server MAY return an error if the identity does not have access to the key.
