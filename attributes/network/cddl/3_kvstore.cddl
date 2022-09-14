@@ -9,9 +9,6 @@ kvstore.info@return = {
     ; The actual hashing method and size of the hash is left to the
     ; implementation.
     0 => bstr,
-
-    ; The permission scheme currently enabled
-    1 => permission,
 }
 ; end::info[]
 
