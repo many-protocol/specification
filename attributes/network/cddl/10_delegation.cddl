@@ -1,0 +1,10 @@
+; tag::create-delegation[]
+; This method does not take an argument, rather using the `from` field of the
+; message.
+delegate.createCertificate@param = {}
+
+; Returns a delegation (or an error).
+delegate.createCertificate@return = {
+    0 => delegation-certificate,
+}
+; end::create-delegation[]

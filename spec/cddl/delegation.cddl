@@ -4,7 +4,8 @@ delegation-certificate = COSE_Sign<{
    ; From. The address of the delegated identity (`Alice` in the example).
    0 => address,
 
-   ; To. The address of the identity that can use the above identity.
+   ; To. The address of the identity that can use the above identity (`Bob` in
+   ; the example).
    1 => address,
 
    ; An expiration timestamp. If the system time is past this timestamp,
