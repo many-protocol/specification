@@ -10,3 +10,28 @@ Insert a key into the store.
 The server MAY return an error if the identity does not have access to the key.
 The server MAY return an error if the key or the value are outside of constraints set by the server itself (e.g. size).
 
+=== Delete
+Delete a key and its value from the store
+The server MAY return an error if the identity does not have access to the key.
+The server MAY return an error if the key is outside of constraints set by the server itself (e.g. size).
+
+== CDDL
+
+=== Types
+[sources,cddl]
+----
+include::{cddl}/7_kvstore_commands.cddl[tag=types]
+----
+
+=== Put
+[sources,cddl]
+----
+include::{cddl}/7_kvstore_commands.cddl[tag=put]
+----
+
+=== Delete
+[sources,cddl]
+----
+include::{cddl}/7_kvstore_commands.cddl[tag=delete]
+----
+

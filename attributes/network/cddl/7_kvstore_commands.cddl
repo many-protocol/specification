@@ -1,3 +1,25 @@
+; tag::types[]
+event-type-put = [7, 0]
+event-type-delete = [7, 1]
+
+event-type /= event-type-put
+           /  event-type-delete
+
+event-info-put = {
+    0 => event-type-put,
+    1 => bstr,      ; Key
+    2 => bstr,      ; Value
+}
+
+event-info-delete = {
+    0 => event-type-delete,
+    1 => bstr,      ; Key
+}
+
+event-info /= event-info-put
+           /  event-info-delete
+; end::types[]
+
 ; tag::put[]
 kvstore.put@param = {
     ; Key.
