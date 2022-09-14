@@ -1,0 +1,25 @@
+== KvStore Account Feature Attribute (#2)
+:cddl: ./cddl/
+
+This attribute adds support for kvstore transactions available to a regular identity on a kvstore.
+Any allowed (see <<Role>>) identities listed in an account using this attribute can perform regular transactions on behalf of the account.
+
+Verification that the sender is able to transact on behalf of an account is left to the server.
+
+For example, a `kvstore.put` call with an able account as the source identity would perform transactions from this account.
+
+== Role
+Two new roles are added by this feature,
+
+- `"canKvStorePut"`, which allow any identities to (over-)write a VALUE located at KEY.
+- `"canKvStoreDelete"`, which allow any identities to delete a KEY and its VALUE.
+
+Identities MUST either be an `"owner"` or have those roles to be allowed to perform transactions.
+
+== CDDL
+
+=== Types
+[sources,cddl]
+----
+include::{cddl}/2_account_kvstore.cddl[tag=types]
+----
