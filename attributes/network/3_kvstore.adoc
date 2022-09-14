@@ -18,6 +18,11 @@ It exposes the following endpoints:
 == Errors
 The following error codes are reserved for kvstore servers:
 
+- 30001, `permission_denied`.
+    A user do not have the authorization to modify this key.
+- 30002, `invalid_initial_state(expected, actual)`.
+    Invalid initial state hash.
+
 == Keys
 Keys are any valid byte string, including NULL characters.
 Keys that don't exist should return an empty value.
