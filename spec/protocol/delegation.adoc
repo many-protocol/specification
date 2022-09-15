@@ -24,16 +24,46 @@ Multiple certificates can be included to allow for a chain of delegations.
 The root of the chain will be the final identity of the sender.
 For example, if `Bob` were to delegate his identity to `Charlie`, `Charlie` could include both `Alice -> Bob` delegate certificate and `Bob -> Charlie` certificate in a message to impersonate `Alice`.
 
+[plantuml, format=png]
+....
+@startuml
+title Delegation Request Sequence
+
+actor alice as "Alice\nmabc..defg"
+actor bob as "Bob\nmhij..klmn"
+participant server as "Server"
+
+== Certificate Creation ==
+bob -> alice : Public Key
+alice -> alice : `many delegate create`
+alice -> bob : certificate
+
+== Request ==
+
+bob -> server : message\n\
+    signature: mhij..klmn\n\
+    from: mabc..defg\n\
+    attributes: [2, certificate]
+activate server
+server -> bob : Response
+deactivate server
+
+@enduml
+....
+
 === Attributes
 
 There are 3 attributes related to this specification:
 
-- xref:../../attributes/network/10_delegation.adoc[10 – Delegation] which allows network to sign delegations automatically.
-- xref:../../attributes/request/2_delegation.adoc[2 - Delegation (Request)] which allows requests to add delegation.
+- xref:../../attributes/network/10_delegation.adoc[10 – Delegation] which allows a server to sign delegations (if supported) and advertise they support delegation.
+- xref:../../attributes/request/2_delegation.adoc[2 - Delegation (Request)] which allows requests to have a delegation.
 - xref:../../attributes/response/2_delegation.adoc[2 - Delegation (Response)] which allows responses to have a delegation.
 
 The certificate is described in the spec CDDL and referred by the attributes above.
+Certificates are passed along with a request or response as an attribute, and are not part of the envelope.
 
-=== Certification
+=== Acceptance
 
-Certificates
+A network who does not advertise xref:../../attributes/network/10_delegation.adoc[attribute 10] should error out if the attribute 2 is found in a request (see unknown attributes).
+
+## TODO: finish above sentence

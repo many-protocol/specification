@@ -15,4 +15,6 @@ delegation-certificate = COSE_Sign<{
 
    ; A description or message about this certificate.
    ? 3 => memo,
+
+   ; A threshold
 }>
