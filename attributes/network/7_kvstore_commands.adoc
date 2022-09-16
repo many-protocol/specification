@@ -10,8 +10,11 @@ Insert a key into the store.
 The server MAY return an error if the identity does not have access to the key.
 The server MAY return an error if the key or the value are outside of constraints set by the server itself (e.g. size).
 
-=== Delete
-Delete a key and its value from the store
+=== Disable
+The server MAY delete the KEY and its VALUE from the database.
+The KEY and its VALUE MUST not be reusable, except by its owner
+The server MAY still return the KEY metadata using `kvstore.query`, with the disabled field filled, or return an error.
+The server MUST error on all endpoints that would change the KEY/VALUE.
 The server MAY return an error if the identity does not have access to the key.
 The server MAY return an error if the key is outside of constraints set by the server itself (e.g. size).
 
@@ -29,9 +32,9 @@ include::{cddl}/7_kvstore_commands.cddl[tag=types]
 include::{cddl}/7_kvstore_commands.cddl[tag=put]
 ----
 
-=== Delete
+=== Disable
 [sources,cddl]
 ----
-include::{cddl}/7_kvstore_commands.cddl[tag=delete]
+include::{cddl}/7_kvstore_commands.cddl[tag=disable]
 ----
 

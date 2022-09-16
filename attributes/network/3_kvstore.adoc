@@ -10,17 +10,19 @@ It exposes the following endpoints:
     Returns information about this kvstore.
 - <<_get, `kvstore.get`>>.
     Returns the value stored at a specific key.
+- <<_query, `kvstore.query`>>.
+    Returns the metadata associated with a specific key.
 - <<_put, `kvstore.put`>>.
     Sets the value at the specific key.
-- <<_delete, `kvstore.delete`>>.
-    Delete the value stored at a specific key.
+- <<_disable, `kvstore.disable`>>.
+    Disable or delete the given key and its value.
 
 == Errors
 The following error codes are reserved for kvstore servers:
 
 - 30001, `permission_denied`.
     A user do not have the authorization to modify this key.
-- 30002, `invalid_initial_state(expected, actual)`.
+- 30002, `invalid_initial_hash(expected, actual)`.
     Invalid initial state hash.
 
 == Keys
@@ -34,11 +36,10 @@ They MUST be considered opaque byte string.
 Other attributes might add this functionality.
 
 == ACL
-
 ** Anyone can read the VALUE located at KEY.
 ** Anyone except `anonymous` can write a VALUE to KEY.
 ** Only the owner of a KEY can overwrite its VALUE.
-** Only the owner of a KEY can delete its VALUE.
+** Only the owner of a KEY can disable or delete its VALUE.
 
 == Info
 The `kvstore.info` endpoint returns general information about the kvstore.
@@ -56,6 +57,14 @@ The `kvstore.get` endpoint returns the value stored at a specific key.
 include::{cddl}/3_kvstore.cddl[tag=get]
 ----
 
+== Query
+The `kvstore.query` endpoint returns the metadata associated with a specific key.
+
+[source,cddl]
+----
+include::{cddl}/3_kvstore.cddl[tag=query]
+----
+
 == Put
 The `kvstore.put` endpoint sets the value at a specific key.
 
@@ -64,9 +73,9 @@ The `kvstore.put` endpoint sets the value at a specific key.
 include::{cddl}/7_kvstore_commands.cddl[tag=put]
 ----
 
-== Delete
-The `kvstore.delete` endpoint removes a value at a specific key.
+== Disable
+The `kvstore.disable` endpoint removes a value at a specific key.
 
 [sources,cddl]
 ----
-include::{cddl}/7_kvstore_commands.cddl[tag=delete]
+include::{cddl}/7_kvstore_commands.cddl[tag=disable]

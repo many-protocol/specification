@@ -23,3 +23,15 @@ kvstore.get@return = {
     ? 0 => bstr,
 }
 ; end::get[]
+
+; tag::query[]
+kvstore.query@param = {
+    ; The key to query
+    0 => bstr,
+}
+
+kvstore.query@return = {
+    ; The key owner
+    0 => non-anonymous-identity,
+}
+; end::query[]
