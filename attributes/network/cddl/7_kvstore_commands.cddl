@@ -45,6 +45,10 @@ kvstore.put@return = ()
 kvstore.disable@param = {
     ; Key.
     0 => bstr,
+
+    ; Alternative key owner
+    ; The sender must be related to this identity, e.g., account, subresource, etc.
+    ? 1 => non-anonymous-identity,
 }
 
 kvstore.disable@return = ()
