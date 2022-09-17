@@ -1,0 +1,15 @@
+= Delegation Response Attribute (#1)
+:cddl: ./cddl/
+
+This attribute is used to delegate the `from` field of a response message to a different identity than the one used to sign the envelope.
+
+For more details, see xref:../../spec/protocol/delegation.adoc[Delegation].
+
+== Argument
+
+A server returning this response MUST pass an argument that is either a certificate or an array of certificates:
+
+[source,cddl]
+....
+delegation@response-attribute-arg = delegation-certificate / [ + delegation-certificate ]
+....

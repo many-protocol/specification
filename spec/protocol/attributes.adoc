@@ -29,6 +29,7 @@ For example, the blockchain attribute (1) implement endpoints that are generic t
 An implementation of a blockchain, for example, might add more methods to manage the blockchain itself.
 
 === Return Values
+
 Some attributes may change the return value of related attributes.
 This is important as not every attribute is synchronous.
 
@@ -43,6 +44,17 @@ The tags are specified per attribute.
 A tag MUST NOT be added to the result if the value follows the schema specified by the attribute specification.
 
 == Request Attributes
-These
+TBD
+
+== Response Attributes
+TBD
 
 == Unknown Attributes
+
+A server who receives a request with an attribute it does not recognize should automatically error our with error code `UnknownRequestAttribute` (-12) and a list of attributes that caused the error.
+No further action should be taken; an unknown attribute should have no side effect.
+The client is then welcome to resend the request without the faulty attribute.
+
+A client receiving a response with an attribute it does not recognize should ignore the attribute, and likely report a warning.
+In some cases the payload might change, so a client that sees unknown attributes in a response should try its best to interpret its payload.
+As an example, a CLI tool that sees `[1, ...]` attribute and doesn't support asynchronous responses should error out with a comment that the payload was empty (see xref:../../attributes/response/1_async.adoc[Response Attribute 1 - Async] for more details).

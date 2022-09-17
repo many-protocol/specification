@@ -22,7 +22,10 @@ The identity of a sender must be resolved with the following algorithm:
    b. Use the key to try and validate the COSE signature.
    c. The resolved identity is the one derived from the public key (see xref:identity.adoc#_cose_key[Identity – COSE Key]]).
 
-3. The resulting key is compared with the message's `from` field:
+3. _This is where additional resolution steps should be inserted._
+   If the server does not support other resolution steps, it should pass to the next step.
+
+4. The resulting key is compared with the message's `from` field:
    a. if the `from` address is anonymous and the resolved key is not, the server MUST return an error.
    b. if the `from` address is a public key and it matches the resolved key, the address is used as the sender.
    c. if the `from` address is a sub-resource identity and its public key matches the resolved key, use the subresource identity address as the sender.
