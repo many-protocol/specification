@@ -12,7 +12,7 @@ For example, a `kvstore.put` call with an able account as the source identity wo
 Two new roles are added by this feature,
 
 - `"canKvStorePut"`, which allow any identities to (over-)write a VALUE located at KEY.
-- `"canKvStoreDelete"`, which allow any identities to delete a KEY and its VALUE.
+- `"canKvStoreDisable"`, which allow any identities to disable/delete a KEY and its VALUE.
 
 Identities MUST either be an `"owner"` or have those roles to be allowed to perform transactions.
 

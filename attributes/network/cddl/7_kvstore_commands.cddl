@@ -32,7 +32,7 @@ kvstore.put@param = {
     1 => bstr,
 
     ; Alternative key owner
-    ; The sender must be related to this identity, e.g., account, subresource, etc.
+    ; The sender must be related to this identity, e.g., account, etc.
     ? 2 => non-anonymous-identity,
 }
 
