@@ -16,6 +16,7 @@ event-info-disable = {
     0 => event-type-disable,
     1 => bstr,                    ; Key
     ? 2 => non-anonymous-identity ; Key owner
+    ? 3 => reason<u64>            ; The reason this was deleted/disabled.
 }
 
 event-info /= event-info-put

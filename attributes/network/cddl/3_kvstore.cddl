@@ -33,5 +33,13 @@ kvstore.query@param = {
 kvstore.query@return = {
     ; The key owner
     0 => non-anonymous-identity,
+
+    ; Whether this key is still enabled. A server MAY choose to disable
+    ; keys for some reasons (or instead of deleting), and MAY choose to
+    ; put an error record here instead of `true`. This field is not part of
+    ; the regular error code space and should only use application-specific
+    ; codes (positive codes).
+    ; If this field is omitted, this account is enabled.
+    ? 1 => bool / reason<uint>,
 }
 ; end::query[]
