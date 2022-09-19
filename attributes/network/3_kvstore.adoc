@@ -24,6 +24,14 @@ The following error codes are reserved for kvstore servers:
     A user do not have the authorization to modify this key.
 - 30002, `invalid_initial_hash(expected, actual)`.
     Invalid initial state hash.
+- 30003, `key_disabled`
+    The key was disabled by its owner.
+- 30004, `anon_alt_denied`
+    Anonymous alternative owner denied.
+- 30005, `subres_alt_unsupported`
+    Subresource alternative owner unsupported
+- 30006, `key_not_found`
+    The key was not found.
 
 == Keys
 Keys are any valid byte string, including NULL characters.
