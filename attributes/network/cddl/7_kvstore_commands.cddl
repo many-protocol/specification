@@ -9,13 +9,13 @@ event-info-put = {
     0 => event-type-put,
     1 => bstr,                    ; Key
     2 => bstr,                    ; Value
-    ? 3 => non-anonymous-identity ; Alternative key owner
+    ? 3 => non-anonymous-identity ; Key owner
 }
 
 event-info-disable = {
     0 => event-type-disable,
     1 => bstr,                    ; Key
-    ? 2 => non-anonymous-identity ; Alternative key owner
+    ? 2 => non-anonymous-identity ; Key owner
 }
 
 event-info /= event-info-put
