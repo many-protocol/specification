@@ -32,6 +32,8 @@ The following error codes are reserved for kvstore servers:
     Subresource alternative owner unsupported
 - 30006, `key_not_found`
     The key was not found.
+- 30007, `cannot_disable_empty_key`
+    Unable to disable an empty key.
 
 == Keys
 Keys are any valid byte string, including NULL characters.
