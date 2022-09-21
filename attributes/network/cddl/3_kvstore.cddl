@@ -32,7 +32,7 @@ kvstore.query@param = {
 
 kvstore.query@return = {
     ; The key owner
-    0 => non-anonymous-identity,
+    ? 0 => non-anonymous-identity,
 
     ; Whether this key is still enabled. A server MAY choose to disable
     ; keys for some reasons (or instead of deleting), and MAY choose to
