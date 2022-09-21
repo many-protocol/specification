@@ -12,7 +12,7 @@ The server MAY return an error if the key or the value are outside of constraint
 
 === Disable
 The server MAY delete the KEY and its VALUE from the database.
-The KEY and its VALUE MUST not be reusable, except by its owner
+The KEY and its VALUE MUST not be reusable, except potentially by its owner.
 The server MAY still return the KEY metadata using `kvstore.query`, with the disabled field filled, or return an error.
 The server MUST error on all endpoints that would change the KEY/VALUE.
 The server MAY return an error if the identity does not have access to the key.
