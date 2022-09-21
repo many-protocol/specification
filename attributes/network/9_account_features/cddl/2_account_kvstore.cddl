@@ -1,0 +1,4 @@
+; tag::types[]
+account-role /= "canKvStorePut"
+             /  "canKvStoreDisable"
+; end::types[]

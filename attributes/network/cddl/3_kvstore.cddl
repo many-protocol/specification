@@ -1,9 +1,7 @@
 ; tag::info[]
-; Info endpoint.
 kvstore.info@param = ()
-kvstore.info@return = (info)
 
-info = {
+kvstore.info@return = {
     ; Hash value of the key value state. If two stores have the same hashes,
     ; chances are they have the same values on the same keys (with
     ; some risk of collision).
@@ -25,3 +23,23 @@ kvstore.get@return = {
     ? 0 => bstr,
 }
 ; end::get[]
+
+; tag::query[]
+kvstore.query@param = {
+    ; The key to query
+    0 => bstr,
+}
+
+kvstore.query@return = {
+    ; The key owner
+    ? 0 => non-anonymous-identity,
+
+    ; Whether this key is still enabled. A server MAY choose to disable
+    ; keys for some reasons (or instead of deleting), and MAY choose to
+    ; put an error record here instead of `true`. This field is not part of
+    ; the regular error code space and should only use application-specific
+    ; codes (positive codes).
+    ; If this field is omitted, this account is enabled.
+    ? 1 => bool / reason<uint>,
+}
+; end::query[]
