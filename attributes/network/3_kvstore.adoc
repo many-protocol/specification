@@ -47,7 +47,8 @@ Other attributes might add this functionality.
 
 == ACL
 ** Anyone can read the VALUE located at KEY.
-** Anyone except `anonymous` can write a VALUE to KEY.
+** Anyone can write a VALUE to KEY.
+   The server MAY refuse to write to KEY for a given identity.
 ** Only the owner of a KEY can overwrite its VALUE.
 ** Only the owner of a KEY can disable or delete its VALUE.
 
