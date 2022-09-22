@@ -7,5 +7,27 @@ For example, it could only allow delegations to safe listed identities.
 
 == Endpoints
 
-There is only 1 endpoint: `delegate.createCertificate()`.
-It takes an identity and delegate the server's identity, if possible.
+There is 2 endpoints: `delegate.createCertificate()` and `delegate.whoAmI()`.
+Both take an identity from the message itself.
+
+`delegate.createCertificate()` delegates the server's identity, if possible, to the identity of the message.
+Servers are not under any obligation to delegate their identities, and MAY refuse all requests to this endpoint.
+
+`delegate.whoAmI()` returns the identity that was understood from the message.
+Using a similar message to a different endpoint would result in the same identity being used.
+The server MUST ignore the payload entirely.
+
+== CDDL
+=== createCertificate
+[sources,cddl]
+----
+include::{cddl}10_delegation.cddl[tag=create-certificate]
+----
+
+=== whoAmI
+[sources,cddl]
+----
+include::{cddl}10_delegation.cddl[tag=whoami]
+----
+
+

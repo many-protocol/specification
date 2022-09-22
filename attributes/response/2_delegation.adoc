@@ -11,5 +11,5 @@ A server returning this response MUST pass an argument that is either a certific
 
 [source,cddl]
 ....
-delegation@response-attribute-arg = delegation-certificate / [ + delegation-certificate ]
+include::{cddl}/2_delegation.cddl[]
 ....

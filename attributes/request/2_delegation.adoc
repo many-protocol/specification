@@ -11,5 +11,5 @@ A client returning this request MUST pass an argument that is either a certifica
 
 [source,cddl]
 ....
-delegation@request-attribute-arg = delegation-certificate / [ + delegation-certificate ]
+include::{cddl}/2_delegation.cddl[]
 ....

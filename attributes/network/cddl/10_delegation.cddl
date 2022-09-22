@@ -1,4 +1,4 @@
-; tag::create-delegation[]
+; tag::create-certificate[]
 ; This method does not take an argument, rather using the `from` field of the
 ; message.
 delegate.createCertificate@param = {}
@@ -7,4 +7,14 @@ delegate.createCertificate@param = {}
 delegate.createCertificate@return = {
     0 => delegation-certificate,
 }
-; end::create-delegation[]
+; end::create-certificate[]
+
+; tag::whoami[]
+; Returns which identity the message to. Useful for testing delegations.
+delegate.whoAmI@param = ()
+
+; Returns who you are.
+delegate.whoAmI@return = {
+    0 => address
+}
+; end::whoami[]
