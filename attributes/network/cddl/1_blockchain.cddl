@@ -21,9 +21,9 @@ single-block-query = {
 bound-block-query =
     single-block-query
     ; Height range.
-    / { 1 => bound<uint> }
+    / { 1 => range<uint> }
     ; Time value or time range.
-    / { 2 => time / bound<time> }
+    / { 2 => time / range<time> }
 
 ; A block identifier, as a way to target a block. This matches loosely the fields
 ; of single-block-query.
@@ -147,6 +147,33 @@ blockchain.block@return = {
     0 => block,
 }
 ; end::block[]
+
+; tag::list[]
+; The blockchain.list endpoint query the list of blocks and returns multiple blocks with their
+; summaries.
+blockchain.list@param = {
+    ; Maximum number of blocks to return. The server can still limit the number of
+    ; blocks it returns if this number is high.
+    ? 0 => uint,
+
+    ; Whether or not to show the last events or the first ones found (ordering).
+    ; The default behaviour is left to the server implementation.
+    ; Ordering is done by block height.
+    ? 1 => order,
+
+    ; Block filter criteria.
+    ? 2 => bound-block-query,
+}
+
+blockchain.list@return = {
+    ; Latest height of the blockchain (currently).
+    0 => uint,
+
+    ; List of blocks of the blocks found. This might be capped to the size of a response
+    ; and return less blocks than requested or transaction hashes instead of content.
+    1 => [ * block ],
+}
+; end::list[]
 
 ; tag::transaction[]
 ; The blockchain.transaction endpoint returns a single transaction by its identifier.

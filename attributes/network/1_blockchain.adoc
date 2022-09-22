@@ -31,3 +31,6 @@ In that case the payload of the response MUST be empty.
 
 === Block
 The `blockchain.block` endpoint returns a block and its metadata.
+
+=== List
+The `blockchain.list` endpoint list block infos according to some filter criteria.
