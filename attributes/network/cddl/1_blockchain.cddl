@@ -7,7 +7,7 @@ message = bstr .cbor request
 
 ; A block query, which can contain either a hash, index (or height) or time.
 ; This targets a single block. Since multiple blocks might have been created
-; at the same time, this cannot include a time value (use a bounded block
+; at the same time, this cannot include a time value (use a ranged block
 ; query instead).
 single-block-query = {
     ; A hash of a block. The length and algorithm is implementation specific.
@@ -16,14 +16,13 @@ single-block-query = {
     // 1 => uint
 }
 
-; A block query over a range of height or time. This can also be a single
-; block-query.
-bound-block-query =
-    single-block-query
+; A block query over a range of height or time. This cannot be a hash or
+; specific height (use `blockchain.block` for specific height/hash).
+range-block-query =
     ; Height range.
-    / { 1 => range<uint> }
+    { 1 => range<uint> }
     ; Time value or time range.
-    / { 2 => time / range<time> }
+    / { 2 => range<time> }
 
 ; A block identifier, as a way to target a block. This matches loosely the fields
 ; of single-block-query.
@@ -162,15 +161,15 @@ blockchain.list@param = {
     ? 1 => order,
 
     ; Block filter criteria.
-    ? 2 => bound-block-query,
+    ? 2 => range-block-query,
 }
 
 blockchain.list@return = {
     ; Latest height of the blockchain (currently).
     0 => uint,
 
-    ; List of blocks of the blocks found. This might be capped to the size of a response
-    ; and return less blocks than requested or transaction hashes instead of content.
+    ; List of blocks found. This might be capped to the size of a response and return less blocks
+    ; than requested or transaction hashes instead of content.
     1 => [ * block ],
 }
 ; end::list[]

@@ -29,8 +29,48 @@ In that case the payload of the response MUST be empty.
 
 == Endpoints
 
+=== Types
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=types]
+----
+
+=== Info
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=info]
+----
+
 === Block
 The `blockchain.block` endpoint returns a block and its metadata.
 
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=block]
+----
+
 === List
 The `blockchain.list` endpoint list block infos according to some filter criteria.
+
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=list]
+----
+
+=== Transaction
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=transaction]
+----
+
+=== Request
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=request]
+----
+
+=== Response
+[sources,cddl]
+----
+include::{cddl}1_blockchain.cddl[tag=response]
+----
