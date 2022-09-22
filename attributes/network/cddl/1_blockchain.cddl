@@ -19,7 +19,7 @@ single-block-query = {
 ; A block query over a range of height or time. This can also be a single
 ; block-query.
 bound-block-query =
-    block-query
+    single-block-query
     ; Height range.
     / { 1 => bound<uint> }
     ; Time value or time range.
