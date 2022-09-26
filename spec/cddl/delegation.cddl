@@ -16,7 +16,3 @@ delegation-certificate = COSE_Sign<{
    ; A description or message about this certificate.
    ? 3 => memo,
 }>
-
-; When using this as part of a request or response attribute, it is a byte
-; string.
-delegation-certificate-bstr = bstr .cbor delegation-certificate

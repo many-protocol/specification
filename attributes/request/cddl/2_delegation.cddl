@@ -1,1 +1,1 @@
-delegation@request-attribute-arg = delegation-certificate-bstr / [ + delegation-certificate-bstr ]
+delegation@request-attribute-arg = delegation-certificate / [ + delegation-certificate ]
