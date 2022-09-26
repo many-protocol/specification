@@ -8,23 +8,36 @@ It exposes the following endpoints:
 
 - <<_info, `kvstore.info`>>.
     Returns information about this kvstore.
+- <<_get, `kvstore.get`>>.
+    Returns the value stored at a specific key.
+- <<_query, `kvstore.query`>>.
+    Returns the metadata associated with a specific key.
 - <<_put, `kvstore.put`>>.
-    Returns the balance of the account specified (or the sender).
-- <<_get, `kvstore.get`>>. Creates new tokens and add them to an account.
+    Sets the value at the specific key.
+- <<_disable, `kvstore.disable`>>.
+    Disable or delete the given key and its value.
 
 == Errors
-The following error codes are reserved for ledger servers:
+The following error codes are reserved for kvstore servers:
 
-- 20001, `u(symbol)`.
-    A symbol name is unknown.
-- 20002, `unauthorized`.
-    A user is not authorized to make this transaction.
-- 20003, `insufficient_funds`.
-    An account does not have enough funds for a transaction.
+- 30001, `permission_denied`.
+    A user do not have the authorization to modify this key.
+- 30002, `invalid_initial_hash(expected, actual)`.
+    Invalid initial state hash.
+- 30003, `key_disabled`
+    The key was disabled by its owner.
+- 30004, `anon_alt_denied`
+    Anonymous alternative owner denied.
+- 30005, `subres_alt_unsupported`
+    Subresource alternative owner unsupported
+- 30006, `key_not_found`
+    The key was not found.
+- 30007, `cannot_disable_empty_key`
+    Unable to disable an empty key.
 
 == Keys
 Keys are any valid byte string, including NULL characters.
-Keys that don't exist should return
+Keys that don't exist should return an empty value.
 
 == Schema
 The store MUST NOT do any validation on the schema of values.
@@ -32,11 +45,15 @@ They MUST be considered opaque byte string.
 
 Other attributes might add this functionality.
 
-== ACLs
-Similarly, by default a kvstore is permission-less and should allow any identities to overwrite and read any keys.
+== ACL
+** Anyone can read the VALUE located at KEY.
+** Anyone can write a VALUE to KEY.
+   The server MAY refuse to write to KEY for a given identity.
+** Only the owner of a KEY can overwrite its VALUE.
+** Only the owner of a KEY can disable or delete its VALUE.
 
 == Info
-The `kvstore.info` endpoint returns general information about the ledger.
+The `kvstore.info` endpoint returns general information about the kvstore.
 
 [sources,cddl]
 ----
@@ -51,6 +68,14 @@ The `kvstore.get` endpoint returns the value stored at a specific key.
 include::{cddl}/3_kvstore.cddl[tag=get]
 ----
 
+== Query
+The `kvstore.query` endpoint returns the metadata associated with a specific key.
+
+[source,cddl]
+----
+include::{cddl}/3_kvstore.cddl[tag=query]
+----
+
 == Put
 The `kvstore.put` endpoint sets the value at a specific key.
 
@@ -59,10 +84,9 @@ The `kvstore.put` endpoint sets the value at a specific key.
 include::{cddl}/7_kvstore_commands.cddl[tag=put]
 ----
 
-== Delete
-The `kvstore.delete` endpoint removes a value at a specific key.
+== Disable
+The `kvstore.disable` endpoint removes a value at a specific key.
 
 [sources,cddl]
 ----
-include::{cddl}/7_kvstore_commands.cddl[tag=delete]
-----
+include::{cddl}/7_kvstore_commands.cddl[tag=disable]

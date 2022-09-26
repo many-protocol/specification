@@ -1,3 +1,28 @@
+; tag::types[]
+event-type-put = [7, 0]
+event-type-disable = [7, 1]
+
+event-type /= event-type-put
+           /  event-type-disable
+
+event-info-put = {
+    0 => event-type-put,
+    1 => bstr,                    ; Key
+    2 => bstr,                    ; Value
+    ? 3 => non-anonymous-identity ; Key owner
+}
+
+event-info-disable = {
+    0 => event-type-disable,
+    1 => bstr,                    ; Key
+    ? 2 => non-anonymous-identity ; Key owner
+    ? 3 => reason<u64>            ; The reason this was deleted/disabled.
+}
+
+event-info /= event-info-put
+           /  event-info-disable
+; end::types[]
+
 ; tag::put[]
 kvstore.put@param = {
     ; Key.
@@ -5,16 +30,28 @@ kvstore.put@param = {
 
     ; Value
     1 => bstr,
+
+    ; Alternative key owner
+    ; The sender must be related to this identity, e.g., account, etc.
+    ? 2 => non-anonymous-identity,
 }
 
 kvstore.put@return = ()
 ; end::put[]
 
-; tag::delete[]
-kvstore.delete@param = {
+; tag::disable[]
+; Disable or delete an KEY/VALUE.
+; The KEY/VALUE cannot be reused, except by its owner
+; The server MUST return an error if the sender does not have the `"owner"` role or the `canKvStoreDisable` role for the given key
+; The server MAY choose to fully delete the KEY and its VALUE
+kvstore.disable@param = {
     ; Key.
     0 => bstr,
+
+    ; Alternative key owner
+    ; The sender must be related to this identity, e.g., account, subresource, etc.
+    ? 1 => non-anonymous-identity,
 }
 
-kvstore.delete@return = ()
-; end::delete[]
+kvstore.disable@return = ()
+; end::disable[]

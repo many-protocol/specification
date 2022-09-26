@@ -7,7 +7,7 @@ message = bstr .cbor request
 
 ; A block query, which can contain either a hash, index (or height) or time.
 ; This targets a single block. Since multiple blocks might have been created
-; at the same time, this cannot include a time value (use a bounded block
+; at the same time, this cannot include a time value (use a ranged block
 ; query instead).
 single-block-query = {
     ; A hash of a block. The length and algorithm is implementation specific.
@@ -16,14 +16,13 @@ single-block-query = {
     // 1 => uint
 }
 
-; A block query over a range of height or time. This can also be a single
-; block-query.
-bound-block-query =
-    block-query
+; A block query over a range of height or time. This cannot be a hash or
+; specific height (use `blockchain.block` for specific height/hash).
+range-block-query =
     ; Height range.
-    / { 1 => bound<uint> }
+    { 1 => range<uint> }
     ; Time value or time range.
-    / { 2 => time / bound<time> }
+    / { 2 => range<time> }
 
 ; A block identifier, as a way to target a block. This matches loosely the fields
 ; of single-block-query.
@@ -147,6 +146,33 @@ blockchain.block@return = {
     0 => block,
 }
 ; end::block[]
+
+; tag::list[]
+; The blockchain.list endpoint query the list of blocks and returns multiple blocks with their
+; summaries.
+blockchain.list@param = {
+    ; Maximum number of blocks to return. The server can still limit the number of
+    ; blocks it returns if this number is high.
+    ? 0 => uint,
+
+    ; Whether or not to show the last events or the first ones found (ordering).
+    ; The default behaviour is left to the server implementation.
+    ; Ordering is done by block height.
+    ? 1 => order,
+
+    ; Block filter criteria.
+    ? 2 => range-block-query,
+}
+
+blockchain.list@return = {
+    ; Latest height of the blockchain (currently).
+    0 => uint,
+
+    ; List of blocks found. This might be capped to the size of a response and return less blocks
+    ; than requested or transaction hashes instead of content.
+    1 => [ * block ],
+}
+; end::list[]
 
 ; tag::transaction[]
 ; The blockchain.transaction endpoint returns a single transaction by its identifier.
