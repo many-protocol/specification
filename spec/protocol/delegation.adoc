@@ -64,7 +64,7 @@ Certificates are passed along with a request or response as an attribute, and ar
 
 === Acceptance
 
-A network who does not advertise xref:../../attributes/network/10_delegation.adoc[attribute 10] should error out if the attribute 2 is found in a request (see <<./attributes.adoc#_unknown_attributes,Unknown Attributes>>).
+A server who does not advertise xref:../../attributes/network/10_delegation.adoc[attribute 10] MUST error out if the attribute 2 is found in a request (see <<./attributes.adoc#_unknown_attributes,Unknown Attributes>>).
 
 === Anonymous
 
@@ -74,8 +74,8 @@ Please note that even though the anonymous address does not have a public key, i
 
 A server supporting attribute 10 MUST add a resolution step 3 (see <<./envelope.adoc#_identity,Identity Resolution>>) that does the following:
 
-1. look for attribute `2`
-   a. if the attribute not found, the server MUST use the previous resolved identity.
+1. look for attribute `2` in the `message`;
+   a. if the attribute is not found, the server MUST use the previous resolved identity.
    b. if the attribute is found, read its argument and;
       . if the argument is an array of certificates, perform step 2 and 3 for each certificate, in order,
       . if the argument is a single certificate, perform step 2 and 3 once for it.
@@ -83,7 +83,8 @@ A server supporting attribute 10 MUST add a resolution step 3 (see <<./envelope.
 2. for each certificate, validate (in order);
    a. the signature using the same <<./envelope.adoc#_identity,Identity Resolution>> steps for a regular envelope,
    b. the `to` (1) field is the same as the identity resolved thus far (either the last identity resolved as part of this step, or the identity resolved from the message envelope),
-   c. the `expiration` (3) field is still in the future (must also not be equal).
+   c. the `expiration` (2) field is still in the future (must also not be equal).
+   d. if the `final` (4) field is `true`, and there are more certificates to evaluate, the server MUST return an error.
 
 3. if all validation above pass, the latest identity is the `from` (0) field of the certificate.
    If there are more certificate to resolve, go back to step 2 with the next certificate.

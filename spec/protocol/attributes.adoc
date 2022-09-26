@@ -51,7 +51,7 @@ TBD
 
 == Unknown Attributes
 
-A server who receives a request with an attribute it does not recognize should automatically error our with error code `UnknownRequestAttribute` (-12) and a list of attributes that caused the error.
+A server who receives a request with an attribute it does not recognize MUST automatically return an error with code `UnknownRequestAttribute` (-12) and a list of attributes that caused the error.
 No further action should be taken; an unknown attribute should have no side effect.
 The client is then welcome to resend the request without the faulty attribute.
 

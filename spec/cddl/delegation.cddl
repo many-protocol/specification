@@ -15,4 +15,8 @@ delegation-certificate = COSE_Sign<{
 
    ; A description or message about this certificate.
    ? 3 => memo,
+
+   ; Whether or not this MUST be the final certificate (no sub-delegation
+   ; allowed).
+   ? 4 => bool,
 }>
