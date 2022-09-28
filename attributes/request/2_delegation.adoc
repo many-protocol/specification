@@ -1,4 +1,4 @@
-= Delegation Request Attribute (#1)
+= Delegation Request Attribute (#2)
 :cddl: ./cddl/
 
 This attribute is used to delegate the `from` field of a request message to a different identity than the one used to sign the envelope.

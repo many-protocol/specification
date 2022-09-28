@@ -6,7 +6,7 @@ The key pair can derive an Address, which may contain additional parts (such as 
 
 == Address
 
-There are really 3 types of addresses as part of the ManyVerse;
+There are 3 types of addresses as part of the ManyVerse;
 
 1. *Anonymous.*
    An anonymous user does not sign messages.
@@ -15,7 +15,7 @@ There are really 3 types of addresses as part of the ManyVerse;
 
 2. [[public_key_address]]*Public Key.*
    A public key can be a program or a user that is the source of a message and can send messages.
-   It MUST sign all messages sent, and its ID is a hash of the public key that can validate the signature.
+   It MUST sign all messages sent, and its address is a hash of the public key that can validate the signature.
 
 3. *Subresource.*
    A Subresource address is an indexed resource inside a network that does not have its own internal public key but can be addressed.
@@ -39,7 +39,7 @@ The rest depends on the type of address:
 3+| 0x00 (Anonymous)
 | Anonymous Address.
   The address field can be omitted for anonymous identities (no bytes).
-  If required, the serialization of the anonymous identity is a single nul byte.
+  If required, the serialization of the anonymous identity is a single null byte.
 
 | 0x01 (Public Key)
 2+| SHA-3 (224 bits) of COSE encoded public key (see <<_cose_key>>).

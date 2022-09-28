@@ -51,10 +51,10 @@ TBD
 
 == Unknown Attributes
 
-A server who receives a request with an attribute it does not recognize MUST automatically return an error with code `UnknownRequestAttribute` (-12) and a list of attributes that caused the error.
+A server receiving a request message containing an unknown attribute MUST return an `UnknownRequestAttribute` (12) error.
 No further action should be taken; an unknown attribute should have no side effect.
 The client is then welcome to resend the request without the faulty attribute.
 
-A client receiving a response with an attribute it does not recognize should ignore the attribute, and likely report a warning.
+A client receiving a response with an attribute it does not recognize should ignore the attribute and report a warning.
 In some cases the payload might change, so a client that sees unknown attributes in a response should try its best to interpret its payload.
 As an example, a CLI tool that sees `[1, ...]` attribute and doesn't support asynchronous responses should error out with a comment that the payload was empty (see xref:../../attributes/response/1_async.adoc[Response Attribute 1 - Async] for more details).
