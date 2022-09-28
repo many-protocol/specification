@@ -1,9 +1,8 @@
 ; tag::create-certificate[]
-; This method does not take an argument, rather using the `from` field of the
-; message.
+; This method does not take an argument, rather using the `from` field of the message.
 delegate.createCertificate@param = {}
 
-; Returns a delegation (or an error).
+; Returns a delegation.
 delegate.createCertificate@return = {
     0 => delegation-certificate,
 }
