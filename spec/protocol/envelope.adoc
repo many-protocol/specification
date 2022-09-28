@@ -30,4 +30,4 @@ The identity of a sender must be resolved with the following algorithm:
    b. if the `from` address is a public key and it matches the resolved key, the address is used as the sender.
    c. if the `from` address is a sub-resource identity and its public key matches the resolved key, use the subresource identity address as the sender.
 
-The final resolved address can be used to identify the sender where it makes sense (e.g. resolving ACLs).
+The final resolved address can be used to identify the sender.
