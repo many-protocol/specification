@@ -10,12 +10,12 @@ A server MAY error if too many certificates are contained in a message.
 == Endpoints
 
 There is 2 endpoints: `delegate.createCertificate()` and `delegate.whoAmI()`.
-Both take an identity from the message itself.
+Both resolve the identity from the message itself.
 
-`delegate.createCertificate()` delegates the server's identity, if possible, to the identity of the message.
+`delegate.createCertificate()` delegates the server's identity, if possible, to the address of the message.
 Servers are not under any obligation to delegate their identities, and MAY refuse all requests to this endpoint.
 
-`delegate.whoAmI()` returns the identity that was understood from the message.
+`delegate.whoAmI()` returns the address that was understood from the message.
 Using a similar message to a different endpoint would result in the same identity being used.
 The server MUST ignore the payload entirely.
 

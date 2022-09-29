@@ -117,7 +117,7 @@ function initialize(backend_url, tendermint_url) {
             if (info.is_command) {
                 let tx = await tendermint_client.deliver_tx(envelope);
                 // The transaction hash is used as the async token.
-                return new Envelope(this.identity, null, [ResponseAttributes.ASYNC(tx.hash)]);
+                return new Envelope(this.address, null, [ResponseAttributes.ASYNC(tx.hash)]);
             } else {
                 return many_client.send_envelope(envelope);
             }
