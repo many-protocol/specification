@@ -7,7 +7,7 @@
 == Introduction
 
 The MANY protocol relies on digital signatures of messages to identify users and servers.
-Messages are tagged COSE Sign envelopes containing headers and a signature (and optionally counter signatures).
+Messages are tagged COSE Sign envelopes containing headers and a signature.
 
 == Identity
 
@@ -22,8 +22,8 @@ The identity of a sender must be resolved with the following algorithm:
    b. Use the key to try and validate the COSE signature.
    c. The resolved identity is the one derived from the public key (see xref:identity.adoc#_cose_key[Identity – COSE Key]]).
 
-3. _This is where additional resolution steps should be inserted._
-   If the server does not support other resolution steps, it should pass to the next step.
+3. If the server supports Delegation (with attribute 10), proceed to evaluate delegation certificates (see xref:delegation.adoc#_resolution[Delegation - Resolution]]).
+   __Additional resolution steps should be inserted here.__
 
 4. The resulting key is compared with the message's `from` field:
    a. if the `from` address is anonymous and the resolved key is not, the server MUST return an error.

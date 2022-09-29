@@ -53,7 +53,6 @@ TBD
 
 A server receiving a request message containing an unknown attribute MUST return an `UnknownRequestAttribute` (12) error.
 No further action should be taken; an unknown attribute should have no side effect.
-The client is then welcome to resend the request without the faulty attribute.
 
 A client receiving a response with an attribute it does not recognize should ignore the attribute and report a warning.
 In some cases the payload might change, so a client that sees unknown attributes in a response should try its best to interpret its payload.

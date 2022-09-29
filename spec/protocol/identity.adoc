@@ -1,7 +1,7 @@
 = Identity
 
 Every actor, signer and networks have an identity (materialized in a ManyVerse Address), which is similar to an address in Ethereum.
-This identity is usually represented by a private and public key pair.
+This identity is represented by a private and public key pair.
 The key pair can derive an Address, which may contain additional parts (such as a sub-resource identifier).
 
 == Address
@@ -11,11 +11,10 @@ There are 3 types of addresses as part of the ManyVerse;
 1. *Anonymous.*
    An anonymous user does not sign messages.
    It's a fixed address that can be used by anyone when sending messages.
-   Those messages won't be able to identify the source.
 
 2. [[public_key_address]]*Public Key.*
-   A public key can be a program or a user that is the source of a message and can send messages.
-   It MUST sign all messages sent, and its address is a hash of the public key that can validate the signature.
+   A public key identity is derived from a public key (itself derived from a private key).
+   Its private key MUST sign all messages sent, and its address is a hash of the public key that can validate the signature (see <<_cose_key>>).
 
 3. *Subresource.*
    A Subresource address is an indexed resource inside a network that does not have its own internal public key but can be addressed.
