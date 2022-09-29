@@ -86,3 +86,43 @@ A server supporting attribute 10 MUST add a resolution step 3 (see <<./envelope.
    d. if the `final` (4) field is `true`, and there are more certificates to evaluate, the server MUST return an error.
 
 3. if all validation above pass, the latest identity is the `from` (0) field of the certificate.
+
+=== Pseudocode
+
+[source, javascript]
+....
+function resolveDelegation(sender, message) {
+    let attr = message.attributes.get(2);
+    if (!attr) {
+        return sender;
+    }
+
+    let args = decodeCborArray(args);
+    for (let i = 0; i < args.length, i++) {
+        let arg = args[i];
+        let envelope = decodeCborEnvelope(arg);
+        let from = validateSignature(envelope);
+        if (!from) {
+            throw new Error();
+        }
+
+        let cert = decodeCborDelegationCertificate(envelope.payload);
+        if (!from.matches(cert.from)) {
+            throw new Error();
+        }
+        if (!sender.matches(cert.sender)) {
+            throw new Error();
+        }
+        if (cert.expiration <= now) {
+            throw new Error();
+        }
+        if (cert.final && i < args.length) {
+            throw new Error();
+        }
+
+        sender = cert.to;
+    }
+
+    return sender;
+}
+....

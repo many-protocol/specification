@@ -31,3 +31,76 @@ The identity of a sender must be resolved with the following algorithm:
    c. if the `from` address is a sub-resource identity and its public key matches the resolved key, use the subresource identity address as the sender.
 
 The final resolved address can be used to identify the sender.
+
+=== Pseudocode
+
+The `resolveDelegation` function is described xref:delegation.adoc#_pseudocode[here].
+
+[source, javascript]
+....
+// Validates an envelope's signature and returns true if the signature is valid.
+function validateSignature(envelope) {
+    if (envelope.signature.byteLength == 0 && !envelope.protectedHeaders.keyId) {
+        return Address.anonymous();
+    }
+
+    let keyset = envelope.protectedHeaders.get("keyset");
+    if (!keyset) {
+        // A keyset must be present. Servers could add matching to known keys here
+        // if they implement the right infrastructure.
+        return false;
+    }
+
+    let keyId = envelope.protectedHeaders.keyId;
+    if (!keyId) {
+        return false;
+    }
+
+    let pCoseKey = keyset.get(keyId);
+    if (!pCoseKey) {
+        return false;
+    }
+
+    // This implementation is left to servers.
+    let pKey = decodeCborPublicKey(pCoseKey);
+    if (!pKey) {
+        return false;
+    }
+
+    if (!pKey.verify(envelope.signature)) {
+        return false;
+    }
+
+    return Address.fromPublicKey(pKey);
+}
+
+// Returns an array [message, sender] (or throw an error), where sender is the resolved sender
+// and not necessarily the `from` field of the message.
+function decodeEnvelope(envelope) {
+    let resolvedSender = validateSignature(envelope);
+    if (!resolvedSender) {
+        throw new Error();
+    }
+
+    let message = decodeCborMessage(envelope.payload);
+    let sender = message.from;
+
+    if (sender.isAnonymous() && !resolvedSender.isAnonymous()) {
+        throw new Error();
+    }
+
+    if (sender.isPublicKey() && !sender.matches(resolvedSender)) {
+        throw new Error();
+    }
+
+    if (sender.isSubResource() && !sender.matches(resolvedSender)) {
+        throw new Error();
+    }
+
+    if (this.supportsAttribute(10)) {
+        sender = resolveDelegation(sender, message);
+    }
+
+    return [sender, message];
+}
+....
