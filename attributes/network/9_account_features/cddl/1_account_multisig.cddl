@@ -40,8 +40,8 @@ event-type /= account-event-type-multisig-submit
 
 account-multisig-event-info-submit = {
     0 => account-event-type-multisig-submit,
-    1 => non-anonymous-identity,        ; Submitter
-    2 => non-anonymous-identity,        ; Account source
+    1 => non-anonymous-address,         ; Submitter
+    2 => non-anonymous-address,         ; Account source
     ? 3 => memo,                        ; Memo of the transaction
     4 => account-multisig-transaction,  ; The transaction submitted
     5 => account-multisig-token,        ; Token created by the submission.
@@ -51,33 +51,33 @@ account-multisig-event-info-submit = {
 }
 account-multisig-event-info-approve = {
     0 => account-event-type-multisig-approve,
-    1 => non-anonymous-identity,        ; Account source
+    1 => non-anonymous-address,         ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    3 => non-anonymous-identity,        ; Approver
+    3 => non-anonymous-address,         ; Approver
 }
 account-multisig-event-info-revoke = {
     0 => account-event-type-multisig-revoke,
-    1 => non-anonymous-identity,        ; Account source
+    1 => non-anonymous-address,         ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    3 => non-anonymous-identity,        ; Revoker
+    3 => non-anonymous-address,         ; Revoker
 }
 account-multisig-event-info-execute = {
     0 => account-event-type-multisig-execute,
-    1 => non-anonymous-identity,        ; Account source
+    1 => non-anonymous-address,         ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    ? 3 => identity,                    ; Executer. This is omitted if the execution was automatic.
+    ? 3 => address,                     ; Executer. This is omitted if the execution was automatic.
     4 => response,                      ; The response message from executing this transaction.
 }
 account-multisig-event-info-withdraw = {
     0 => account-event-type-multisig-withdraw,
-    1 => non-anonymous-identity,        ; Account source
+    1 => non-anonymous-address,         ; Account source
     2 => account-multisig-token,        ; Token created by the submission
-    3 => non-anonymous-identity,        ; Withdrawer
+    3 => non-anonymous-address,         ; Withdrawer
 }
 account-multisig-event-info-set-defaults = {
     0 => account-event-type-multisig-set-defaults,
-    1 => non-anonymous-identity,        ; Instigator of the transaction.
-    2 => non-anonymous-identity,        ; Account to change the multisig defaults.
+    1 => non-anonymous-address,         ; Instigator of the transaction.
+    2 => non-anonymous-address,         ; Account to change the multisig defaults.
     ? 3 => null / uint,                 ; The number of approvals needed. Use null to reset
                                         ; this default to its default value.
     ? 4 => null / time,                 ; Expiration date time. Use null to reset this default
@@ -87,7 +87,7 @@ account-multisig-event-info-set-defaults = {
 }
 account-multisig-event-info-expire = {
     0 => account-event-type-multisig-expire,
-    1 => non-anonymous-identity,        ; Account source
+    1 => non-anonymous-address,         ; Account source
     2 => account-multisig-token,        ; Token created by the submission
     3 => time,                          ; The time this transaction expired.
 }
@@ -147,7 +147,7 @@ multisig@account-feature@argument = {
 ; The server MUST return an error if the sender does not have the `owner` role.
 account.multisigSetDefaults@param = {
     ; The account to set the new defaults.
-    0 => non-anonymous-identity,
+    0 => non-anonymous-address,
 
     ; A new default threshold.
     ? 1 => uint,
@@ -167,7 +167,7 @@ account.multisigSetDefaults@return = ()
 ; Submit a transaction to be executed when the threshold is reached.
 account.multisigSubmitTransaction@param = {
     ; The account to submit the transaction to.
-    0 => non-anonymous-identity,
+    0 => non-anonymous-address,
 
     ; A memo associated with the transaction.
     ? 1 => memo,
@@ -216,11 +216,11 @@ account.multisigInfo@return = {
     1 => account-multisig-transaction,
 
     ; The submitter of the transaction.
-    2 => non-anonymous-identity,
+    2 => non-anonymous-address,
 
     ; Approver list for this transaction, and their information.
     3 => {
-        1* identity => {
+        1* address => {
             ; Whether they approved or not.
             0 => bool
         }

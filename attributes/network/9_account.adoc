@@ -32,7 +32,7 @@ Some example of dripping wallet's use cases include;
 *   An account MUST own itself.
     See the <<_owner_role>> section.
 *   Accounts are referred to by their identities.
-*   A server creating an account MUST use a subresource identity of its own identity for the identity of the account, or a public key it owns.
+*   A server creating an account MUST use a subresource address of its own identity for the identity of the account, or a public key it owns.
 
 == Detailed Design
 The simplified design for this attribute is to add the basics for account management, and let account features decide how the account act.
@@ -111,7 +111,7 @@ The design has a few flaws that can be mitigated:
   This can be implemented by servers. +
   Another way is by creating new private keys to allow for more sub resources.
   This process can be done in a secure way, but needs to be researched further before being part of this specification.
-* Redefining the identity type in the protocol to allow for larger identities (e.g. up to 64 bytes).
+* Redefining the address type in the protocol to allow for larger addresses (e.g. up to 64 bytes).
 
 == CDDL
 === Types

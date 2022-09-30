@@ -2,24 +2,34 @@
 :cddl-dir: ../cddl
 
 == Attribute Format
-Attributes are numeral indices into a table of additive attributes.
-The exact number is taken from the attribute blockchain.
+
+Attributes are numeral indices into a table of additive feature list.
+They are defined as part of this specification for positive attribute IDs.
+
+=== Attribute Arguments
+
+An attribute specification will list all arguments and their types related to the attribute itself.
+For example, the
 
 == Network Attributes
+
 These attributes are associated to a network and give a list of the capabilities of the network.
 
 === Private Attributes
+
 Any negative attribute is reserved for experimental or private attributes that the network might define within itself, advertise, but is not yet finalized or adopted.
 The rest of the fields are up to the internal implementation.
 Unless a system is certain of the meaning of the attribute for a specific network, it should not interpret those attributes itself.
 
 === Implementation specific Attributes
+
 Some attributes can be implementation specific, and will implement both the generic attribute endpoints, and its own implementation specific endpoints.
 
 For example, the blockchain attribute (1) implement endpoints that are generic to all blockchains or when dealing with blocks in general.
 An implementation of a blockchain, for example, might add more methods to manage the blockchain itself.
 
 === Return Values
+
 Some attributes may change the return value of related attributes.
 This is important as not every attribute is synchronous.
 
@@ -32,3 +42,29 @@ A CBOR tag on the payload value (not in the bytestring) must be added by those p
 The tags are specified per attribute.
 
 A tag MUST NOT be added to the result if the value follows the schema specified by the attribute specification.
+
+== Request Attributes
+TBD
+
+== Response Attributes
+TBD
+
+== Unknown Attributes
+
+=== Request
+
+A server receiving a request message containing an unknown attribute MUST return an `UnknownRequestAttribute` (12) error.
+No further action should be taken; an unknown attribute should have no side effect.
+
+=== Response
+
+A client receiving a response with an attribute it does not recognize should ignore the attribute and report a warning.
+In some cases the payload might change, so a client that sees unknown attributes in a response should try its best to interpret its payload.
+
+Because the client is in a situation where a request was sent, the request executed an action with potential side effects, the server returned a valid response, but there are attributes in the response the client does not understand.
+Showing the user an error might imply the user should re-execute the message, but that is dangerous as the action requested was executed.
+The only error to show a user would be similar to "Error: Success" in meaning.
+
+In this case it is recommended to show a warning instead, indicating that something on the client is wrong; it is either out of date or did not implement the whole spec.
+
+As an example, a CLI tool that sees `[1, ...]` attribute and doesn't support asynchronous responses should error out with a comment that the payload was empty (see xref:../../attributes/response/1_async.adoc[Response Attribute 1 - Async] for more details).

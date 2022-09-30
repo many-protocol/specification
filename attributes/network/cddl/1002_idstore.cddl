@@ -1,7 +1,7 @@
 ; tag::types[]
 word = tstr
 idstore-recall-phrase = [2*5 word]
-idstore-address = non-anonymous-identity
+idstore-address = non-anonymous-address
 idstore-credid = bstr .size (16..1023)
 idstore-pubkey = bstr .cbor COSE_Key
 ; end::types[]
@@ -19,14 +19,14 @@ idstore.store@param = {
 }
 idstore.store@return = {
     ; The recall phrase associated with the credential ID and public key
-    0 => idstore-recall-phrase, 
+    0 => idstore-recall-phrase,
 }
 ; end::store[]
 
 ; tag::getFromRecallPhrase[]
 idstore.getFromRecallPhrase@param = {
     ; The recall phrase associated with the credential ID and public key
-    0 => idstore-recall-phrase, 
+    0 => idstore-recall-phrase,
 }
 idstore.idstore.getFromRecallPhrase@return = {
     ; The credential ID associated with the recall phrase
@@ -40,7 +40,7 @@ idstore.idstore.getFromRecallPhrase@return = {
 ; tag::getFromAddress[]
 idstore.getFromAddress@param = {
     ; The public address associated with the credential ID and public key
-    0 => idstore-address, 
+    0 => idstore-address,
 }
 idstore.getFromAddress@return = {
     ; The credential ID associated with the address

@@ -1,0 +1,106 @@
+= MANY Envelope Specification
+:cddl: ./cddl/
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+== Introduction
+
+The MANY protocol relies on digital signatures of messages to identify users and servers.
+Messages are tagged COSE Sign envelopes containing headers and a signature.
+
+== Identity
+
+The identity of a sender must be resolved with the following algorithm:
+
+1. If the signature is empty and there is no Key ID field in the protected headers, the resolved identity is Anonymous.
+
+2. If there is a signature and a Key ID;
+
+   a. The Key ID of the protected header matches a key in the `"keyset"` protected header.
+      If no key fits the Key ID, the server MUST return an error.
+   b. Use the key to try and validate the COSE signature.
+   c. The resolved identity is the one derived from the public key (see xref:identity.adoc#_cose_key[Identity – COSE Key]]).
+
+3. If the server supports Delegation (with attribute 10), proceed to evaluate delegation certificates (see xref:delegation.adoc#_resolution[Delegation - Resolution]]).
+   __Additional resolution steps should be inserted here.__
+
+4. The resulting key is compared with the message's `from` field:
+   a. if the `from` address is anonymous and the resolved key is not, the server MUST return an error.
+   b. if the `from` address is a public key and it matches the resolved key, the address is used as the sender.
+   c. if the `from` address is a sub-resource identity and its public key matches the resolved key, use the subresource identity address as the sender.
+
+The final resolved address can be used to identify the sender.
+
+=== Pseudocode
+
+The `resolveDelegation` function is described xref:delegation.adoc#_pseudocode[here].
+
+[source, javascript]
+....
+// Validates an envelope's signature and returns true if the signature is valid.
+function validateSignature(envelope) {
+    if (envelope.signature.byteLength == 0 && !envelope.protectedHeaders.keyId) {
+        return Address.anonymous();
+    }
+
+    let keyset = envelope.protectedHeaders.get("keyset");
+    if (!keyset) {
+        // A keyset must be present. Servers could add matching to known keys here
+        // if they implement the right infrastructure.
+        return false;
+    }
+
+    let keyId = envelope.protectedHeaders.keyId;
+    if (!keyId) {
+        return false;
+    }
+
+    let pCoseKey = keyset.get(keyId);
+    if (!pCoseKey) {
+        return false;
+    }
+
+    // This implementation is left to servers.
+    let pKey = decodeCborPublicKey(pCoseKey);
+    if (!pKey) {
+        return false;
+    }
+
+    if (!pKey.verify(envelope.signature)) {
+        return false;
+    }
+
+    return Address.fromPublicKey(pKey);
+}
+
+// Returns an array [message, sender] (or throw an error), where sender is the resolved sender
+// and not necessarily the `from` field of the message.
+function decodeEnvelope(envelope) {
+    let resolvedSender = validateSignature(envelope);
+    if (!resolvedSender) {
+        throw new Error();
+    }
+
+    let message = decodeCborMessage(envelope.payload);
+    let sender = message.from;
+
+    if (sender.isAnonymous() && !resolvedSender.isAnonymous()) {
+        throw new Error();
+    }
+
+    if (sender.isPublicKey() && !sender.matches(resolvedSender)) {
+        throw new Error();
+    }
+
+    if (sender.isSubResource() && !sender.matches(resolvedSender)) {
+        throw new Error();
+    }
+
+    if (this.supportsAttribute(10)) {
+        sender = resolveDelegation(sender, message);
+    }
+
+    return [sender, message];
+}
+....

@@ -1,0 +1,128 @@
+= MANY Delegation Specification
+:cddl: ./cddl/
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+== Introduction
+
+The MANY protocol relies on digital signatures of messages to identify users and servers.
+The resolution of the address is defined in the xref:envelope.adoc#_identity[Envelope – Identity] section.
+
+This specification adds and describe an additional attribute and resolution step; delegation.
+Delegation happens when an identity signs a delegation certificate to another identity, allowing the private key of the latter one to sign messages where the sender is the first one.
+
+== Overview
+
+Given the identities `Alice` and `Bob`, assuming `Alice` would like to allow `Bob` to impersonate them in a message.
+`Alice` would sign a delegate certificate to `Bob`, which `Bob` would include in their messages.
+Servers use the certificate the resolve the identity.
+It first sees `Bob` signature on the message, but resolve `Alice` identity using the certificate chain.
+
+Multiple certificates can be included to allow for a chain of delegations.
+The root of the chain will be the final identity of the sender.
+For example, if `Bob` were to delegate his identity to `Charlie`, `Charlie` could include both `Alice -> Bob` delegate certificate and `Bob -> Charlie` certificate in a message to impersonate `Alice`.
+
+[plantuml, format=png]
+....
+@startuml
+title Delegation Request Sequence
+
+actor alice as "Alice\nmabc..defg"
+actor bob as "Bob\nmhij..klmn"
+participant server as "Server"
+
+== Certificate Creation ==
+bob -> alice : Public Key
+alice -> alice : `many delegate create`
+alice -> bob : certificate
+
+== Request ==
+
+bob -> server : message\n\
+    signature: mhij..klmn\n\
+    from: mabc..defg\n\
+    attributes: [2, certificate]
+activate server
+server -> bob : Response
+deactivate server
+
+@enduml
+....
+
+=== Attributes
+
+There are 3 attributes related to this specification:
+
+- xref:../../attributes/network/10_delegation.adoc[10 – Delegation] which allows a server to sign delegations (if supported) and advertise they support delegation.
+- xref:../../attributes/request/2_delegation.adoc[2 - Delegation (Request)] which allows requests to have a delegation.
+- xref:../../attributes/response/2_delegation.adoc[2 - Delegation (Response)] which allows responses to have a delegation.
+
+The certificate is described in the spec CDDL and referred by the attributes above.
+Certificates are passed along with a request or response as an attribute, and are not part of the envelope.
+
+=== Acceptance
+
+A server who does not advertise xref:../../attributes/network/10_delegation.adoc[attribute 10] MUST error out if the attribute 2 is found in a request (see <<./attributes.adoc#_unknown_attributes,Unknown Attributes>>).
+
+=== Anonymous
+
+Please note that even though the anonymous address does not have a public key, it is a valid identity and can be delegated _to_, as well as from, although it has no utility.
+
+== Resolution
+
+A server supporting attribute 10 MUST add a resolution step 3 (see <<./envelope.adoc#_identity,Identity Resolution>>) that does the following:
+
+1. look for attribute `2` in the `message`;
+   a. if the attribute is not found, the server MUST use the previous resolved identity.
+   b. if the attribute is found, read its argument and;
+      . if the argument is an array of certificates, perform step 2 and 3 for each certificate, in order,
+      . if the argument is a single certificate, perform step 2 and 3 once for it.
+
+2. for each certificate, validate (in order);
+   a. the signature using the same <<./envelope.adoc#_identity,Identity Resolution>> steps for a regular envelope,
+   b. the `to` (1) field is the same as the identity resolved thus far (either the last identity resolved as part of this step, or the identity resolved from the message envelope),
+   c. the `expiration` (2) field is still in the future (must also not be equal).
+   d. if the `final` (4) field is `true`, and there are more certificates to evaluate, the server MUST return an error.
+
+3. if all validation above pass, the latest identity is the `from` (0) field of the certificate.
+
+=== Pseudocode
+
+[source, javascript]
+....
+function resolveDelegation(sender, message) {
+    let attr = message.attributes.get(2);
+    if (!attr) {
+        return sender;
+    }
+
+    let args = decodeCborArray(attr);
+    for (let i = 0; i < args.length, i++) {
+        let arg = args[i];
+        let envelope = decodeCborEnvelope(arg);
+        let from = validateSignature(envelope);
+        if (!from) {
+            throw new Error();
+        }
+
+        let cert = decodeCborDelegationCertificate(envelope.payload);
+        if (!from.matches(cert.from)) {
+            throw new Error();
+        }
+        if (!sender.matches(cert.to)) {
+            throw new Error();
+        }
+        if (cert.expiration <= now) {
+            throw new Error();
+        }
+        if (cert.final && i < args.length) {
+            throw new Error();
+        }
+
+        sender = cert.to;
+    }
+
+    return sender;
+}
+....

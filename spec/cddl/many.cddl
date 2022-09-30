@@ -7,14 +7,14 @@ request = COSE_Sign<{
     ; Message originator (From). If anonymous, this field can be omitted.
     ; This can also be omitted if the envelope only contains 1 signature and
     ; public key.
-    ? 1 => identity,
+    ? 1 => address,
 
     ; Message destination (To). If omitted or anonymous, the first server who
     ; receives this message should assume he is the destination. If different
     ; than the server receiving the message, the server is allowed to reject
     ; the message, or proxy/forward it. That behaviour is the same when using
-    ; an anonymous identity as destination.
-    ? 2 => identity,
+    ; an anonymous address as destination.
+    ? 2 => address,
 
     ; Endpoint name.
     3 => text,
@@ -50,13 +50,13 @@ response = COSE_Sign<{
 
     ; Response originator (From). This SHOULD BE the request destination, but
     ; can differ when proxying or depending on attributes.
-    1 => identity,
+    1 => address,
 
     ; Message destination (To). This SHOULD BE the request originator, but can
     ; differ depending on attributes. It should be checked by the client before
     ; assuming the response is for itself. If anonymous or omitted, the client
     ; should assume it is the intended recipient.
-    ? 2 => identity,
+    ? 2 => address,
 
     ; Skipping 3 so that fields from Request and Response matches their
     ; "equivalent" index. 3 in Request is `endpoint` which doesn't exist in the
@@ -119,30 +119,30 @@ reason<T> = {
 }
 ; end::error[]
 
-; tag::identity[]
-; An identity is either a tagged byte string matching the identity format, or a textual
-; representation of the identity (which can deserialize to the byte string matching the
-; identity format).
-identity =
-    textual-non-anonymous-identity
-    / textual-anonymous-identity
-    / #6.10000(non-anonymous-identity)
-    / #6.10000(anonymous-identity)
+; tag::address[]
+; An address is either a tagged byte string matching the address format, or a textual
+; representation of the address (which can deserialize to the byte string matching the
+; address format).
+address =
+    textual-non-anonymous-address
+    / textual-anonymous-address
+    / #6.10000(non-anonymous-address)
+    / #6.10000(anonymous-address)
 
-; A textual version of an identity that is anonymous.
-textual-anonymous-identity = "maa" / "maaaa"
+; A textual version of an address that is anonymous.
+textual-anonymous-address = "maa" / "maaaa"
 
-; A textual identity. This does not validate the actual content of the text (ie. the
+; A textual address. This does not validate the actual content of the text (ie. the
 ; checksum might be wrong).
-textual-identity = tstr .regexp "m[abcdefghijklmnopqrstuvwxyz234567]{2}[abcdefghijklmnopqrstuvwxyz234567]*"
+textual-address = tstr .regexp "m[abcdefghijklmnopqrstuvwxyz234567]{2}[abcdefghijklmnopqrstuvwxyz234567]*"
 
-; An identity that isn't anonymous.
-non-anonymous-identity = public-key-identity / subresource-identity
+; An address that isn't anonymous.
+non-anonymous-address = public-key-address / subresource-address
 
-anonymous-identity = h'00'
-public-key-identity = bytes .cbor [ h'01', bytes .size 28 ]
-subresource-identity = bytes .cbor [ h'80'..h'FF', bytes .size 28, bytes .size 3 ]
-; end::identity[]
+anonymous-address = h'00'
+public-key-address = bytes .cbor [ h'01', bytes .size 28 ]
+subresource-address = bytes .cbor [ h'80'..h'FF', bytes .size 28, bytes .size 3 ]
+; end::address[]
 
 ; An attribute can have one or many attribute arguments.
 attribute-arg = ()

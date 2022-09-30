@@ -1,0 +1,19 @@
+; tag::create-certificate[]
+; This method does not take an argument, rather using the `from` field of the message.
+delegate.createCertificate@param = {}
+
+; Returns a delegation.
+delegate.createCertificate@return = {
+    0 => delegation-certificate,
+}
+; end::create-certificate[]
+
+; tag::whoami[]
+; Returns which address the message resolves to. Useful for testing delegations.
+delegate.whoAmI@param = ()
+
+; Returns who you are.
+delegate.whoAmI@return = {
+    0 => address
+}
+; end::whoami[]

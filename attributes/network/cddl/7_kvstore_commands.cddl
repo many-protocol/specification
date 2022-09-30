@@ -9,13 +9,13 @@ event-info-put = {
     0 => event-type-put,
     1 => bstr,                    ; Key
     2 => bstr,                    ; Value
-    ? 3 => non-anonymous-identity ; Key owner
+    ? 3 => non-anonymous-address ; Key owner
 }
 
 event-info-disable = {
     0 => event-type-disable,
     1 => bstr,                    ; Key
-    ? 2 => non-anonymous-identity ; Key owner
+    ? 2 => non-anonymous-address ; Key owner
     ? 3 => reason<u64>            ; The reason this was deleted/disabled.
 }
 
@@ -32,8 +32,8 @@ kvstore.put@param = {
     1 => bstr,
 
     ; Alternative key owner
-    ; The sender must be related to this identity, e.g., account, etc.
-    ? 2 => non-anonymous-identity,
+    ; The sender must be related to this address, e.g., account, etc.
+    ? 2 => non-anonymous-address,
 }
 
 kvstore.put@return = ()
@@ -49,8 +49,8 @@ kvstore.disable@param = {
     0 => bstr,
 
     ; Alternative key owner
-    ; The sender must be related to this identity, e.g., account, subresource, etc.
-    ? 1 => non-anonymous-identity,
+    ; The sender must be related to this address, e.g., account, subresource, etc.
+    ? 1 => non-anonymous-address,
 }
 
 kvstore.disable@return = ()
