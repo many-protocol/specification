@@ -110,7 +110,7 @@ function resolveDelegation(sender, message) {
         if (!from.matches(cert.from)) {
             throw new Error();
         }
-        if (!sender.matches(cert.sender)) {
+        if (!sender.matches(cert.to)) {
             throw new Error();
         }
         if (cert.expiration <= now) {
