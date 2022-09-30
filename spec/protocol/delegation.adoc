@@ -97,7 +97,7 @@ function resolveDelegation(sender, message) {
         return sender;
     }
 
-    let args = decodeCborArray(args);
+    let args = decodeCborArray(attr);
     for (let i = 0; i < args.length, i++) {
         let arg = args[i];
         let envelope = decodeCborEnvelope(arg);
