@@ -1,21 +1,25 @@
 ; tag::types[]
 ; A filter argument for event types.
 events-filter = {
-    ; Filter by account affected.
+    ; Filter by address affected. Address in this context can be an identity,
+    ; a symbol, anything that is related to an address.
     ? 0 => address / [ * address ],
 
     ; Filter by event type.
     ? 1 => event-type / [ * event-type ],
-
-    ; Filter by symbol if affected.
-    ? 2 => ledger-symbol / [ * ledger-symbol ],
 
     ; Filter by event ID range.
     ? 3 => range<event-id>,
 
     ; Filter by date range.
     ? 4 => range<time>,
+
+    ; Attribute specific values.
+    events-filter-attribute-specific
 }
+
+; Extend this type to add attribute specific filters for events.
+events-filter-attribute-specific = ()
 
 ; An ID that is unique for all events in the log. This must be monotonically
 ; incrementing between when events are logged.
