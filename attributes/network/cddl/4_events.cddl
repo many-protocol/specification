@@ -2,7 +2,8 @@
 ; A filter argument for event types.
 events-filter = {
     ; Filter by address affected. Address in this context can be an identity,
-    ; a symbol, anything that is related to an address.
+    ; a symbol, anything that is related to an address. This matches _exactly_
+    ; the identity, and does not match subresources.
     ? 0 => address / [ * address ],
 
     ; Filter by event type.
