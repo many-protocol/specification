@@ -23,7 +23,7 @@ async.status@return =
     ; The request associated with the token has a result available.
     / {
         0 => async-result-done,
-        1 => bstr .cbor COSE_Sign<response>,
+        1 => bstr .cbor response,
     }
 
     ; A result expired from the local cache and is not available anymore. This is optional
