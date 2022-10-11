@@ -10,49 +10,119 @@ ledger-symbol = address
 ; for simplicity. The networks CAN use either when serializing, but
 ; MUST accept both when doing transactions.
 ledger-amount = biguint / uint
-; end::types[]
 
-; tag::info[]
-; Info endpoint.
-ledger.info@param = ()
-ledger.info@return = (ledger-info)
+; A single logo that can be shown for representing the token. A token can
+; have a set of logos that can represent visually its identity.
+single-visual-token-logo = single-visual-token-logo-unicode
+                         / single-visual-token-logo-image
 
-ledger-info = {
-    ; List of supported symbols for this ledger.
-    0 => [* ledger-symbol],
+; A unicode logo.
+; For Bitcoin this would be U+20BF ("₿").
+single-visual-token-logo-unicode = {
+    ; Type.
+    0 => 0,
 
-    ; Hash value of the ledger state. If two ledgers have the same hashes,
-    ; chances are they have the same balances on the same accounts (with
-    ; some risk of collision).
-    ; This can include configuration, depending on the implementation.
-    ; The actual hashing method and size of the hash is left to the
-    ; implementation.
-    1 => bstr,
+    ; Unicode code point. This isn't limited to a single glyph but can be
+    ; truncated or transformed by the server or the frontend.
+    1 => tstr,
+}
 
-    ; Transfer fees for each symbols, between accounts.
-    ; TODO: not implemented.
-    2 => {
-        ledger-symbol => transaction-fee,
-    },
+; A binary image.
+single-visual-token-logo-image = {
+    ; Type.
+    0 => 1,
 
-    ; Conversion rates and fees between symbols.
-    ; TODO: not implemented.
-    3 => {
-        [ledger-symbol, ledger-symbol] => conversion,
-    },
+    ; Content-type, following the IANA list. This should be part of the
+    ; image section.
+    ; See https://www.iana.org/assignments/media-types/media-types.xhtml#image
+    1 => tstr,
 
-    ; Local human readable names for symbols.
-    ; These names are local only, and are only guaranteed to be unique on this
-    ; specific ledger.
-    4 => {
-        ; TODO: this.
-        ledger-symbol => {
-            0 => tstr,
-            1 => tstr,  ; Description
-            2 => uint, ; Number of precision digits
-            tstr => tstr ; metadata
-        }
-    }
+    ; Binary content of the image.
+    2 => bstr,
+
+    ; Optional height and width, in pixels.
+    ? 3 => [ uint, uint ],
+
+    ; Optional DPI.
+    ? 4 => uint,
+}
+
+; A logo that can be shown visually. The server might add limits to how big
+; a logo can be (both in height x width, and on byte size).
+; A frontend should pick the first one that can be represented in its
+; interface, so this should be an ordered set in decrementing order of
+; importance. For example, a terminal would look for the first unicode character
+; in the set, while a UI on a phone might want a small assets for lists and a
+; big asset for detailed views.
+visual-token-logo = [ * single-visual-token-logo ]
+
+; A summary information for a token. This does not contain extended information
+; which isn't needed in most cases.
+token-info-summary = {
+    ; A human readable name for the token. This is the full name of the token.
+    ; e.g. Bitcoin would use "Bitcoin" here.
+    0 => tstr,
+
+    ; A human readable symbol for the token. This should be _short_ and can
+    ; be limited by the server at creation. This should be unique to the
+    ; ledger.
+    ; e.g. Bitcoin would use "BTC" here.
+    1 => tstr,
+
+    ; Precision decimals. This is used to show how many tokens can be divided.
+    ; It is recommended for the server to limit this number.
+    ; e.g. Bitcoin would use 8.
+    2 => uint,
+
+    ; A transaction fee. A server can deny having no or too low of a transaction
+    ; fee on new tokens or updates. The fee is in the token currency itself.
+    ; Server can still deny transactions based on other criteria (such as
+    ; imposing a ledger's native token as additional transaction fee).
+    ; Servers can also clamp this value to assure a minimum transaction fee.
+    3 => transaction-fee,
+
+    ; A memo, description of the token, information about it that can be
+    ; human readable.
+    ? 4 => memo,
+}
+
+; The supply of a token on a given ledger.
+token-info-supply = {
+    ; The total supply for the token on this particular ledger.
+    ; For Bitcoin, that would be ~19 million at the time of this writing.
+    3 => uint,
+
+    ; The circulating supply for the token on this particular ledger.
+    ; For Bitcoin, that would also be ~19 million, but if there was a staking
+    ; mechanism, that would be less, as those tokens are not burnt but
+    ; frozen.
+    4 => uint,
+
+    ; The maximum supply for the token on this particular ledger.
+    ; This is the maximum amount of tokens at any point in time, including
+    ; in the far future, and should never change.
+    ; If this is null, then the token has an infinite maximum supply.
+    5 => uint / null,
+}
+
+; A full definition of a token, including its visual logo and any memo.
+token-info = {
+    ; The address of the token, used for referencing the token. This should
+    ; be unique across all the MANYverse.
+    0 => ledger-symbol,
+
+    ; Summary information for the token.
+    1 => token-info-summary,
+
+    ; Supply information for the token.
+    2 => token-info-supply,
+
+    ; Owner of the token. If missing, the token has no owner.
+    ? 3 => non-anonymous-address,
+
+    ; A visual logo. If this is missing, a frontend should try to display
+    ; something in exchange.
+    ? 4 => visual-token-logo,
 }
 
 ; Fees can be set for each symbols independently.
@@ -97,6 +167,48 @@ conversion-fee = transaction-fee
 ; A percent based on 32 bits. The percent is fixed point over 32 bits,
 ; so 50% would be 0x80000000, and 1% 0x28F5C28.
 fixed-point-percent = uint
+; end::types[]
+
+; tag::info[]
+; Info endpoint.
+ledger.info@param = ()
+ledger.info@return = (ledger-info)
+
+ledger-info = {
+    ; DO NOT USE. Burnt for backward compatibility.
+    ; To get the list of supported tokens, use the map below.
+    ? 0 => null,
+
+    ; Hash value of the ledger state. If two ledgers have the same hashes,
+    ; chances are they have the same balances on the same accounts (with
+    ; some risk of collision).
+    ; This can include configuration, depending on the implementation.
+    ; The actual hashing method and size of the hash is left to the
+    ; implementation.
+    1 => bstr,
+
+    ; Transfer fees for each symbols, between accounts.
+    ; TODO: not implemented.
+    2 => {
+        ledger-symbol => transaction-fee,
+    },
+
+    ; Conversion rates and fees between symbols.
+    ; TODO: not implemented.
+    3 => {
+        [ledger-symbol, ledger-symbol] => conversion,
+    },
+
+    ; DO NOT USE. Burnt for backward compatibility.
+    ? 4 => null,
+
+    ; Summary of the information for the token symbols.
+    ; These names are local only, and are only guaranteed to be unique on this
+    ; specific ledger.
+    5 => {
+        ledger-symbol => token-info-summary,
+    }
+}
 ; end::info[]
 
 ; tag::balance[]

@@ -1,0 +1,168 @@
+; tag::types[]
+ledger-tokens-address-map = {
+    * non-anonymous-address => ledger-amount,
+}
+; end::types[]
+
+; tag::events[]
+event-info /= ledger-tokens-event-info-create
+            / ledger-tokens-event-info-update
+            / ledger-tokens-event-info-mint
+            / ledger-tokens-event-info-burn
+
+ledger-tokens-event-type-create = [11, 0]
+ledger-tokens-event-type-update = [11, 1]
+ledger-tokens-event-type-mint = [11, 2]
+ledger-tokens-event-type-burn = [11, 3]
+
+; A token genesis event.
+ledger-tokens-event-info-create = {
+    0 => ledger-tokens-event-type-create,
+
+    1 => token-info-summary,            ; Summary.
+    2 => address,                       ; Symbol.
+    3 => address,                       ; Owner.
+    ? 4 => visual-token-logo,           ; Visual logo.
+    ? 5 => ledger-tokens-address-map,   ; Holders at genesis.
+    ? 6 => ledger-amount,               ; Maximum supply, if any.
+}
+
+; An update to a token information.
+ledger-tokens-event-info-update = {
+    0 => ledger-tokens-event-type-update,
+    ? 0 => tstr,                        ; Token name.
+    ? 1 => tstr,                        ; Human readable ticker symbol.
+    ? 2 => uint,                        ; Precision decimals.
+    ? 3 => transaction-fee,             ; Transaction fees.
+    ? 4 => memo,                        ; Memo of the token itself.
+    ? 5 => memo,                        ; Memo.
+}
+
+; A token minting event.
+ledger-tokens-event-info-mint = {
+    0 => ledger-tokens-event-type-mint,
+    1 => ledger-symbol,
+    2 => ledger-tokens-address-map,
+    ? 3 => memo,
+}
+
+; A token burning event.
+ledger-tokens-event-info-burn = {
+    0 => ledger-tokens-event-type-burn
+    1 => ledger-symbol,
+    2 => ledger-tokens-address-map,
+    ? 3 => memo,
+}
+; end::events[]
+
+; tag::create[]
+tokens.create@param = {
+    ; The summary information for the token.
+    0 => token-info-summary,
+
+    ; An optional owner for the token. If missing, the message sender will be
+    ; used as owner. There can only be one owner.
+    ? 1 => non-anonymous-address,
+
+    ; An optional visual logo. See 2_ledger.cddl for more information on logos.
+    ? 2 => visual-token-logo,
+
+    ; An optional list of token holders. If missing, no one gets token and the
+    ; total supply is 0 at genesis.
+    ? 3 => ledger-tokens-address-map,
+
+    ; A maximum supply for the token. When minting, this will be checked to make
+    ; sure tokens cannot have more than this number in circulation.
+    ; If this number is smaller than the supply held by token holders, the
+    ; server MUST return an error.
+    ; If this is missing, there is no maximum supply.
+    ? 4 => ledger-amount,
+}
+
+tokens.create@return = {
+    0 => token-info,
+}
+; end::create[]
+
+; tag::update[]
+; Update the information of a token on this ledger. Missing fields will not
+; be updated.
+tokens.update@param = {
+    ; Human readable name for the token.
+    ? 0 => tstr,
+
+    ; Human readable symbol for the token.
+    ? 1 => tstr,
+
+    ; Precision decimals. Please note that this will not change any amounts,
+    ; but will impact how many tokens users might see from their frontend.
+    ; Servers MAY error if this field is updated or out of supported range.
+    ? 2 => uint,
+
+    ; Transaction fees.
+    ; Servers MAY error if this field is updated to invalid values.
+    ? 3 => transaction-fee,
+
+    ; A memo associated with the token. This will override the memo, not just
+    ; add to it.
+    ? 4 => memo,
+
+    ; An optional owner for the token. If missing, the message sender will be
+    ; used as owner. There can only be one owner.
+    ? 5 => non-anonymous-address,
+
+    ; An optional visual logo. See 2_ledger.cddl for more information on logos.
+    ? 6 => visual-token-logo,
+
+    ; A memo associated with this update.
+    ? 7 => memo,
+}
+
+tokens.update@return = ()
+; end::update[]
+
+; tag::mint[]
+; Add tokens to the supply. If the new total supply of the token is above its
+; maximum supply, a server MUST return an error.
+; Only the owner of the token can mint tokens.
+tokens.mint@param = {
+    ; The token to mint.
+    0 => ledger-symbol,
+
+    ; Addresses and amounts to give to.
+    1 => ledger-tokens-address-map,
+
+    ; A memo about this event.
+    ? 2 => memo,
+}
+
+; Empty return.
+tokens.mint@return = ()
+; end::mint[]
+
+; tag::burn[]
+; Remove tokens from the supply. To avoid race conditions on transactions,
+; a flag can be passed (index 3) to error out instead of under-burning.
+; Only the owner of the token can burn tokens.
+tokens.burn@param = {
+    ; The token to mint.
+    0 => ledger-symbol,
+
+    ; Addresses and amounts to give to.
+    1 => ledger-tokens-address-map,
+
+    ; A memo about this event.
+    ? 2 => memo,
+
+    ; If true, the server MUST error out if some tokens cannot be burnt,
+    ; e.g. if an address doesn't have enough tokens.
+    ; By default this is false.
+    ? 3 => bool,
+}
+
+tokens.burn@return = {
+    ; The amount of tokens actually burnt. This might be different than the
+    ; amount requested.
+    0 => ledger-tokens-address-map,
+}
+; end::burn[]

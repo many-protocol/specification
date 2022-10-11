@@ -1,0 +1,5 @@
+; tag::types[]
+account-role /= "canTokensMint"
+             /  "canTokensBurn"
+             /  "canTokensUpdate"
+; end::types[]

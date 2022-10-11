@@ -3,7 +3,25 @@
 
 This attribute is used by servers that supports commands related to ledger.
 
+== Events
+
+Calling `ledger.send` MUST add the `[6, 0]` event to the event log.
+
 == Endpoints
+
+=== Types
+
+[sources,cddl]
+----
+include::{cddl}/6_ledger_commands.cddl[tag=types]
+----
 
 === Send
 Send tokens from one address to another.
+
+Sending 0 tokens SHOULD NOT result in an error and MUST record an event in the event log.
+
+[sources,cddl]
+----
+include::{cddl}/6_ledger_commands.cddl[tag=send]
+----
