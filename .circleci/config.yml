@@ -7,7 +7,7 @@ version: 2.1
 jobs:
   validate_cddl:
     docker:
-      - image: ghcr.io/anweiss/cddl-cli:latest
+      - image: cimg/base:2022.10
     resource_class: small
     steps:
       - checkout
@@ -15,7 +15,8 @@ jobs:
           name: validate cddl
           command: |
             find * -iname \*.cddl | xargs cat > temp.cddl
-            compile-cddl --cddl temp.cddl
+            docker pull ghcr.io/anweiss/cddl-cli:latest
+            docker run -it --rm -v $PWD:/ll-work -w /ll-work ghcr.io/anweiss/cddl-cli:latest compile-cddl --cddl temp.cddl
 
 workflows:
   validate_cddl:
