@@ -6,8 +6,8 @@ find_cddl() {
     # List all in directory order (breadth-first), and remove the files
     # that aren't part of the repository from the list.
     for i in 0 1 2 3 4 5 6 7 8; do
-        find "$1" -mindepth $i -maxdepth $i -iname \*.cddl \
-            | xargs git ls-files --exclude-standard
+        find "$1" -mindepth "$i" -maxdepth "$i" -iname \*.cddl -print0 \
+            | xargs -0 git ls-files --exclude-standard
     done
 }
 
