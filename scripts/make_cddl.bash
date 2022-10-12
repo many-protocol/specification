@@ -3,6 +3,8 @@
 find_cddl() {
     local i
 
+    man find
+
     # List all in directory order (breadth-first), and remove the files
     # that aren't part of the repository from the list.
     for i in 0 1 2 3 4 5 6 7 8; do
