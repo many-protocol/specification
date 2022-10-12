@@ -11,6 +11,8 @@ find_cddl() {
     done
 }
 
+find_cddl "$(dirname "$(dirname "$0")")"
+echo '-----------'
 find_cddl "$(dirname "$(dirname "$0")")" | xargs cat > "$1"
 
 echo "$1":
