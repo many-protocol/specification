@@ -5,20 +5,33 @@ version: 2.1
 #  rust: circleci/rust@1.6.0
 
 jobs:
-  validate_cddl:
+  merge_cddl:
     docker:
       - image: cimg/base:2022.10
     resource_class: small
     steps:
       - checkout
+      - run: mkdir -p artifacts
+      - run: find * -iname \*.cddl | xargs cat > artifacts/temp.cddl
+      - persist_to_workspace:
+          root: artifacts
+          paths:
+            - "temp.cddl"
+  validate_cddl:
+    docker:
+      - image: ghcr.io/anweiss/cddl-cli:latest
+        entrypoint: cddl
+        command: --version
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: ~/project/artifacts
       - run:
           name: validate cddl
-          command: |
-            find * -iname \*.cddl | xargs cat > temp.cddl
-            docker pull ghcr.io/anweiss/cddl-cli:latest
-            docker run -it --rm -v $PWD:/ll-work -w /ll-work ghcr.io/anweiss/cddl-cli:latest compile-cddl --cddl temp.cddl
+          command: cddl compile-cddl --cddl ~/project/artifacts/temp.cddl
 
 workflows:
   validate_cddl:
     jobs:
+      - merge_cddl
       - validate_cddl
