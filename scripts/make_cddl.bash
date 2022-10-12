@@ -11,8 +11,8 @@ find_cddl() {
 }
 
 {
-    find_cddl "$(dirname "$(dirname "$0")")"/spec | xargs cat
-    find_cddl "$(dirname "$(dirname "$0")")"/attributes | xargs cat
+    find_cddl "$(dirname "$(dirname "$0")")"/spec | xargs --null cat
+    find_cddl "$(dirname "$(dirname "$0")")"/attributes | xargs --null cat
 } > "$1"
 
 echo "$1":
