@@ -20,7 +20,7 @@ events-filter = {
 }
 
 ; Extend this type to add attribute specific filters for events.
-events-filter-attribute-specific = ()
+events-filter-attribute-specific /= ()
 
 ; An ID that is unique for all events in the log. This must be monotonically
 ; incrementing between when events are logged.
