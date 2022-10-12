@@ -1,0 +1,23 @@
+# many-protocol/specification CI
+version: 2.1
+
+#orbs:
+#  rust: circleci/rust@1.6.0
+
+jobs:
+  validate_cddl:
+    docker:
+      - image: ghcr.io/anweiss/cddl-cli:latest
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: validate cddl
+          command: |
+            find * -iname \*.cddl | xargs cat > temp.cddl
+            compile-cddl --cddl temp.cddl
+
+workflows:
+  validate_cddl:
+    jobs:
+      - validate_cddl
