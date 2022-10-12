@@ -35,9 +35,6 @@ status = {
     ; If this field is missing, the server does not advertize a timeout,
     ; but it might still be enforced.
     ? 7 => uint,
-
-    ; Additional fields are okay here as metadata, keys MUST be strings.
-    * tstr => any,
 }
 ; end::status[]
 
@@ -48,7 +45,16 @@ heartbeat@return = ()
 
 ; tag::endpoints[]
 endpoints@param = ()
-endpoints@return = [ * tstr ]
+endpoints@return = {
+    * tstr => endpoint-info,
+}
+
+; Information related to
+endpoint-info = {
+    ; Whether this endpoint is a command (true) or query (false). See
+    ; endpoints.adoc for more information.
+    0 => bool,
+}
 ; end::endpoints[]
 
 ; tag::result[]

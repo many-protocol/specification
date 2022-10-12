@@ -31,14 +31,14 @@ include::{cddl}/0_base.cddl[tag=heartbeat]
 ----
 
 == Endpoints
-The `endpoints` endpoint returns an array of endpoints supported by this network.
-The list MAY be imcomplete, but endpoints returned by this call MUST be supported.
+The `endpoints` endpoint returns a map of endpoints to their information, supported by this network.
+The list MAY be imcomplete, but endpoints returned by this call MUST be supported and have the correct information.
 
 Some networks don't know if they implement an endpoint before trying to execute a message (for example, if the endpoint is conditional on the sender).
 Those networks are not obligated to return endpoints that it might not want to expose.
 Another example are proxy networks which may or not know the actual list of endpoints as it differs based on the backend itself.
 
-A server MAY return an empty list.
+A server MAY return an empty map.
 
 [sources,cddl]
 ----
