@@ -1,7 +1,8 @@
 = MANY Endpoints
 
-Endpoints are methods exposed by servers that a client can call with a single bytestring payload, and return either an error or a bytestring payload.
-
+Endpoints are methods exposed by servers that a client can call with a single bytestring payload.
+The server will reply to the client in a timely matter footnote:[If this cannot be done synchronously, the server MUST still respond with a response, see xref:../../attributes/network/8_async.adoc[Async Attribute].].
+The reply MAY contain the result of the operation or an error if the operation failed to execute properly.
 
 == Command Query Responsibility Segregation
 
