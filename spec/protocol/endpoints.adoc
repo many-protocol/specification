@@ -1,19 +1,20 @@
 = MANY Endpoints
 
-A server exposes endpoints that a message must target.
-Endpoints receive a single bytestring payload, and optionally return either an error or a bytestring payload.
+Endpoints are methods exposed by servers that a client can call with a single bytestring payload, and return either an error or a bytestring payload.
+
 
 == Command Query Responsibility Segregation
 
 MANY separates messages into two kinds;
 
-1. Query (or read) which access data in read-only mode.
-   Executing a query should NOT change the application state hash. Any queued command calls should be resolved or paused (commands SHOULD NOT be in the middle of executing).
+1. Query: access data in read-only mode.
+   Executing a query SHOULD NOT change the application state hash.
+   Any queued command calls should be resolved or paused (commands SHOULD NOT be in the middle of executing) prior to executing a query.
    Query results can be cached on the state hash, and they can also be executed at the same time since the state does not change.
-2. Command (or update) which perform changes to the data.
-   This does not necessarily mean that the app state must change, just that it can.
+2. Command: access data in write mode.
+   The application state hash MAY change after performing a command.
 
-An endpoint needs to be either.
 A server SHOULD use commands for calls that it isn't sure can update the state (for example, conditionally).
+For example, a mailbox server that delays messages to other servers, but does not know if the other server's endpoint is a command or query, should report all endpoints being forwarded this way as command.
 
 For more information, see https://en.wikipedia.org/wiki/Command%E2%80%93query_separation[Wikipedia's Article on CQRS].
