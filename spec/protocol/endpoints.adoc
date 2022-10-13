@@ -8,7 +8,7 @@ Endpoints receive a single bytestring payload, and optionally return either an e
 MANY separates messages into two kinds;
 
 1. Query (or read) which access data in read-only mode.
-   The app state hash should not be changed after running a query, and any queued command calls should be resolved or paused (commands SHOULD NOT be in the middle of executing).
+   Executing a query should NOT change the application state hash. Any queued command calls should be resolved or paused (commands SHOULD NOT be in the middle of executing).
    Query results can be cached on the state hash, and they can also be executed at the same time since the state does not change.
 2. Command (or update) which perform changes to the data.
    This does not necessarily mean that the app state must change, just that it can.
