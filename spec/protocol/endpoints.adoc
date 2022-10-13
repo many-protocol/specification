@@ -1,0 +1,21 @@
+= MANY Endpoints
+
+Endpoints are methods exposed by servers that a client can call with a single bytestring payload.
+The server will reply to the client in a timely matter footnote:[If this cannot be done synchronously, the server MUST still respond with a response, see xref:../../attributes/network/8_async.adoc[Async Attribute].].
+The reply MAY contain the result of the operation or an error if the operation failed to execute properly.
+
+== Command Query Responsibility Segregation
+
+MANY separates messages into two kinds;
+
+1. Query: access data in read-only mode.
+   Executing a query SHOULD NOT change the application state hash.
+   A server SHOULD NOT execute a query while a command is running.
+   Query results can be cached on the state hash, and they can also be executed at the same time since the state does not change.
+2. Command: access data in write mode.
+   The application state hash MAY change after performing a command.
+
+A server SHOULD use commands for calls that it isn't sure can update the state (for example, conditionally).
+For example, a mailbox server that delays messages to other servers, but does not know if the other server's endpoint is a command or query, should report all endpoints being forwarded this way as command.
+
+For more information, see https://en.wikipedia.org/wiki/Command%E2%80%93query_separation[Wikipedia's Article on CQRS].
