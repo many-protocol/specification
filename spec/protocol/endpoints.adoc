@@ -10,7 +10,7 @@ MANY separates messages into two kinds;
 
 1. Query: access data in read-only mode.
    Executing a query SHOULD NOT change the application state hash.
-   Any queued command calls should be resolved or paused (commands SHOULD NOT be in the middle of executing) prior to executing a query.
+   A server SHOULD NOT execute a query while a command is running.
    Query results can be cached on the state hash, and they can also be executed at the same time since the state does not change.
 2. Command: access data in write mode.
    The application state hash MAY change after performing a command.
