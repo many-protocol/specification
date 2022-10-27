@@ -39,12 +39,6 @@ single-visual-token-logo-image = {
 
     ; Binary content of the image.
     2 => bstr,
-
-    ; Optional height and width, in pixels.
-    ? 3 => [ uint, uint ],
-
-    ; Optional DPI.
-    ? 4 => uint,
 }
 
 ; A logo that can be shown visually. The server might add limits to how big
@@ -63,7 +57,7 @@ token-info-summary = {
     ; e.g. Bitcoin would use "Bitcoin" here.
     0 => tstr,
 
-    ; A human readable symbol for the token. This should be _short_ and can
+    ; A human readable short name (aka ticker symbol) of the token. This SHOULD
     ; be limited by the server at creation. This should be unique to the
     ; ledger.
     ; e.g. Bitcoin would use "BTC" here.
@@ -90,19 +84,19 @@ token-info-summary = {
 token-info-supply = {
     ; The total supply for the token on this particular ledger.
     ; For Bitcoin, that would be ~19 million at the time of this writing.
-    3 => uint,
+    0 => uint,
 
     ; The circulating supply for the token on this particular ledger.
     ; For Bitcoin, that would also be ~19 million, but if there was a staking
     ; mechanism, that would be less, as those tokens are not burnt but
     ; frozen.
-    4 => uint,
+    1 => uint,
 
     ; The maximum supply for the token on this particular ledger.
     ; This is the maximum amount of tokens at any point in time, including
     ; in the far future, and should never change.
     ; If this is null, then the token has an infinite maximum supply.
-    5 => uint / null,
+    2 => uint / null,
 }
 
 ; A full definition of a token, including its visual logo and any memo.
@@ -117,8 +111,8 @@ token-info = {
     ; Supply information for the token.
     2 => token-info-supply,
 
-    ; Owner of the token. If missing, the token has no owner.
-    ? 3 => non-anonymous-address,
+    ; Owner of the token.
+    3 => non-anonymous-address,
 
     ; A visual logo. If this is missing, a frontend should try to display
     ; something in exchange.

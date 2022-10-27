@@ -5,7 +5,7 @@ This attribute is used by servers that supports commands related to ledger.
 
 == Events
 
-Calling `ledger.send` MUST add the `[6, 0]` event to the event log.
+Calling `ledger.send` successfully MUST add the `[6, 0]` event to the event log.
 
 == Endpoints
 

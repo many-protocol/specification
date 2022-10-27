@@ -15,15 +15,15 @@ ledger-tokens-event-type-update = [11, 1]
 ledger-tokens-event-type-mint = [11, 2]
 ledger-tokens-event-type-burn = [11, 3]
 
-; A token genesis event.
+; A token creation event.
 ledger-tokens-event-info-create = {
     0 => ledger-tokens-event-type-create,
 
     1 => token-info-summary,            ; Summary.
     2 => address,                       ; Symbol.
-    3 => address,                       ; Owner.
+    3 => address / null,                ; Owner.
     ? 4 => visual-token-logo,           ; Visual logo.
-    ? 5 => ledger-tokens-address-map,   ; Holders at genesis.
+    ? 5 => ledger-tokens-address-map,   ; Holders at creation.
     ? 6 => ledger-amount,               ; Maximum supply, if any.
 }
 
@@ -31,10 +31,12 @@ ledger-tokens-event-info-create = {
 ledger-tokens-event-info-update = {
     0 => ledger-tokens-event-type-update,
     ? 0 => tstr,                        ; Token name.
-    ? 1 => tstr,                        ; Human readable ticker symbol.
+    ? 1 => tstr,                        ; Human readable short name (ticker
+                                        ; symbol).
     ? 2 => uint,                        ; Precision decimals.
     ? 3 => transaction-fee,             ; Transaction fees.
-    ? 4 => memo,                        ; Memo of the token itself.
+    ? 4 => memo,                        ; Memo of the token itself (in
+                                        ; token-info-summary).
     ? 5 => memo,                        ; Memo.
 }
 
@@ -62,13 +64,14 @@ tokens.create@param = {
 
     ; An optional owner for the token. If missing, the message sender will be
     ; used as owner. There can only be one owner.
-    ? 1 => non-anonymous-address,
+    ; To remove the owner of a token, this can be null.
+    ? 1 => address / null,
 
     ; An optional visual logo. See 2_ledger.cddl for more information on logos.
     ? 2 => visual-token-logo,
 
     ; An optional list of token holders. If missing, no one gets token and the
-    ; total supply is 0 at genesis.
+    ; total supply is 0 at creation.
     ? 3 => ledger-tokens-address-map,
 
     ; A maximum supply for the token. When minting, this will be checked to make
@@ -107,9 +110,9 @@ tokens.update@param = {
     ; add to it.
     ? 4 => memo,
 
-    ; An optional owner for the token. If missing, the message sender will be
-    ; used as owner. There can only be one owner.
-    ? 5 => non-anonymous-address,
+    ; An owner for the token.
+    ; To remove the owner of a token, this can be null.
+    ? 5 => address / null,
 
     ; An optional visual logo. See 2_ledger.cddl for more information on logos.
     ? 6 => visual-token-logo,

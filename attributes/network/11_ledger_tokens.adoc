@@ -26,6 +26,10 @@ Most of all information for a token can be updated using the `tokens.update` com
 include::{cddl}/11_ledger_tokens.cddl[tag=update]
 ----
 
+=== Ownerless Tokens
+
+One can update a token to not have an owner by giving ownership to `null` (NOT anonymous).
+
 == Minting and Burning
 
 One can mint new tokens using the `tokens.mint` command.
