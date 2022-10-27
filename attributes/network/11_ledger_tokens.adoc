@@ -36,8 +36,8 @@ The `tokens.burn` endpoint burns new tokens in the ledger associated with certai
 If a certain flag is passed, servers MUST return an error if accounts have fewer tokens than being burnt.
 Otherwise, servers MUST burn all tokens in the accounts and leave those accounts empty.
 
-Servers MAY delay minting and burning (for example, to process them in order at the end of the day).
-In this case, the command should be async and only resolved when the minting or burning actually occurs.
+Servers MAY delay minting and burning (for example, to process them at the end of the day).
+In this case, the response should have the async attribute and only resolve when the minting or burning actually occurs.
 See xref:../response/1_async.adoc[Async Responses] for more information on asynchronous operations.
 
 [sources,cddl]
