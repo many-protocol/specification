@@ -114,8 +114,7 @@ token-info = {
     ; Owner of the token.
     3 => non-anonymous-address,
 
-    ; A visual logo. If this is missing, a frontend should try to display
-    ; something in exchange.
+    ; A visual logo. If this is missing, a frontend should display a placeholder
     ? 4 => visual-token-logo,
 }
 

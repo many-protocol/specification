@@ -129,7 +129,7 @@ tokens.update@return = ()
 ; maximum supply, a server MUST return an error.
 ; Only the owner of the token can mint tokens.
 tokens.mint@param = {
-    ; The token to mint.
+    ; The symbol of the token to mint.
     0 => ledger-symbol,
 
     ; Addresses and amounts to give to.
@@ -148,10 +148,10 @@ tokens.mint@return = ()
 ; a flag can be passed (index 3) to error out instead of under-burning.
 ; Only the owner of the token can burn tokens.
 tokens.burn@param = {
-    ; The token to mint.
+    ; The symbol of the token to burn.
     0 => ledger-symbol,
 
-    ; Addresses and amounts to give to.
+    ; Addresses and amounts to burn from.
     1 => ledger-tokens-address-map,
 
     ; A memo about this event.

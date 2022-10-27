@@ -36,9 +36,13 @@ One can mint new tokens using the `tokens.mint` command.
 The ledger instantly mints the new tokens and associates them with given addresses.
 Servers MUST return an error if minting the tokens means increasing the total supply over the maximum supply.
 
-The `tokens.burn` endpoint burns new tokens in the ledger associated with certain addresses instantly.
-If a certain flag is passed, servers MUST return an error if accounts have fewer tokens than being burnt.
-Otherwise, servers MUST burn all tokens in the accounts and leave those accounts empty.
+One can burn tokens using the `tokens.burn` command. 
+The ledger instantly burns the tokens from the given associated addresses.
+One can set the token-burning behavior using a parameter.
+1. The ledger MUST burn all tokens held by the accounts and leave them empty if the amount of burnt tokens exceeds the amount held by the accounts, OR;
+2. The ledger MUST return an error if the number of burnt tokens exceeds the amount held in the account.
+A single token-burning behavior can be active at all times.
+A server MUST implement all the behaviors listed above.
 
 Servers MAY delay minting and burning (for example, to process them at the end of the day).
 In this case, the response should have the async attribute and only resolve when the minting or burning actually occurs.
