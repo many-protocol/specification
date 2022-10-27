@@ -1,8 +1,8 @@
 = Ledger Tokens Management Attribute (#11)
 :cddl: ./cddl/
 
-This attribute specifies that a ledger specifically can have tokens managed by an authority.
-By default, without this attribute, tokens are defined at genesis of the ledger, and cannot be created, minted or burnt.
+This attribute specifies that a ledger can have tokens managed by an authority.
+Without this attribute, tokens are defined at the genesis of the ledger, and cannot be created, minted, or burnt.
 
 Tokens described by this attribute are fungible and well specified.
 They would be equivalent to ERC-20 tokens.
