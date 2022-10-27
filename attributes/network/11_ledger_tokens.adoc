@@ -59,7 +59,7 @@ include::{cddl}/11_ledger_tokens.cddl[tag=burn]
 ----
 
 == Events
-All creation, update, minting and burning must be recorded in the event log.
+Token creation, update, minting, and burning MUST be recorded in the event log.
 
 [sources,cddl]
 ----
