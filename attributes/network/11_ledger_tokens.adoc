@@ -28,8 +28,9 @@ include::{cddl}/11_ledger_tokens.cddl[tag=update]
 
 == Minting and Burning
 
-One can mint new tokens using the `tokens.mint` command. 
+One can mint new tokens using the `tokens.mint` command.
 The ledger instantly mints the new tokens and associates them with given addresses.
+Servers MUST return an error if minting the tokens means increasing the total supply over the maximum supply.
 
 The `tokens.burn` endpoint burns new tokens in the ledger associated with certain addresses instantly.
 If a certain flag is passed, servers MUST return an error if accounts have fewer tokens than being burnt.
