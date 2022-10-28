@@ -37,6 +37,13 @@ This information is specified in separate files and can be extended in the futur
 
 Events in the event log do not contain extended information, as these can be large in size.
 
+One can query the information of a token, including its extended information, with `tokens.info`.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=info]
+----
+
 == Minting and Burning
 
 One can mint new tokens using the `tokens.mint` command.
