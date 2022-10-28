@@ -1,0 +1,45 @@
+; A single logo that can be shown for representing the token. A token can
+; have a set of logos that can represent visually its identity.
+single-visual-token-logo = single-visual-token-logo-unicode
+                         / single-visual-token-logo-image
+
+; A unicode logo.
+; For Bitcoin this would be U+20BF ("₿").
+single-visual-token-logo-unicode = {
+    ; Type.
+    0 => 0,
+
+    ; Unicode code point. This isn't limited to a single glyph but can be
+    ; truncated or transformed by the server or the frontend.
+    1 => tstr,
+}
+
+; A binary image.
+single-visual-token-logo-image = {
+    ; Type.
+    0 => 1,
+
+    ; Content-type, following the IANA list. This should be part of the
+    ; image section.
+    ; See https://www.iana.org/assignments/media-types/media-types.xhtml#image
+    1 => tstr,
+
+    ; Binary content of the image.
+    2 => bstr,
+}
+
+; A logo that can be shown visually. The server might add limits to how big
+; a logo can be (both in height x width, and on byte size).
+; A frontend should pick the first one that can be represented in its
+; interface, so this should be an ordered set in decrementing order of
+; importance. For example, a terminal would look for the first unicode character
+; in the set, while a UI on a phone might want a small assets for lists and a
+; big asset for detailed views.
+visual-token-logo = [ * single-visual-token-logo ]
+
+token-extended-info-visual-logo = 1
+token-extended-info //= {
+    ; A visual logo. If this is missing, a frontend should try to display a
+    ; placeholder.
+    ? token-extended-info-visual-logo => visual-token-logo,
+}
