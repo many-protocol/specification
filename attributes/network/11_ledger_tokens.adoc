@@ -44,6 +44,18 @@ One can query the information of a token, including its extended information, wi
 include::{cddl}/11_ledger_tokens.cddl[tag=info]
 ----
 
+Extended info can be updated with `tokens.addExtendedInfo` and `tokens.removeExtendedInfo`.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=addExtendedInfo]
+----
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=removeExtendedInfo]
+----
+
 == Minting and Burning
 
 One can mint new tokens using the `tokens.mint` command.

@@ -27,13 +27,17 @@ token-extended-info = {}
 ; tag::events[]
 event-info /= ledger-tokens-event-info-create
             / ledger-tokens-event-info-update
+            / ledger-tokens-event-info-add-extended-info
+            / ledger-tokens-event-info-remove-extended-info
             / ledger-tokens-event-info-mint
             / ledger-tokens-event-info-burn
 
 ledger-tokens-event-type-create = [11, 0]
 ledger-tokens-event-type-update = [11, 1]
-ledger-tokens-event-type-mint = [11, 2]
-ledger-tokens-event-type-burn = [11, 3]
+ledger-tokens-event-type-add-extended-info = [11, 2]
+ledger-tokens-event-type-remove-extended-info = [11, 3]
+ledger-tokens-event-type-mint = [11, 4]
+ledger-tokens-event-type-burn = [11, 5]
 
 ; A token creation event.
 ledger-tokens-event-info-create = {
@@ -50,15 +54,27 @@ ledger-tokens-event-info-create = {
 ; An update to a token information.
 ledger-tokens-event-info-update = {
     0 => ledger-tokens-event-type-update,
-    ? 1 => tstr,                            ; Token name.
-    ? 2 => tstr,                            ; Human readable short name (ticker
+    1 => ledger-symbol,                     ; Symbol.
+    ? 2 => tstr,                            ; Token name.
+    ? 3 => tstr,                            ; Human readable short name (ticker
                                             ; symbol).
-    ? 3 => uint,                            ; Precision decimals.
-    ? 4 => transaction-fee,                 ; Transaction fees.
-    ? 5 => address / null,                  ; New owner.
-    ? 6 => [ + attribute-related-index ],   ; Extended info added.
-    ? 7 => [ + attribute-related-index ],   ; Extended info removed.
-    ? 8 => memo,                            ; Memo.
+    ? 4 => uint,                            ; Precision decimals.
+    ? 5 => transaction-fee,                 ; Transaction fees.
+    ? 6 => address / null,                  ; New owner.
+    ? 7 => memo,                            ; Memo.
+}
+
+ledger-tokens-event-info-add-extended-info = {
+    0 => ledger-tokens-event-type-add-extended-info,
+    1 => ledger-symbol,                     ; Symbol.
+    2 => [ * attribute-related-index ],     ; Extended infos added.
+}
+
+; Removing extended info.
+ledger-tokens-event-info-remove-extended-info = {
+    0 => ledger-tokens-event-type-remove-extended-info,
+    1 => ledger-symbol,                     ; Symbol.
+    2 => [ * attribute-related-index ],     ; Extended infos removed.
 }
 
 ; A token minting event.
@@ -128,37 +144,59 @@ tokens.info@return = {
 ; Update the information of a token on this ledger. Missing fields will not
 ; be updated.
 tokens.update@param = {
+    ; The ledger symbol of the token to update.
+    0 => ledger-symbol,
+
     ; Human readable name for the token.
-    ? 0 => tstr,
+    ? 1 => tstr,
 
     ; Human readable symbol for the token.
-    ? 1 => tstr,
+    ? 2 => tstr,
 
     ; Precision decimals. Please note that this will not change any amounts,
     ; but will impact how many tokens users might see from their frontend.
     ; Servers MAY error if this field is updated or out of supported range.
-    ? 2 => uint,
+    ? 3 => uint,
 
     ; Transaction fees.
     ; Servers MAY error if this field is updated to invalid values.
-    ? 3 => transaction-fee,
+    ? 4 => transaction-fee,
 
     ; An owner for the token.
     ; To remove the owner of a token, this can be null.
-    ? 4 => address / null,
+    ? 5 => address / null,
 
     ; A memo associated with this update.
-    ? 5 => memo,
-
-    ; Extended info to add. This is merged with the existing extended info.
-    ? 6 => token-extended-info,
-
-    ; Extended info to remove.
-    ? 7 => [ + attribute-related-index ],
+    ? 6 => memo,
 }
 
 tokens.update@return = ()
 ; end::update[]
+
+; tag::addExtendedInfo[]
+tokens.addExtendedInfo@param = {
+    ; The ledger symbol of the token to update.
+    0 => ledger-symbol,
+
+    ; Extended info to add or overwrite. This is merged with the existing
+    ; extended info, replacing any existing matching info.
+    1 => token-extended-info,
+}
+
+tokens.addExtendedInfo@return = ()
+; end::addExtendedInfo[]
+
+; tag::removeExtendedInfo[]
+tokens.removeExtendedInfo@param = {
+    ; The ledger symbol of the token to update.
+    0 => ledger-symbol,
+
+    ; Extended info to remove. If an info doesn't exist, it MUST be ignored.
+    1 => [ + attribute-related-index ],
+}
+
+tokens.removeExtendedInfo@return = ()
+; end::removeExtendedInfo[]
 
 ; tag::mint[]
 ; Add tokens to the supply. If the new total supply of the token is above its
