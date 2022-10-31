@@ -35,7 +35,7 @@ One can update a token to not have an owner by giving ownership to `null` (NOT a
 A token can have optional and separately defined extended information.
 This information is specified in separate files and can be extended in the future.
 
-Events in the event log do not contain extended information, as these can be large in size.
+The extended information attribute indices are present in the event log, not the associated data.
 
 One can query the information of a token, including its extended information, with `tokens.info`.
 
