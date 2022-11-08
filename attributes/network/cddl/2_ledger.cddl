@@ -28,32 +28,25 @@ token-info-summary = {
     ; It is recommended for the server to limit this number.
     ; e.g. Bitcoin would use 8.
     2 => uint,
-
-    ; A transaction fee. A server can deny having no or too low of a transaction
-    ; fee on new tokens or updates. The fee is in the token currency itself.
-    ; Server can still deny transactions based on other criteria (such as
-    ; imposing a ledger's native token as additional transaction fee).
-    ; Servers can also clamp this value to assure a minimum transaction fee.
-    3 => transaction-fee,
 }
 
 ; The supply of a token on a given ledger.
 token-info-supply = {
     ; The total supply for the token on this particular ledger.
     ; For Bitcoin, that would be ~19 million at the time of this writing.
-    0 => uint,
+    0 => ledger-amount,
 
     ; The circulating supply for the token on this particular ledger.
     ; For Bitcoin, that would also be ~19 million, but if there was a staking
     ; mechanism, that would be less, as those tokens are not burnt but
     ; frozen.
-    1 => uint,
+    1 => ledger-amount,
 
     ; The maximum supply for the token on this particular ledger.
     ; This is the maximum amount of tokens at any point in time, including
     ; in the far future, and should never change.
-    ; If this is null, then the token has an infinite maximum supply.
-    2 => uint / null,
+    ; If this is missing, then the token has an infinite maximum supply.
+    ? 2 => ledger-amount,
 }
 
 ; Fees can be set for each symbols independently.
@@ -118,11 +111,9 @@ ledger-info = {
     ; implementation.
     1 => bstr,
 
+    ; DO NOT USE. Burnt for backward compatibility.
     ; Transfer fees for each symbols, between accounts.
-    ; TODO: not implemented.
-    2 => {
-        ledger-symbol => transaction-fee,
-    },
+    ? 2 => null,
 
     ; Conversion rates and fees between symbols.
     ; TODO: not implemented.

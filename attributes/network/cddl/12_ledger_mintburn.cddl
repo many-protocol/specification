@@ -1,0 +1,70 @@
+; tag::events[]
+event-info /= ledger-tokens-event-info-create
+            / ledger-tokens-event-info-mint
+            / ledger-tokens-event-info-burn
+
+ledger-tokens-event-type-mint = [11, 4]
+ledger-tokens-event-type-burn = [11, 5]
+
+; A token minting event.
+ledger-tokens-event-info-mint = {
+    0 => ledger-tokens-event-type-mint,
+    1 => ledger-symbol,
+    2 => ledger-tokens-address-map,
+    ? 3 => memo,
+}
+
+; A token burning event.
+ledger-tokens-event-info-burn = {
+    0 => ledger-tokens-event-type-burn
+    1 => ledger-symbol,
+    2 => ledger-tokens-address-map,
+    ? 3 => memo,
+}
+; end::events[]
+
+; tag::mint[]
+; Add tokens to the supply. If the new total supply of the token is above its
+; maximum supply, a server MUST return an error.
+; Only the owner of the token can mint tokens.
+tokens.mint@param = {
+    ; The symbol of the token to mint.
+    0 => ledger-symbol,
+
+    ; Addresses and amounts to give to.
+    1 => ledger-tokens-address-map,
+
+    ; A memo about this event.
+    ? 2 => memo,
+}
+
+; Empty return.
+tokens.mint@return = ()
+; end::mint[]
+
+; tag::burn[]
+; Remove tokens from the supply. To avoid race conditions on transactions,
+; a flag can be passed (index 3) to error out instead of under-burning.
+; Only the owner of the token can burn tokens.
+tokens.burn@param = {
+    ; The symbol of the token to burn.
+    0 => ledger-symbol,
+
+    ; Addresses and amounts to burn from.
+    1 => ledger-tokens-address-map,
+
+    ; A memo about this event.
+    ? 2 => memo,
+
+    ; If true, the server MUST error out if some tokens cannot be burnt,
+    ; e.g. if an address doesn't have enough tokens.
+    ; By default this is false.
+    ? 3 => bool,
+}
+
+tokens.burn@return = {
+    ; The amount of tokens actually burnt. This might be different than the
+    ; amount requested.
+    0 => ledger-tokens-address-map,
+}
+; end::burn[]
