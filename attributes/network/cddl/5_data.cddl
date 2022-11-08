@@ -4,19 +4,19 @@ data-index = attribute-related-index
 
 ; A data value.
 data-value = data-value-type-counter
-           / data-value-type-gauge
+           / data-value-type-gauge-int
 
 ; The type of a data.
 data-type = data-type-counter
-          / data-type-gauge
+          / data-type-gauge-int
 
 ; A monotonically incrementing unsigned integer.
 data-type-counter = 0
 data-value-type-counter = uint
 
-; An integer, float or big integer.
-data-type-gauge = 1
-data-value-type-gauge = int / float / bigint
+; An integer gauge, which can be a big integer.
+data-type-gauge-int = 1
+data-value-type-gauge-int = int / bigint
 
 data-info = {
     ; Type.
