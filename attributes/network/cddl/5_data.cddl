@@ -2,21 +2,28 @@
 ; A data index. Currently, custom data indices SHOULD NOT be accepted.
 data-index = attribute-related-index
 
-; A data value.
-data-value = data-value-type-counter
-           / data-value-type-gauge-int
+; A data value. The actual value depends on the tag.
+; TODO: get the tag(s) approved by IETF.
+data-value = #6.10100(data-value-type-counter)
+           / #6.10101(data-value-type-gauge-int)
+           / #6.10102(data-value-type-gauge-float)
 
 ; The type of a data.
 data-type = data-type-counter
           / data-type-gauge-int
+          / data-type-gauge-float
 
 ; A monotonically incrementing unsigned integer.
-data-type-counter = 0
+data-type-counter = 10100
 data-value-type-counter = uint
 
 ; An integer gauge, which can be a big integer.
-data-type-gauge-int = 1
+data-type-gauge-int = 10101
 data-value-type-gauge-int = int / bigint
+
+; A fixed point gauge.
+data-type-gauge-float = 10102
+data-value-type-gauge-float = bigfloat
 
 data-info = {
     ; Type.
