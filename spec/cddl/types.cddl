@@ -49,4 +49,4 @@ memo = [ + (tstr / (bstr .cbor any)) ]
 ; A burnt field is any valid CBOR value, but is used to indicate that this
 ; field should not be used anymore. It is normally kept as a backward compatible
 ; placeholder. Always should be used with an optional key in a map.
-burnt<T = any> = T
+burnt<T> = T
