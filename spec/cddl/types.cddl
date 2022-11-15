@@ -45,3 +45,8 @@ sub-attribute-related-index = [attribute-id, uint]
 ; different ways, or contain additional data.
 ; The memo itself CANNOT be empty and MUST contain at least one entry.
 memo = [ + (tstr / (bstr .cbor any)) ]
+
+; A burnt field is any valid CBOR value, but is used to indicate that this
+; field should not be used anymore. It is normally kept as a backward compatible
+; placeholder. Always should be used with an optional key in a map.
+burnt<T = any> = T
