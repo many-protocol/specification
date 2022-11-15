@@ -49,12 +49,14 @@ account-multisig-event-info-submit = {
     0 => account-event-type-multisig-submit,
     1 => non-anonymous-address,         ; Submitter
     2 => non-anonymous-address,         ; Account source
-    ? 3 => memo,                        ; Memo of the transaction
+    ? 3 => burnt<tstr>,                 ; DO NOT USE. Previous memo.
     4 => account-multisig-transaction,  ; The transaction submitted
     5 => account-multisig-token,        ; Token created by the submission.
     6 => uint,                          ; The number of approvals needed.
     7 => time,                          ; Expiration date time.
     8 => bool,                          ; Whether to automatically execute.
+    ? 9 => burnt<bstr>,                 ; DO NOT USE. Previous memo.
+    ? 10 => memo,                       ; Memo of the transaction
 }
 account-multisig-event-info-approve = {
     0 => account-event-type-multisig-approve,
@@ -176,8 +178,8 @@ account.multisigSubmitTransaction@param = {
     ; The account to submit the transaction to.
     0 => non-anonymous-address,
 
-    ; A memo associated with the transaction.
-    ? 1 => memo,
+    ; DO NOT USE. Previous memo.
+    ? 1 => burnt<tstr>,
 
     ; The transaction to send. Must be a valid transaction understood by the
     ; server.
@@ -200,6 +202,12 @@ account.multisigSubmitTransaction@param = {
     ; The server MUST return an error if this value is passed but the submitter
     ; does not have the `owner` role, or if automatic execution is not supported.
     ? 5 => bool,
+
+    ; A CBOR associated data field.
+    ? 6 => burnt<bstr>,
+
+    ; A memo associated with the transaction.
+    ? 7 => memo,
 }
 account.multisigSubmitTransaction@return = {
     ; A token identifying this transaction. This is an implementation specific opaque
@@ -216,8 +224,8 @@ account.multisigInfo@param = {
 }
 
 account.multisigInfo@return = {
-    ; Memo sent when creating the transaction.
-    ? 0 => memo,
+    ; DO NOT USE. Previous memo.
+    ? 0 => burnt<tstr>,
 
     ; The transaction info.
     1 => account-multisig-transaction,
@@ -243,8 +251,14 @@ account.multisigInfo@return = {
     ; Unix EPOCH.
     6 => time,
 
+    ; DO NOT USE. Previous data.
+    ? 7 => burnt<bstr>,
+
     ; A state of the transaction.
     8 => multisig-transaction-state,
+
+    ; Memo sent when creating the transaction.
+    ? 9 => memo,
 }
 ; end::info[]
 
