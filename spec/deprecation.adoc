@@ -1,0 +1,67 @@
+= Deprecation Policy
+:cddl: ./cddl/
+// Metadata
+:toc:
+:hide-uri-scheme:
+
+As we are still in Alpha phase of the protocol, we allow some fields to be deprecated and "burnt".
+This is to allow some velocity in the design and experimentation while we finalize the protocol.
+
+== Burning Fields
+
+During Alpha, it is still possible to remove and replace fields.
+This is done by burning the old fields and add new fields.
+
+To burn a field, replace its type with `burnt<ORIGINAL_TYPE>` (see the xref:{cddl}/types.cddl[burnt type]), and ensure that it is optional.
+Indicate clearly in a comment not to use the field for anything else.
+The new fields should also be marked as optional.
+
+This allows us to keep backward compatibility.
+Fields that are burnt this way should be moved out of the implementations gradually.
+
+For example, when reworking the `memo` field from a `tstr` to an array containing either text or byte strings (`[ + (tstr / (bstr .cbor any)) ]`), all memo fields were replaced with `burnt<tstr>`, and the new type used new indices in the maps to replace the old fields.
+This lead to the following change:
+
+.`multisig.cddl` original
+[source,cddl]
+----
+account-multisig-event-info-submit = {
+    0 => account-event-type-multisig-submit,
+    1 => non-anonymous-identity,        ; Submitter
+    2 => non-anonymous-identity,        ; Account source
+    ? 3 => memo,                        ; Memo of the transaction
+    4 => account-multisig-transaction,  ; The transaction submitted
+    5 => account-multisig-token,        ; Token created by the submission.
+    6 => uint,                          ; The number of approvals needed.
+    7 => time,                          ; Expiration date time.
+    8 => bool,                          ; Whether to automatically execute.
+    ? 9 => bstr .cbor any,              ; CBOR data associated with the
+                                        ; transaction.
+}
+----
+
+.`multisig.cddl` with burnt fields
+[source,cddl]
+----
+account-multisig-event-info-submit = {
+    0 => account-event-type-multisig-submit,
+    1 => non-anonymous-address,         ; Submitter
+    2 => non-anonymous-address,         ; Account source
+    ? 3 => burnt<tstr>,                 ; DO NOT USE. Previous memo.
+    4 => account-multisig-transaction,  ; The transaction submitted
+    5 => account-multisig-token,        ; Token created by the submission.
+    6 => uint,                          ; The number of approvals needed.
+    7 => time,                          ; Expiration date time.
+    8 => bool,                          ; Whether to automatically execute.
+    ? 9 => burnt<bstr>,                 ; DO NOT USE. Previous memo.
+    ? 10 => memo,                       ; Memo of the transaction
+}
+----
+
+== Beta
+
+Once the protocol itself is in Beta, we will not allow removing existing fields anymore, to ensure backward compatibility.
+This means that existing files will become immutable (outside of documentation PRs).
+Security issues should be resolved by deprecating but not removing attributes, and create new attributes with the correct properties.
+
+We do not have criteria or a timeline for moving the specification to Beta.

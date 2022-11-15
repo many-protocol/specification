@@ -56,7 +56,7 @@ account-multisig-event-info-submit = {
     7 => time,                          ; Expiration date time.
     8 => bool,                          ; Whether to automatically execute.
     ? 9 => burnt<bstr>,                 ; DO NOT USE. Previous memo.
-    10 => memo,                         ; Memo of the transaction
+    ? 10 => memo,                       ; Memo of the transaction
 }
 account-multisig-event-info-approve = {
     0 => account-event-type-multisig-approve,
