@@ -9,8 +9,8 @@ single-visual-token-logo-unicode = {
     ; Type.
     0 => 0,
 
-    ; Unicode code point. This isn't limited to a single glyph but can be
-    ; truncated or transformed by the server or the frontend.
+    ; Unicode glyph. This isn't limited to a single code point but should be
+    ; a single visual glyph. The server MAY transform or truncate this string.
     1 => tstr,
 }
 

@@ -2,7 +2,7 @@
 :cddl: ./cddl/
 
 This attribute specifies that a ledger can have tokens managed by an authority.
-Without this attribute, tokens are defined at the genesis of the ledger, and cannot be created, minted, or burnt.
+Without this attribute, tokens are defined at the genesis of the ledger, and cannot be created.
 
 Tokens described by this attribute are fungible and well specified.
 They would be equivalent to ERC-20 tokens.
@@ -10,9 +10,14 @@ They would be equivalent to ERC-20 tokens.
 A server implementing this attribute SHOULD protect the endpoints described in this form in some way.
 For example, endpoints SHOULD error if the sender isn't from a certain address.
 
+Addresses for newly created tokens are decided by the server or neighborhood.
+A recommended way is to use a unique subresource of the neighborhood's identity.
+
 == Creating Tokens
 
 One can create new tokens using the `tokens.create` command.
+A server MAY allow or refuse any identity to create new tokens, at its convenience.
+For example, a server MAY require an identity to have the `canTokensCreate` permission.
 
 [sources,cddl]
 ----
@@ -58,34 +63,11 @@ include::{cddl}/11_ledger_tokens.cddl[tag=removeExtendedInfo]
 
 == Minting and Burning
 
-One can mint new tokens using the `tokens.mint` command.
-The ledger instantly mints the new tokens and associates them with given addresses.
-Servers MUST return an error if minting the tokens means increasing the total supply over the maximum supply.
-
-One can burn tokens using the `tokens.burn` command.
-The ledger instantly burns the tokens from the given associated addresses.
-One can set the token-burning behavior using a parameter.
-1. The ledger MUST burn all tokens held by the accounts and leave them empty if the amount of burnt tokens exceeds the amount held by the accounts, OR;
-2. The ledger MUST return an error if the number of burnt tokens exceeds the amount held in the account.
-A single token-burning behavior can be active at all times.
-A server MUST implement all the behaviors listed above.
-
-Servers MAY delay minting and burning (for example, to process them at the end of the day).
-In this case, the response should have the async attribute and only resolve when the minting or burning actually occurs.
-See xref:../response/1_async.adoc[Async Responses] for more information on asynchronous operations.
-
-[sources,cddl]
-----
-include::{cddl}/11_ledger_tokens.cddl[tag=mint]
-----
-
-[sources,cddl]
-----
-include::{cddl}/11_ledger_tokens.cddl[tag=burn]
-----
+Minting and burning tokens is done through the attribute #12.
+Tokens created using this attribute cannot mint and burn if the server does not implement attribute 12.
 
 == Events
-Token creation, update, minting, and burning MUST be recorded in the event log.
+Token creation and update MUST be recorded in the event log.
 
 [sources,cddl]
 ----

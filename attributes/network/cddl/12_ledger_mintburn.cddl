@@ -3,8 +3,8 @@ event-info /= ledger-tokens-event-info-create
             / ledger-tokens-event-info-mint
             / ledger-tokens-event-info-burn
 
-ledger-tokens-event-type-mint = [11, 4]
-ledger-tokens-event-type-burn = [11, 5]
+ledger-tokens-event-type-mint = [12, 0]
+ledger-tokens-event-type-burn = [12, 1]
 
 ; A token minting event.
 ledger-tokens-event-info-mint = {

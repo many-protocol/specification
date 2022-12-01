@@ -1,0 +1,28 @@
+== Account Tokens Feature Attribute (#2)
+:cddl: ./cddl/
+
+This attribute adds support for token creation, update to regular addresses on a ledger.
+Any allowed (see <<Role>>) identities listed in an account using this attribute can perform regular transactions on behalf of the account.
+
+Verification that the sender is able to transact on behalf of an account is left to the server.
+
+== Role
+Six new roles are added by this feature,
+
+
+- `"canTokensMint"`, which allow an address to mint new tokens.
+- `"canTokensBurn"`, which allow an address to burn new tokens.
+- `"canTokensCreate"`, which allow an address to create new tokens.
+- `"canTokensUpdate"`, which allow an address to update an existing token.
+- `"canTokensAddExtendedInfo"`, which allow an address to add extended information about a token.
+- `"canTokensRemoveExtendedInfo"`, which allow an address to remove extended information about a token.
+
+Identities MUST either be an `"owner"` or have those roles to be allowed to perform transactions.
+
+== CDDL
+
+=== Types
+[sources,cddl]
+----
+include::{cddl}3_account_tokens.cddl[tag=types]
+----
