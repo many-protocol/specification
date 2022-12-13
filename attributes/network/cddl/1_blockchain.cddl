@@ -59,19 +59,22 @@ transaction = {
     ; The identifier of the transaction.
     0 => transaction-identifier,
 
+    ; DO NOT USE.  This is the old transaction content field.
+    ? 1 => burnt<bstr>,
+
     ; The content of the transaction. This should be a MANY request.
     ; If this field is missing, the transaction was too large to fit here and
     ; should be queried separately. Use the `block.request` endpoint.
     ; If this field is there but empty (not a request), the transaction is
     ; empty or metadata-only (implementation specific).
-    ? 1 => bstr .cbor request / bstr .size 0,
+    ? 2 => bstr .cbor request / bstr .size 0,
 
     ; The response for the transaction. This should be a MANY response.
     ; If this field is missing, the response might be too large to fit in a single
     ; response.  Use the `block.response` endpoint.
     ; If this field is empty, the transaction is empty or metadata-only
     ; (implementation specific).
-    ? 2 => bstr .cbor response / bstr .size 0,
+    ? 3 => bstr .cbor response / bstr .size 0,
 
     ; Additional fields are okay here as metadata, as long as keys are strings.
     tstr => any,
