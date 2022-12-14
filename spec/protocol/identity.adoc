@@ -6,7 +6,7 @@ The key pair can derive an Address, which may contain additional parts (such as 
 
 == Address
 
-There are 3 types of addresses as part of the ManyVerse;
+There are multiple types of addresses as part of the ManyVerse;
 
 1. *Anonymous.*
    An anonymous user does not sign messages.
@@ -20,6 +20,12 @@ There are 3 types of addresses as part of the ManyVerse;
    A Subresource address is an indexed resource inside a network that does not have its own internal public key but can be addressed.
    Messages to and from a subresource should use the same public key as the network they're part of.
    To resolve a public key address from a subresource, use the hash part and build the public key address with its hash.
+
+4. *Invalid.*
+   The invalid address does not refer to any identity and cannot sign or validate messages.
+   This is a fixed address similar to anonymous, but cannot be used as a source of messages.
+   It is however a valid destination and can be used as a target or owner to remove any ownership of resources or assets.
+   For example, sending tokens to the invalid address is akin to removing them from the supply (effectively burning them).
 
 === Binary Format
 
@@ -44,6 +50,9 @@ The rest depends on the type of address:
 2+| SHA-3 (224 bits) of COSE encoded public key (see <<_cose_key>>).
 | The address of an identity that has a private key (can sign), and MAY receive messages.
   This can be a user or a network of computers sharing a distributed key.
+
+3+| 0x02 (Invalid)
+| Invalid Address.
 
 | 0x80 - 0xFF (Subresource index high bits)
 | SHA-3 (224 bits) of COSE encoded public key (see <<_cose_key>>).
@@ -84,6 +93,7 @@ The following addresses can be used as examples:
 |===
 | Address Binary | Textual Format
 | `0x00` (Anonymous) | `maa` or `maaaa`
+| `0x02` (Invalid) | `maiyg`
 | `0x0100000000000000000000000000000000000000000000000000000000` | `maeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah`
 | `0x8000000000000000000000000000000000000000000000000000000000000000` | `mqaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaayb`
 | `0x8000000000000000000000000000000000000000000000000000000000000001` | `mqaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaqac`
