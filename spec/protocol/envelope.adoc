@@ -81,10 +81,16 @@ function decodeEnvelope(envelope) {
     if (!resolvedSender) {
         throw new Error();
     }
+    if (resolvedSender.isIllegal()) {
+        throw new Error();
+    }
 
     let message = decodeCborMessage(envelope.payload);
     let sender = message.from;
 
+    if (sender.isIllegal()) {
+        throw new Error();
+    }
     if (sender.isAnonymous() && !resolvedSender.isAnonymous()) {
         throw new Error();
     }
