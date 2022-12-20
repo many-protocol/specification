@@ -1,26 +1,36 @@
 ; tag::types[]
 event-type-put = [7, 0]
 event-type-disable = [7, 1]
+event-type-disable = [7, 2]
 
 event-type /= event-type-put
            /  event-type-disable
+           /  event-type-transfer
 
 event-info-put = {
     0 => event-type-put,
     1 => bstr,                    ; Key
     2 => bstr,                    ; Value
-    ? 3 => non-anonymous-address ; Key owner
+    ? 3 => non-anonymous-address  ; Key owner
 }
 
 event-info-disable = {
     0 => event-type-disable,
     1 => bstr,                    ; Key
-    ? 2 => non-anonymous-address ; Key owner
+    ? 2 => non-anonymous-address  ; Key owner
     ? 3 => reason<u64>            ; The reason this was deleted/disabled.
+}
+
+event-info-transfer = {
+    0 => event-type-transfer,
+    1 => bstr,                    ; Key
+    2 => non-anonymous-address    ; Previous owner
+    3 => non-anonymous-address    ; The new key owner
 }
 
 event-info /= event-info-put
            /  event-info-disable
+           /  event-info-transfer
 ; end::types[]
 
 ; tag::put[]
@@ -55,3 +65,18 @@ kvstore.disable@param = {
 
 kvstore.disable@return = ()
 ; end::disable[]
+
+; tag::transfer[]
+; Transfer ownership of a key.
+kvstore.transfer@param = {
+    ; Key.
+    0 => bstr,
+
+    ; Alternative key owner
+    ; The sender must be related to this address, e.g., account, subresource, etc.
+    ? 1 => non-anonymous-address,
+
+    ; New owner. This is required.
+    2 => non-anonymous-address,
+}
+; end::transfer[]

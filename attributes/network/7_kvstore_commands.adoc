@@ -38,3 +38,8 @@ include::{cddl}/7_kvstore_commands.cddl[tag=put]
 include::{cddl}/7_kvstore_commands.cddl[tag=disable]
 ----
 
+=== Transfer
+[sources,cddl]
+----
+include::{cddl}/7_kvstore_commands.cddl[tag=transfer]
+----
