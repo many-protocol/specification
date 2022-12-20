@@ -1,7 +1,7 @@
 ; tag::types[]
 event-type-put = [7, 0]
 event-type-disable = [7, 1]
-event-type-disable = [7, 2]
+event-type-transfer = [7, 2]
 
 event-type /= event-type-put
            /  event-type-disable
