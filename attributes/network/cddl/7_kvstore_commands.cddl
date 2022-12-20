@@ -79,4 +79,6 @@ kvstore.transfer@param = {
     ; New owner. This is required.
     2 => non-anonymous-address,
 }
+
+kvstore.transfer@return = ()
 ; end::transfer[]
