@@ -11,14 +11,13 @@ event-info-put = {
     0 => event-type-put,
     1 => bstr,                    ; Key
     2 => bstr,                    ; Value
-    ? 3 => non-anonymous-address  ; Key owner
+    3 => non-anonymous-address    ; Key owner
 }
 
 event-info-disable = {
     0 => event-type-disable,
     1 => bstr,                    ; Key
-    ? 2 => non-anonymous-address  ; Key owner
-    ? 3 => reason<u64>            ; The reason this was deleted/disabled.
+    2 => reason<u64>              ; The reason this was deleted/disabled.
 }
 
 event-info-transfer = {
