@@ -39,6 +39,11 @@ request = COSE_Sign<{
     ; Attributes. An optional list of request attributes defined in the spec. See
     ; the list of all attributes in this repo.
     ? 8 => [ * attribute ],
+
+    ; Flag.  When set, a proof of what was requested will be given, if possible.
+    ; Otherwise, an error will be returned.  When not set, a response will be given
+    ; without an associated proof and without error.
+    ? 9 => bool
 }>
 ; end::request[]
 
@@ -85,6 +90,12 @@ response = COSE_Sign<{
     ; Attributes. An optional list of response attributes defined in the spec. See
     ; the list of all attributes in this repo.
     ? 8 => [ * attribute ],
+
+    ; Proof.  If requested, this is the set of steps constituting a proof of existence
+    ; of what was requested in the state of the Merkle tree.
+    ; See https://github.com/liftedinit/merk/blob/develop/docs/algorithms.md#binary-format for
+    ; reference.
+    ? 9 => [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
 }>
 ; end::response[]
 
@@ -159,3 +170,44 @@ attribute-id-custom = nint
 
 ; An attribute contains an ID and arguments.
 attribute = attribute-id / [attribute-id, * attribute-arg]
+
+; Represents a parent operation in a proof
+parent = h'10'
+
+; Represents a child operation in a proof
+child = h'11'
+
+; The hash of a key-value pair
+key-value-hash = bstr
+
+; The hash of a node in a proof, containing, in order, the hash
+; of the key-value pair, the hash of the left child, and the hash of
+; the right child
+node-hash = bstr
+
+; A node key of a proof is a collection of bytes together with its length
+node-key = {
+    ; The length of the key
+    0 => uint,
+
+    ; The value of the key
+    1 => bstr,
+}
+
+; A node value of a proof is a collection of bytes together with its length
+node-value = {
+    ; The length of the value
+    0 => uint,
+
+    ; The value itself
+    1 => bstr
+}
+
+; The key-value pair of a proof
+key-value-pair = {
+    ; The key
+    0 => node-key,
+
+    ; The value
+    1 => node-value
+}
