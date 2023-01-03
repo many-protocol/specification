@@ -1,5 +1,5 @@
 ; tag::types[]
-event-type-transfer = [11, 0]
+event-type-transfer = [13, 0]
 
 event-type /= event-type-transfer
 

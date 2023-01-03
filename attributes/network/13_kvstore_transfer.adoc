@@ -1,4 +1,4 @@
-= KVStore Transfer Commands Attribute (#11)
+= KVStore Transfer Commands Attribute (#13)
 :cddl: ./cddl/
 
 This attribute is used by servers that supports transfers of key ownership in a KvStore.
@@ -13,5 +13,5 @@ Transfer ownership of a key to another address.
 === Transfer
 [sources,cddl]
 ----
-include::{cddl}/11_kvstore_transfer.cddl[tag=transfer]
+include::{cddl}/13_kvstore_transfer.cddl[tag=transfer]
 ----
