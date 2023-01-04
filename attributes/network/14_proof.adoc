@@ -1,4 +1,4 @@
-= Proof Attribute (#11)
+= Proof Attribute (#14)
 :cddl: ./cddl/
 
 This attribute allows server to deliver the proof of an object requested.
@@ -30,3 +30,8 @@ two items are popped from the stack, and a new item with the second item as the
 left child of the first item is pushed onto the stack.  In the child operation,
 two items are popped from the stack, and a new item with the first item as the right child
 of the second item is pushed back onto the stack.
+
+[sources,cddl]
+----
+include::{cddl}14_proof.cddl
+----

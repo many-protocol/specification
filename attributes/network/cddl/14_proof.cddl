@@ -9,42 +9,18 @@ proof@return = {
 }
 
 ; Represents a parent operation in a proof
-parent = h'10'
+parent = 0x10
 
 ; Represents a child operation in a proof
-child = h'11'
+child = 0x11
 
 ; The hash of a key-value pair
-key-value-hash = bstr
+key-value-hash = [1, bstr]
 
 ; The hash of a node in a proof, containing, in order, the hash
 ; of the key-value pair, the hash of the left child, and the hash of
 ; the right child
-node-hash = bstr
-
-; A node key of a proof is a collection of bytes together with its length
-node-key = {
-    ; The length of the key
-    0 => uint,
-
-    ; The value of the key
-    1 => bstr,
-}
-
-; A node value of a proof is a collection of bytes together with its length
-node-value = {
-    ; The length of the value
-    0 => uint,
-
-    ; The value itself
-    1 => bstr
-}
+node-hash = [2, bstr]
 
 ; The key-value pair of a proof
-key-value-pair = {
-    ; The key
-    0 => node-key,
-
-    ; The value
-    1 => node-value
-}
+key-value-pair = [3, bstr, bstr]

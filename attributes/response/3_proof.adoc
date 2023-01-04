@@ -1,0 +1,11 @@
+= Proof Attribute (#3)
+:cddl: ./cddl/
+
+This attribute represents a proof of an object requested with respect to the blockchain's underlying state represented as a Merkle tree.
+
+== Argument
+
+[source,cddl]
+....
+include::{cddl}/3_proof.cddl[]
+....
