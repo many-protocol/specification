@@ -21,4 +21,4 @@ key-value-hash = [1, bstr]
 node-hash = [2, bstr]
 
 ; The key-value pair of a proof
-key-value-pair = [3, (0 => bstr, 1 => bstr)]
+key-value-pair = [3, bstr, bstr]
