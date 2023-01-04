@@ -1,12 +1,13 @@
 proof@param = ()
 
 proof@return = {
-    ; Proof.  If requested, this is the set of steps constituting a proof of existence
-    ; of what was requested in the state of the Merkle tree.
-    ; See https://github.com/liftedinit/merk/blob/develop/docs/algorithms.md#binary-format for
-    ; reference.
+    ; Proof.  If requested, this is the set of steps constituting a proof of existence of what was requested in the state of the Merkle tree.
+    ; See https://github.com/liftedinit/merk/blob/develop/docs/algorithms.md#binary-format for reference.
     0 => [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
 }
+
+; Attribute id (related to hashing implementation)
+proof@attribute-arg = uint
 
 ; Represents a parent operation in a proof
 parent = 0x10
@@ -17,10 +18,8 @@ child = 0x11
 ; The hash of a key-value pair
 key-value-hash = [1, bstr]
 
-; The hash of a node in a proof, containing, in order, the hash
-; of the key-value pair, the hash of the left child, and the hash of
-; the right child
+; The hash of a node in a proof, containing, in order, the hash of the key-value pair, the hash of the left child, and the hash of the right child
 node-hash = [2, bstr]
 
 ; The key-value pair of a proof
-key-value-pair = [3, bstr, bstr]
+key-value-pair = [3, (0 => bstr, 1 => bstr)]
