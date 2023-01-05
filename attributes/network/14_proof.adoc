@@ -8,21 +8,10 @@ The proof itself is a sequence of actions used to construct the state in which t
 
 This is a uint representing the hasher to be used in constructing proofs.
 
-* 0 - merk default hash (currently blake3)
-
-* 1 - TBD
-
-== Hash Scheme
-
-Each node contains a "kv hash", which is the hash of a prefix concatenanted with the nodes key and its value.
-The hash of the node is the hash of a distinct prefix, the kv hash, and the hash of each of the left and right child nodes.
-
-```
-kv_hash = H(0x00, key, value)
-node_hash = H(0x01, kv_hash, left_child_hash, right_child_hash)
-```
+* 0 - merk default hash (see see xref:../../spec/proof_hash_scheme.adoc.)
 
 [sources,cddl]
 ----
 include::{cddl}14_proof.cddl
 ----
+

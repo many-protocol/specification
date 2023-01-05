@@ -1,0 +1,11 @@
+= Proof Hash Scheme
+:cddl: ./cddl/
+
+Each node contains a "kv hash", which is the hash of a prefix concatenanted with the nodes key and its value.
+The hash of the node is the hash of a distinct prefix, the kv hash, and the hash of each of the left and right child nodes.
+
+```
+kv_hash = H(0x00, key, value)
+node_hash = H(0x01, kv_hash, left_child_hash, right_child_hash)
+```
+
