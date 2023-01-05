@@ -9,3 +9,5 @@ kv_hash = H(0x00, key, value)
 node_hash = H(0x01, kv_hash, left_child_hash, right_child_hash)
 ```
 
+The hash function H is currently the blake3 hash.
+
