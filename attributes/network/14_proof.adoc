@@ -8,7 +8,7 @@ The proof itself is a sequence of actions used to construct the state in which t
 
 This is a uint representing the hasher to be used in constructing proofs.
 
-* 0 - merk default hash (see see xref:../../spec/proof_hash_scheme.adoc.)
+* 0 - merk default hash (see xref:../../spec/proof_hash_scheme.adoc.)
 
 [sources,cddl]
 ----
