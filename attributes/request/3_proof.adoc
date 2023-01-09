@@ -1,0 +1,7 @@
+= Proof Request Attribute (#3)
+:cddl: ./cddl/
+
+[source,cddl]
+....
+include::{cddl}/3_proof.cddl[]
+....
