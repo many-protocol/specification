@@ -37,4 +37,3 @@ include::{cddl}/7_kvstore_commands.cddl[tag=put]
 ----
 include::{cddl}/7_kvstore_commands.cddl[tag=disable]
 ----
-

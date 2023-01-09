@@ -1,0 +1,31 @@
+; tag::types[]
+event-type-transfer = [13, 0]
+
+event-type /= event-type-transfer
+
+event-info-transfer = {
+    0 => event-type-transfer,
+    1 => bstr,                    ; Key
+    2 => non-anonymous-address    ; Previous owner
+    3 => non-anonymous-address    ; The new key owner
+}
+
+event-info /= event-info-transfer
+; end::types[]
+
+; tag::transfer[]
+; Transfer ownership of a key.
+kvstore.transfer@param = {
+    ; Key.
+    0 => bstr,
+
+    ; Alternative key owner
+    ; The sender must be related to this address, e.g., account, subresource, etc.
+    ? 1 => non-anonymous-address,
+
+    ; New owner. This is required.
+    2 => non-anonymous-address,
+}
+
+kvstore.transfer@return = ()
+; end::transfer[]
