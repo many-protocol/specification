@@ -1,6 +1,10 @@
 = Proof Hash Scheme
 :cddl: ./cddl/
 
+The following list of hash schemes is ordered by attribute id
+
+== 0
+
 Each node contains a "kv hash", which is the hash of a prefix concatenanted with the nodes key and its value.
 The hash of the node is the hash of a distinct prefix, the kv hash, and the hash of each of the left and right child nodes.
 

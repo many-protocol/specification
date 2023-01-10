@@ -3,26 +3,6 @@
 
 This attribute represents a proof of an object requested with respect to the blockchain's underlying state represented as a Merkle tree.
 
-== Returns
-
-A proof is a collection of operations used to reconstruct a state that can be embedded into the existing state of the Merkle tree that contains it.
-
-Each state can be represented by one of five operations:
-
-* A node hash
-
-* A key/value hash of a node
-
-* A key and value pair of a node
-
-* The "parent" operation
-
-* The "child" operation
-
-Interpreting these operations as acting on a stack, the first three operations listed can be interpreted as pushing data onto the stack.
-In the parent operation, two items are popped from the stack, and a new item with the second item as the left child of the first item is pushed onto the stack.
-In the child operation, two items are popped from the stack, and a new item with the first item as the right child of the second item is pushed back onto the stack.
-
 == Example
 The following is taken from https://github.com/liftedinit/merk/blob/develop/docs/algorithms.md#example-proofs
 
