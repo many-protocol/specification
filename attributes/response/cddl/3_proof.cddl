@@ -1,5 +1,5 @@
 ; Proof.  If requested, this is the set of steps constituting a proof of existence of what was requested in the state of the Merkle tree.
-proof = [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
+proof@response-attribute-arg = [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
 
 ; Represents a parent operation in a proof
 parent = 0x10
