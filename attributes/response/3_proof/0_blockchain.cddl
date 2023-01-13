@@ -2,3 +2,4 @@ proof@response-attribute-arg //= {
     ; Block height.
     [3, [0, 0]] => uint
 }
+
