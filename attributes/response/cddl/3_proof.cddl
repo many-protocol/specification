@@ -4,13 +4,11 @@ proof@response-attribute-arg = {
     0 => bstr,
     
     ; The proof operations
-    1 => proof,
+    1 => [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ],
     
     ; Extensible attribute related indices for extra information (implementation specific)
     * attribute-related-index => any,
 }
-
-proof = [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
 
 ; Represents a parent operation in a proof
 parent = 0x10
