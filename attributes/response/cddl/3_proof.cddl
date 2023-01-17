@@ -7,7 +7,7 @@ proof@response-attribute-arg = {
     1 => proof,
     
     ; Extensible attribute related indices for extra information (implementation specific)
-    * attribute-related-index = (),
+    * attribute-related-index => (),
 }
 
 proof = [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
