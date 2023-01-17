@@ -7,10 +7,12 @@ proof@response-attribute-arg = {
     1 => proof,
     
     ; Extensible attribute related indices for extra information (implementation specific)
-    * proof-attribute-related-index => any,
+    proof-attribute-related-index,
 }
 
 proof = [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
+
+proof-attribute-related-index = ()
 
 ; Represents a parent operation in a proof
 parent = 0x10
