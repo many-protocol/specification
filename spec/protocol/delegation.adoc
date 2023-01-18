@@ -105,6 +105,9 @@ function resolveDelegation(sender, message) {
         if (!from) {
             throw new Error();
         }
+        if (from.isIllegal() || sender.isIllegal()) {
+            throw new Error();
+        }
 
         let cert = decodeCborDelegationCertificate(envelope.payload);
         if (!from.matches(cert.from)) {

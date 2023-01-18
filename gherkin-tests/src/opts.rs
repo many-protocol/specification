@@ -34,7 +34,7 @@ where
             E: serde::de::Error,
         {
             let pem = std::fs::read_to_string(v).map_err(E::custom)?;
-            CoseKeyIdentity::from_pem(&pem).map_err(E::custom)
+            CoseKeyIdentity::from_pem(pem).map_err(E::custom)
         }
     }
     d.deserialize_any(InternalVisitor)
