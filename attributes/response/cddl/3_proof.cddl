@@ -12,7 +12,9 @@ proof@response-attribute-arg = {
 
 proof-attribute-related-index = ()
 
-proof = [ + ( node-hash / key-value-hash / key-value-pair / parent / child ) ]
+proof = [ + proof-operation ]
+
+proof-operation = ( node-hash / key-value-hash / key-value-pair / parent / child )
 
 ; Represents a parent operation in a proof
 parent = 0x10
