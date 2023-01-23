@@ -38,6 +38,7 @@ async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, sy
                     to: identity.address(),
                     amount: amount.clone() - current_balance,
                     symbol,
+                    memo: None,
                 })
                 .await
                 .expect("Should have sent");
@@ -50,6 +51,7 @@ async fn id_has_x_symbols(world: &mut World, id: Identifier, amount: BigUint, sy
                     to: faucet.address(),
                     amount: current_balance - amount.clone(),
                     symbol,
+                    memo: None,
                 })
                 .await
                 .expect("Should have sent");
@@ -79,6 +81,7 @@ async fn send_symbol(
             to: receiver,
             amount: amount.into(),
             symbol,
+            memo: None,
         })
         .await
         .unwrap();
