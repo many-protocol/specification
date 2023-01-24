@@ -42,7 +42,7 @@ event-type /= account-event-type-multisig-submit
 events-filter-attribute-specific /= {
     ; Filter a multisig event by its type. This is only valid for multisig
     ; event types, otherwise should not match any event.
-    ? [ 9, [ 1, 0 ] ] = multisig-transaction-state / [ * multisig-transaction-state ]
+    ? [ 9, [ 1, 0 ] ] => multisig-transaction-state / [ * multisig-transaction-state ]
 }
 
 account-multisig-event-info-submit = {
