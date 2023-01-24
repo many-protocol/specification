@@ -1,0 +1,75 @@
+= Ledger Tokens Management Attribute (#11)
+:cddl: ./cddl/
+
+This attribute specifies that a ledger can have tokens managed by an authority.
+Without this attribute, tokens are defined at the genesis of the ledger, and cannot be created.
+
+Tokens described by this attribute are fungible and well specified.
+They would be equivalent to ERC-20 tokens.
+
+A server implementing this attribute SHOULD protect the endpoints described in this form in some way.
+For example, endpoints SHOULD error if the sender isn't from a certain address.
+
+Addresses for newly created tokens are decided by the server or neighborhood.
+A recommended way is to use a unique subresource of the neighborhood's identity.
+
+== Creating Tokens
+
+One can create new tokens using the `tokens.create` command.
+A server MAY allow or refuse any identity to create new tokens, at its convenience.
+For example, a server MAY require an identity to have the `canTokensCreate` permission.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=create]
+----
+
+One can update the token information using the `tokens.update` command.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=update]
+----
+
+=== Ownerless Tokens
+
+One can update a token to not have an owner by giving ownership to `null` (NOT anonymous).
+
+=== Extended Information
+
+A token can have optional and separately defined extended information.
+This information is specified in separate files and can be extended in the future.
+
+The extended information attribute indices are present in the event log, not the associated data.
+
+One can query the information of a token, including its extended information, with `tokens.info`.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=info]
+----
+
+Extended info can be updated with `tokens.addExtendedInfo` and `tokens.removeExtendedInfo`.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=addExtendedInfo]
+----
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=removeExtendedInfo]
+----
+
+== Minting and Burning
+
+Minting and burning tokens is done through the attribute #12.
+Tokens created using this attribute cannot mint and burn if the server does not implement attribute 12.
+
+== Events
+Token creation and update MUST be recorded in the event log.
+
+[sources,cddl]
+----
+include::{cddl}/11_ledger_tokens.cddl[tag=events]
+----

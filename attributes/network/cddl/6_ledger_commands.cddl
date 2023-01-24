@@ -1,3 +1,18 @@
+; tag::types[]
+event-type /= event-type-send
+event-type-send = [6, 0]
+
+event-info /= event-info-send
+event-info-send = {
+    0 => event-type-send,
+    1 => address,       ; Source
+    2 => address,       ; Destination
+    3 => ledger-symbol, ; Symbol
+    4 => ledger-amount, ; Amount
+    ? 5 => memo,        ; Memo
+}
+; end::types[]
+
 ; tag::send[]
 ; Send tokens between two accounts.
 ledger.send@param = {
@@ -15,6 +30,9 @@ ledger.send@param = {
 
     ; The symbol to send.
     3 => ledger-symbol,
+
+    ; A memo associated with this transaction.
+    ? 4 => memo,
 }
 ledger.send@return = ()
 ; end::send[]

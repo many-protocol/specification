@@ -9,6 +9,9 @@ events-filter = {
     ; Filter by event type.
     ? 1 => event-type / [ * event-type ],
 
+    ; DO NOT USE. Burnt for backward compatibility.
+    ? 2 => null,
+
     ; Filter by event ID range.
     ? 3 => range<event-id>,
 
@@ -31,18 +34,8 @@ event-id = bstr
 
 ; Event types. This can be extended and the server MUST provide a list of
 ; those types.
-event-info /= event-info-send
-event-type /= event-type-send
-
-event-type-send = [6, 0]
-
-event-info-send = {
-    0 => event-type-send,
-    1 => address,       ; Source
-    2 => address,       ; Destination
-    3 => ledger-symbol, ; Symbol
-    4 => ledger-amount, ; Amount
-}
+event-info = ()
+event-type = ()
 
 event-log = {
     ; Event ID

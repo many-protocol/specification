@@ -1,0 +1,7 @@
+token-extended-info-memo = 0
+token-extended-info //= {
+    ; A memo, description of the token (ie. a README), any valuable information
+    ; about it that can be human readable or machine readable (e.g. URLs or
+    ; badges).
+    ? token-extended-info-memo => memo,
+}

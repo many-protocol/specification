@@ -10,49 +10,43 @@ ledger-symbol = address
 ; for simplicity. The networks CAN use either when serializing, but
 ; MUST accept both when doing transactions.
 ledger-amount = biguint / uint
-; end::types[]
 
-; tag::info[]
-; Info endpoint.
-ledger.info@param = ()
-ledger.info@return = (ledger-info)
+; A summary information for a token. This does not contain extended information
+; which isn't needed in most cases.
+token-info-summary = {
+    ; A human readable name for the token. This is the full name of the token.
+    ; e.g. Bitcoin would use "Bitcoin" here.
+    0 => tstr,
 
-ledger-info = {
-    ; List of supported symbols for this ledger.
-    0 => [* ledger-symbol],
+    ; A human readable short name (aka ticker symbol) of the token. This SHOULD
+    ; be limited by the server at creation. This should be unique to the
+    ; ledger.
+    ; e.g. Bitcoin would use "BTC" here.
+    1 => tstr,
 
-    ; Hash value of the ledger state. If two ledgers have the same hashes,
-    ; chances are they have the same balances on the same accounts (with
-    ; some risk of collision).
-    ; This can include configuration, depending on the implementation.
-    ; The actual hashing method and size of the hash is left to the
-    ; implementation.
-    1 => bstr,
+    ; Precision decimals. This is used to show how many tokens can be divided.
+    ; It is recommended for the server to limit this number.
+    ; e.g. Bitcoin would use 8.
+    2 => uint,
+}
 
-    ; Transfer fees for each symbols, between accounts.
-    ; TODO: not implemented.
-    2 => {
-        ledger-symbol => transaction-fee,
-    },
+; The supply of a token on a given ledger.
+token-info-supply = {
+    ; The total supply for the token on this particular ledger.
+    ; For Bitcoin, that would be ~19 million at the time of this writing.
+    0 => ledger-amount,
 
-    ; Conversion rates and fees between symbols.
-    ; TODO: not implemented.
-    3 => {
-        [ledger-symbol, ledger-symbol] => conversion,
-    },
+    ; The circulating supply for the token on this particular ledger.
+    ; For Bitcoin, that would also be ~19 million, but if there was a staking
+    ; mechanism, that would be less, as those tokens are not burnt but
+    ; frozen.
+    1 => ledger-amount,
 
-    ; Local human readable names for symbols.
-    ; These names are local only, and are only guaranteed to be unique on this
-    ; specific ledger.
-    4 => {
-        ; TODO: this.
-        ledger-symbol => {
-            0 => tstr,
-            1 => tstr,  ; Description
-            2 => uint, ; Number of precision digits
-            tstr => tstr ; metadata
-        }
-    }
+    ; The maximum supply for the token on this particular ledger.
+    ; This is the maximum amount of tokens at any point in time, including
+    ; in the far future, and should never change.
+    ; If this is missing, then the token has an infinite maximum supply.
+    ? 2 => ledger-amount,
 }
 
 ; Fees can be set for each symbols independently.
@@ -97,6 +91,46 @@ conversion-fee = transaction-fee
 ; A percent based on 32 bits. The percent is fixed point over 32 bits,
 ; so 50% would be 0x80000000, and 1% 0x28F5C28.
 fixed-point-percent = uint
+; end::types[]
+
+; tag::info[]
+; Info endpoint.
+ledger.info@param = ()
+ledger.info@return = (ledger-info)
+
+ledger-info = {
+    ; DO NOT USE. Burnt for backward compatibility.
+    ; To get the list of supported tokens, use the map below.
+    ? 0 => null,
+
+    ; Hash value of the ledger state. If two ledgers have the same hashes,
+    ; chances are they have the same balances on the same accounts (with
+    ; some risk of collision).
+    ; This can include configuration, depending on the implementation.
+    ; The actual hashing method and size of the hash is left to the
+    ; implementation.
+    1 => bstr,
+
+    ; DO NOT USE. Burnt for backward compatibility.
+    ; Transfer fees for each symbols, between accounts.
+    ? 2 => null,
+
+    ; Conversion rates and fees between symbols.
+    ; TODO: not implemented.
+    3 => {
+        [ledger-symbol, ledger-symbol] => conversion,
+    },
+
+    ; DO NOT USE. Burnt for backward compatibility.
+    ? 4 => null,
+
+    ; Summary of the information for the token symbols.
+    ; These names are local only, and are only guaranteed to be unique on this
+    ; specific ledger.
+    5 => {
+        ledger-symbol => token-info-summary,
+    }
+}
 ; end::info[]
 
 ; tag::balance[]

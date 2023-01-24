@@ -1,0 +1,187 @@
+; tag::types[]
+ledger-tokens-address-map = {
+    * non-anonymous-address => ledger-amount,
+}
+
+; A definition of a token.
+token-info = {
+    ; The address of the token, used for referencing the token. This should
+    ; be unique across all the MANYverse.
+    0 => ledger-symbol,
+
+    ; Summary information for the token.
+    1 => token-info-summary,
+
+    ; Supply information for the token.
+    2 => token-info-supply,
+
+    ; Owner of the token. This is missing if there is no owner.
+    ? 3 => non-anonymous-address,
+}
+
+; Extended information of a token. Keys are `attribute-related-index`,
+; and values should be described in their own CDDL files.
+token-extended-info = {}
+; end::types[]
+
+; tag::events[]
+event-info /= ledger-tokens-event-info-create
+            / ledger-tokens-event-info-update
+            / ledger-tokens-event-info-add-extended-info
+            / ledger-tokens-event-info-remove-extended-info
+
+ledger-tokens-event-type-create = [11, 0]
+ledger-tokens-event-type-update = [11, 1]
+ledger-tokens-event-type-add-extended-info = [11, 2]
+ledger-tokens-event-type-remove-extended-info = [11, 3]
+
+; A token creation event.
+ledger-tokens-event-info-create = {
+    0 => ledger-tokens-event-type-create,
+
+    1 => token-info-summary,                ; Summary.
+    2 => address,                           ; Symbol.
+    3 => address / null,                    ; Owner.
+    ? 4 => ledger-tokens-address-map,       ; Holders at creation.
+    ? 5 => ledger-amount,                   ; Maximum supply, if any.
+    ? 6 => [ + attribute-related-index ],   ; Extended info supplied.
+    ? 7 => memo,                            ; Memo.
+}
+
+; An update to a token information.
+ledger-tokens-event-info-update = {
+    0 => ledger-tokens-event-type-update,
+    1 => ledger-symbol,                     ; Symbol.
+    ? 2 => tstr,                            ; Token name.
+    ? 3 => tstr,                            ; Human readable short name (ticker
+                                            ; symbol).
+    ? 4 => uint,                            ; Precision decimals.
+    ? 5 => address / null,                  ; New owner.
+    ? 6 => memo,                            ; Memo.
+}
+
+ledger-tokens-event-info-add-extended-info = {
+    0 => ledger-tokens-event-type-add-extended-info,
+    1 => ledger-symbol,                     ; Symbol.
+    2 => [ * attribute-related-index ],     ; Extended infos added.
+    ? 3 => memo,                            ; Memo.
+}
+
+; Removing extended info.
+ledger-tokens-event-info-remove-extended-info = {
+    0 => ledger-tokens-event-type-remove-extended-info,
+    1 => ledger-symbol,                     ; Symbol.
+    2 => [ * attribute-related-index ],     ; Extended infos removed.
+    ? 3 => memo,                            ; Memo.
+}
+; end::events[]
+
+; tag::create[]
+tokens.create@param = {
+    ; The summary information for the token.
+    0 => token-info-summary,
+
+    ; An optional owner for the token. If missing, the message sender will be
+    ; used as owner. There can only be one owner.
+    ; To remove the owner of a token, this can be null.
+    ? 1 => address / null,
+
+    ; An optional list of token holders. If missing, no one gets token and the
+    ; total supply is 0 at creation.
+    ? 2 => ledger-tokens-address-map,
+
+    ; A maximum supply for the token. When minting, this will be checked to make
+    ; sure tokens cannot have more than this number in circulation.
+    ; If this number is smaller than the supply held by token holders, the
+    ; server MUST return an error.
+    ; If this is missing, there is no maximum supply.
+    ? 3 => ledger-amount,
+
+    ; Extended info to add to the token on the first creation.
+    ? 4 => token-extended-info,
+
+    ; A memo associated with this create call. This will be logged in the events
+    ; but is not part of the info or extended info of the token.
+    ? 5 => memo,
+}
+
+tokens.create@return = {
+    0 => token-info,
+}
+; end::create[]
+
+; tag::info[]
+; Get all information pertaining to a token.
+tokens.info@param = {
+    0 => ledger-symbol,
+
+    ; Query specific information. If missing, all information will be returned
+    ; if possible (if it fits in response size) or error.
+    ? 1 => [ + attribute-related-index ],
+}
+
+tokens.info@return = {
+    0 => token-info,
+    1 => token-extended-info,
+}
+; end::info[]
+
+; tag::update[]
+; Update the information of a token on this ledger. Missing fields will not
+; be updated.
+tokens.update@param = {
+    ; The ledger symbol of the token to update.
+    0 => ledger-symbol,
+
+    ; Human readable name for the token.
+    ? 1 => tstr,
+
+    ; Human readable ticker symbol for the token.
+    ? 2 => tstr,
+
+    ; Precision decimals. Please note that this will not change any amounts,
+    ; but will impact how many tokens users might see from their frontend.
+    ; Servers MAY error if this field is updated or out of supported range.
+    ? 3 => uint,
+
+    ; An owner for the token.
+    ; To remove the owner of a token, this can be null.
+    ? 4 => address / null,
+
+    ; A memo associated with this update.
+    ? 5 => memo,
+}
+
+tokens.update@return = ()
+; end::update[]
+
+; tag::addExtendedInfo[]
+tokens.addExtendedInfo@param = {
+    ; The ledger symbol of the token to update.
+    0 => ledger-symbol,
+
+    ; Extended info to add or overwrite. This is merged with the existing
+    ; extended info, replacing any existing matching info.
+    1 => token-extended-info,
+
+    ; A memo associated with this call.
+    ? 2 => memo,
+}
+
+tokens.addExtendedInfo@return = ()
+; end::addExtendedInfo[]
+
+; tag::removeExtendedInfo[]
+tokens.removeExtendedInfo@param = {
+    ; The ledger symbol of the token to update.
+    0 => ledger-symbol,
+
+    ; Extended info to remove. If an info doesn't exist, it MUST be ignored.
+    1 => [ + attribute-related-index ],
+
+    ; A memo associated with this call.
+    ? 2 => memo,
+}
+
+tokens.removeExtendedInfo@return = ()
+; end::removeExtendedInfo[]
