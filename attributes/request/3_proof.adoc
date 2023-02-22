@@ -1,0 +1,5 @@
+= Proof Request Attribute (#3)
+:cddl: ./cddl/
+
+This attribute is used to request a proof in the response for a particular request sent to the server.
+

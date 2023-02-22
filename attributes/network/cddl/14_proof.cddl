@@ -1,0 +1,3 @@
+; Attribute id (related to hashing implementation)
+proof@attribute-arg = uint
+

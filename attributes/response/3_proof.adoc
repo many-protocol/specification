@@ -1,0 +1,37 @@
+= Proof Response Attribute (#3)
+:cddl: ./cddl/
+
+This attribute allows server to deliver the proof of an object requested.
+The proof itself is a sequence of actions used to construct the state in which the object is embedded within the corresponding Merkle tree.
+
+== Attribute Argument
+
+This is a `uint` representing the hasher used in constructing the proofs.
+
+* 0 - `merk` default hash (see xref:../../spec/proof_hash_scheme.adoc.)
+
+== Returns
+
+A proof is a collection of operations used to reconstruct a state that can be embedded into the existing state of the Merkle tree that contains it.
+
+Each state can be represented by one of five operations:
+
+* A node hash
+
+* A key/value hash of a node
+
+* A key and value pair of a node
+
+* The "parent" operation
+
+* The "child" operation
+
+Interpreting these operations as acting on a stack, the first three operations listed can be interpreted as pushing data onto the stack.
+In the parent operation, two items are popped from the stack, and a new item with the second item as the left child of the first item is pushed onto the stack.
+In the child operation, two items are popped from the stack, and a new item with the first item as the right child of the second item is pushed back onto the stack.
+
+[source,cddl]
+....
+include::{cddl}/3_proof.cddl[]
+....
+

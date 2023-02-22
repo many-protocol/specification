@@ -1,0 +1,33 @@
+; Proof.  If requested, this is the set of steps constituting a proof of existence of what was requested in the state of the Merkle tree.
+proof@response-attribute-arg = {
+    ; Root application hash
+    0 => bstr,
+    
+    ; The proof operations
+    1 => proof,
+    
+    ; Extensible attribute related indices for extra information (implementation specific)
+    * proof-attribute-related-index,
+}
+
+proof-attribute-related-index = ()
+
+proof = [ + proof-operation ]
+
+proof-operation = ( node-hash / key-value-hash / key-value-pair / parent / child )
+
+; Represents a parent operation in a proof
+parent = 0x10
+
+; Represents a child operation in a proof
+child = 0x11
+
+; The hash of a key-value pair
+key-value-hash = [1, bstr]
+
+; The hash of a node in a proof, containing, in order, the hash of the key-value pair, the hash of the left child, and the hash of the right child
+node-hash = [2, bstr]
+
+; The key-value pair of a proof
+key-value-pair = [3, bstr, bstr]
+
