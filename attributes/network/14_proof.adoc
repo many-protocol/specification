@@ -39,7 +39,8 @@ Push(Hash(<hash of 9>)),
 Child
 ```
 
-Let's step through verification to show that this proof works. We'll create a verification stack, which starts out empty, and walk through each operator in the proof, in order:
+Let's step through verification to show that this proof works.
+We'll create a verification stack, which starts out empty, and walk through each operator in the proof, in order:
 
 ```
 Stack: (empty)
