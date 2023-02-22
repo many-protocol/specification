@@ -177,7 +177,8 @@ Stack:
   3
 ```
 
-Now after going through all these steps, we have sufficient knowlege of the tree's structure and data to compute node hashes in order to verify. At the end, we will have computed a hash for node 5 (the root), and we verify by comparing this hash to the one we expected.
+Now after going through all these steps, we have sufficient knowlege of the tree's structure and data to compute node hashes in order to verify.
+At the end, we will have computed a hash for node 5 (the root), and we verify by comparing this hash to the one we expected.
 
 [sources,cddl]
 ----
