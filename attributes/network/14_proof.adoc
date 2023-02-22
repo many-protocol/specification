@@ -46,7 +46,8 @@ We'll create a verification stack, which starts out empty, and walk through each
 Stack: (empty)
 ```
 
-We will push a key/value pair on the stack, creating a node. However, note that for verification purposes this node will only need to contain the kv_hash which we will compute at this step.
+We will push a key/value pair on the stack, creating a node.
+However, note that for verification purposes this node will only need to contain the kv_hash which we will compute at this step.
 
 ```
 Operator: Push(KV(1, <value of 1>))
