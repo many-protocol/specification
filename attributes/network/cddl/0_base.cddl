@@ -9,8 +9,9 @@ status = {
     ; Human readable name of this server. This is not unique.
     ? 1 => tstr,
 
-    ; Human readable name (with potential subnames) of this network.
-    ; If omitted, the server might not be part of a network.
+    ; Human readable name (with potential subnames) of this neighborhood.
+    ; If omitted, the server might not be part of a neighborhood or
+    ; the neighborhood might not have a name.
     ? 6 => tstr / [ * tstr ],
 
     ; The public key of this server, in cbor, if available.
@@ -19,6 +20,13 @@ status = {
     ; The address of this server. This might be different from
     ; the public key published above, or a subresource of it.
     3 => address,
+
+    ; The public key of the neighborhood, if available.
+    ? 8 => bstr .cbor any,
+
+    ; The address of this neighborhood, if any. This might be different
+    ; from the public key above.
+    ? 9 => address,
 
     ; A list of attributes supported by this server.
     4 => [ * attribute ],
