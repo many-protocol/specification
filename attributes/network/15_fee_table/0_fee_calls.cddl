@@ -1,0 +1,24 @@
+; This represents base cost to initiate the call. This is a fixed cost, and
+; additional costs might be required by other fee table entries. For example,
+; a call can also require additional cost per unit of execution (seconds or cpu
+; cycles).
+
+; A fee table entry for calls to the neighborhood.
+fee-calls-entry = [0]
+
+; A fee table entry for calls to the neighborhood.
+fee-calls-table-endpoint = {
+    ; The endpoint.
+    0 => text,
+
+    ; The cost to call this endpoint. This is fixed.
+    1 => fee-cost,
+}
+
+; The fee table entry for all calls to the neighborhood.
+fee-calls-table-entry = {
+    ; The fee table entries.
+    0 => [ *fee-calls-table-endpoint ],
+}
+
+fee-table-entry //= { fee-calls-entry => fee-calls-table-entry }

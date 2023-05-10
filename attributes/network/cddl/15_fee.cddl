@@ -1,0 +1,81 @@
+; tag::types[]
+; An entry in the fee table. This is defined by extensions.
+fee-table-entry = ()
+
+fee-table-entry-id = attribute-id
+
+; A fee table is a set of fee entries. Fee entries are specified separately.
+; If a fee is missing from this table, the neighborhood will not charge it.
+; For example, a neighborhood might want to charge a fee for sending a
+; message, but be free for sending another message.
+fee-table = {
+   *fee-table-entry-id => fee-table-entry,
+}
+
+; Fixed cost, in tokens.
+fee-cost = { *ledger-amount => ledger-symbol }
+; end::types[]
+
+; tag::events[]
+event-info /= fee-event-info-consumed
+
+fee-event-type-consumed = [ 15, 0 ]
+fee-event-type-updated = [ 15, 1 ]
+
+; When fees are consumed on the neighborhood, this event must trigger.
+fee-event-info-consumed = {
+    0 => fee-event-type-consumed,
+
+    ; The account, token, and amount that was consumed.
+    1 => account,
+    1 => ledger-symbol,
+    2 => amount,
+
+    ; The entry that triggered the fee. This is for reference only.
+    ; The actual calculation is not shared here. Since events are in
+    ; chronological order, they can be used to reconstruct the fee table
+    ; at this point in time.
+    ; Since multiple costs might be incurred, this contains all fee
+    ; table entries that were used in calculation of the fee.
+    3 => [ *fee-table-entry-id ],
+
+    ; Determined by the neighborhood. This is to give some reason for the fee,
+    ; in human and/or machine readable format. It is optional.
+    ? 4 => memo,
+}
+
+; When a fee is updated on the neighborhood, this event must trigger.
+fee-event-type-updated = {
+    0 => fee-event-type-updated,
+    ? 1 => fee-table,
+    ? 2 => [ *fee-table-entry-id ],
+}
+; end::events[]
+
+; tag::table[]
+; Returns all information regarding fees, except for the fee table itself.
+fee.table@param = ()
+
+; Empty return.
+fee.table@return = {
+    ; Fee table.
+    0 => fee-table,
+}
+; end::table[]
+
+; tag::update[]
+; Update the fee table for a neighborhood. Entries are entirely replaced.
+fee.update@param = {
+    ; The fee table entries to add or update. The entries are entirely replaced,
+    ; so if only one value in the entry should be updated, the full entry MUST
+    ; be updated.
+    ? 0 => fee-table,
+
+    ; Fee table entries to remove.
+    ? 1 => [ *fee-table-entry-id ],
+}
+
+fee.update@return = {
+    0 => fee-table,
+}
+; end::update[]

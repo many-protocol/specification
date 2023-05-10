@@ -1,0 +1,17 @@
+== Fee Account Feature Attribute (#15)
+:cddl: ./cddl/
+
+This attribute adds support for paying fees using this account.
+If this attribute is present in an account, any allowed (see <<Role>>) identities can specify this account in the fee request attribute.
+
+== Role
+A new role is added by this feature, `"canDeductFeeFrom"`, which allow any identities to perform regular ledger transactions.
+Identities MUST either be an `"owner"` or have this role to be allowed to use this account to pay for requests.
+
+== CDDL
+
+=== Types
+[sources,cddl]
+----
+include::{cddl}15_account_fee.cddl[tag=types]
+----

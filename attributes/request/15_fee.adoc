@@ -1,0 +1,50 @@
+= Fee Request Attribute (#15)
+:cddl: ./cddl/
+
+Fee is a request attribute that is used to indicate the amount of a fee token that the requester is willing to pay to execute the request.
+The fee argument is a record containing a 64-bit unsigned integer amount, an optional symbol for the fee token being used, an optional account to be used to deduct the fee from and an optional delegation certificate to resolve the requester fee address.
+The neighborhood MUST debit the fee amount from the account of the sender and burn the token.
+If events are supported, the neighborhood MUST emit a `fee_consumed` event with the amount of fee token consumed.
+
+The fee attribute is optional and if not present, no fee is passed with the request and the sender is not willing to pay for it.
+Some requests might be free in the neighborhood, or induce a cost that is not paid by the requester.
+
+== Errors
+
+If a neighborhood does not support fee, it MUST return an error response with the error code `invalid_attribute_id` if the fee attribute is used.
+
+A neighborhood can refuse to execute a request if the amount of fee token provided is not sufficient to cover the cost of the request.
+In this case, the neighborhood MUST return an error response with the error code `insufficient_fee_tokens`.
+
+A neighborhood can also refuse to execute a request if the fee token is not supported by the neighborhood.
+In this case, the neighborhood MUST return an error response with the error code `unsupported_fee_token`.
+
+If the sender does not have enough fee tokens to pay for the request, the neighborhood MUST return an error response with the error code `insufficient_funds`.
+
+== Cost
+
+The cost of any request is determined by the neighborhood being contacted.
+See the fee attribute (#15) for more information.
+
+== Tokens
+
+The specification is agnostic to the fee token being used.
+
+Requests have a single fee token associated with them, but neighborhoods can support multiple fee tokens.
+The neighborhood MAY have a default token for requests, if the token is not specified in the attribute of a request.
+
+== Fee Account Resolution
+
+=== Requests
+
+A neighborhood MUST resolve the fee token to an account address when paying for requests, using the following algorithm:
+
+1. If the attribute does not contain a fee token symbol, AND the neighborhood has a default fee token, use the default fee token.
+   If no default fee token is set, return an error response with the error code `missing_fee_token`.
+2. If the fee token specified is not supported by the neighborhood, return an error response with the error code `unsupported_fee_token`.
+3. Resolve the fee token address to use to deduct fee tokens from.
+   a. Use the request's sender as the address to use for the fee, and if the attribute argument contains a delegation, resolves it using the delegation resolution algorithm (see xref:../../spec/protocol/delegation.adoc#resolution[Delegation Resolution]).
+   b. If the address to be used is an account, verify that the resolved sender has the `"canDeductFeeFrom"` permission on the account.
+      If the sender does not have the permission, return an error response with the error code `user_needs_role`.
+4. Deduct the fee amount from the address' fee token balance.
+   If there isn't enough fee token in the address' balance, return an error response with the error code `insufficient_funds`.
