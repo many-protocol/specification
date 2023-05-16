@@ -1,6 +1,6 @@
 ; tag::types[]
 ; An entry in the fee table. This is defined by extensions.
-fee-table-entry = ()
+fee-table-entry /= {}
 
 fee-table-entry-id = attribute-id
 
@@ -54,10 +54,11 @@ fee-event-info-consumed = {
 }
 
 ; When a fee is updated on the neighborhood, this event must trigger.
-fee-event-type-updated = {
+fee-event-info-updated = {
     0 => fee-event-type-updated,
     ? 1 => fee-table,
     ? 2 => [ *fee-table-entry-id ],
+    ? 3 => memo,
 }
 ; end::events[]
 
@@ -96,6 +97,9 @@ fee.update@param = {
 
     ; Fee table entries to remove.
     ? 1 => [ *fee-table-entry-id ],
+
+    ; Memo.
+    ? 2 => memo,
 }
 
 fee.update@return = {
