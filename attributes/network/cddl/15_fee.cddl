@@ -9,7 +9,10 @@ fee-table-entry-id = attribute-id
 ; For example, a neighborhood might want to charge a fee for sending a
 ; message, but be free for sending another message.
 fee-table = {
-   *fee-table-entry-id => fee-table-entry,
+    *fee-table-entry-id => {
+        0 => fee-table-entry,
+        ? 1 => memo,
+    }
 }
 
 ; Fixed cost, in tokens. All tokens must be provided as fee.
@@ -25,7 +28,6 @@ fee-fixed-alternate-cost = [ *fee-fixed-cost ]
 event-info /= fee-event-info-consumed
 
 fee-event-type-consumed = [ 15, 0 ]
-fee-event-type-updated = [ 15, 1 ]
 
 ; When fees are consumed on the neighborhood, this event must trigger.
 fee-event-info-consumed = {
@@ -35,10 +37,10 @@ fee-event-info-consumed = {
     1 => non-anonymous-address,
 
     ; The token that was used to pay the fee.
-    1 => ledger-symbol,
+    2 => ledger-symbol,
 
     ; The amount that was paid.
-    2 => ledger-amount,
+    3 => ledger-amount,
 
     ; The entry that triggered the fee. This is for reference only.
     ; The actual calculation is not shared here. Since events are in
@@ -46,19 +48,11 @@ fee-event-info-consumed = {
     ; at this point in time.
     ; Since multiple costs might be incurred, this contains all fee
     ; table entries that were used in calculation of the fee.
-    3 => [ *fee-table-entry-id ],
+    4 => [ *fee-table-entry-id ],
 
     ; Determined by the neighborhood. This is to give some reason for the fee,
-    ; in human and/or machine readable format. It is optional.
-    ? 4 => memo,
-}
-
-; When a fee is updated on the neighborhood, this event must trigger.
-fee-event-info-updated = {
-    0 => fee-event-type-updated,
-    ? 1 => fee-table,
-    ? 2 => [ *fee-table-entry-id ],
-    ? 3 => memo,
+    ; in human and/or machine readable format.
+    ? 5 => memo,
 }
 ; end::events[]
 
@@ -86,23 +80,3 @@ fee.entry@return = {
     0 => fee-table,
 }
 ; end::entry[]
-
-; tag::update[]
-; Update the fee table for a neighborhood. Entries are entirely replaced.
-fee.update@param = {
-    ; The fee table entries to add or update. The entries are entirely replaced,
-    ; so if only one value in the entry should be updated, the full entry MUST
-    ; be updated.
-    ? 0 => fee-table,
-
-    ; Fee table entries to remove.
-    ? 1 => [ *fee-table-entry-id ],
-
-    ; Memo.
-    ? 2 => memo,
-}
-
-fee.update@return = {
-    0 => fee-table,
-}
-; end::update[]

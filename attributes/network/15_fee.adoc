@@ -1,4 +1,5 @@
 = Fee Attribute (#15)
+:cddl: ./cddl/
 
 The fee attribute indicates that a neighborhood support fee in requests.
 It also provides endpoints to request information about fee prices and tokens.
@@ -16,12 +17,14 @@ A neighborhood may request sender fees for commands, queries or both.
 Some decentralized neighborhoods might not be able to support fees for queries, as they are not able to change the sender's balance while executing the query.
 In that case, the neighborhood MUST NOT support fees for query calls.
 
-== Fee Token
+== Fees
+
+=== Fee Token
 
 The fee token is the token that is used to pay for fees.
 A neighborhood can support multiple fee tokens, but it MUST support at least one.
 
-== Fee Prices
+=== Fee Prices
 
 Fee Prices are determined by the neighborhood and are subject to change.
 Those prices are expressed in the fee token per call, per unit, per recurring period or any combination.
@@ -33,17 +36,49 @@ A ledger neighborhood may charge 1% of all balances every monday.
 Fees are cumulative.
 For example, a storage neighborhood may charge 1 token per storage call, and 1 token per month per gigabytes for storage, and 1 token per week per kilobytes of bandwidth taken.
 
-== Fee Payment
+=== Fee Table
+
+Neighborhoods supporting this attribute MUST provide a fee table.
+The table can include fees for any use cases.
+To be able to read the table, refer to this specification and the details under the fee entries.
+Neighborhoods are welcome to add memos to explain their fees.
+
+=== Fee Payment
 
 Fees can be charged for various reasons;
 
 1. Requests to the neighborhood, sender pays.
    The message being sent must include the Fee Attribute (#15) and the neighborhood MUST charge the sender the fee.
-// TODO: Requests to the neighborhood, receiver pays.
 2. Recurring, owner pay.
    The owner of the data must pay.
-   This is specified in the Fee Table.
-   The neighborhood must specify the recurring period and the amount of tokens to be paid.
+   This is specified in the <<Fee Table>> entry specification.
+   The neighborhood MUST specify the recurring period and the amount of tokens to be paid.
    If the owner does not have enough to cover the fees, the neighborhood MAY delete the data at any point.
 
+As an example, a ledger neighborhood could charge a fee for sending tokens from one address to another, but also charge a monthly fixed fee to all balances.
+These would be described as multiple fee entries in the Fee Table.
 
+== Events
+
+When fees are consumed, a neighborhood supporting the Event attribute (#4) MUST add it to the event log.
+
+[sources,cddl]
+----
+include::{cddl}/15_fee.cddl[tag=events]
+----
+
+== Endpoints
+
+== Table
+
+[sources,cddl]
+----
+include::{cddl}/15_fee.cddl[tag=table]
+----
+
+== Entry
+
+[sources,cddl]
+----
+include::{cddl}/15_fee.cddl[tag=entry]
+----

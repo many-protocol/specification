@@ -1,0 +1,26 @@
+= Fee Update Attribute (#16)
+:cddl: ./cddl/
+
+The fee update attribute (#16) allows neighborhoods to update their internal fee tables.
+
+Neighborhoods MAY limit access to this attribute to only the owner of the neighborhood.
+
+Neighborhood who exposes this attribute MUST also expose the fee attribute (#15).
+
+== Events
+
+Updates are recorded in the event log.
+
+[sources,cddl]
+----
+include::{cddl}/16_fee_update.cddl[tag=events]
+----
+
+== Endpoints
+
+== Update
+
+[sources,cddl]
+----
+include::{cddl}/16_fee_update.cddl[tag=update]
+----

@@ -1,0 +1,33 @@
+; tag::events[]
+event-info /= fee-event-info-updated
+
+fee-event-type-updated = [ 16, 0 ]
+
+; When a fee is updated on the neighborhood, this event must trigger.
+fee-event-info-updated = {
+    0 => fee-event-type-updated,
+    ? 1 => fee-table,
+    ? 2 => [ *fee-table-entry-id ],
+    ? 3 => memo,
+}
+; end::events[]
+
+; tag::update[]
+; Update the fee table for a neighborhood. Entries are entirely replaced.
+fee.update@param = {
+    ; The fee table entries to add or update. The entries are entirely replaced,
+    ; so if only one value in the entry should be updated, the full entry MUST
+    ; be updated.
+    ? 0 => fee-table,
+
+    ; Fee table entries to remove.
+    ? 1 => [ *fee-table-entry-id ],
+
+    ; Memo.
+    ? 2 => memo,
+}
+
+fee.update@return = {
+    0 => fee-table,
+}
+; end::update[]
