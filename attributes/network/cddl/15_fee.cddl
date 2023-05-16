@@ -31,10 +31,14 @@ fee-event-type-updated = [ 15, 1 ]
 fee-event-info-consumed = {
     0 => fee-event-type-consumed,
 
-    ; The account, token, and amount that was consumed.
-    1 => account,
+    ; The account which provided the fees.
+    1 => non-anonymous-address,
+
+    ; The token that was used to pay the fee.
     1 => ledger-symbol,
-    2 => amount,
+
+    ; The amount that was paid.
+    2 => ledger-amount,
 
     ; The entry that triggered the fee. This is for reference only.
     ; The actual calculation is not shared here. Since events are in
@@ -61,12 +65,26 @@ fee-event-type-updated = {
 ; Returns all information regarding fees, except for the fee table itself.
 fee.table@param = ()
 
-; Empty return.
+; Fee table.
 fee.table@return = {
-    ; Fee table.
     0 => fee-table,
 }
 ; end::table[]
+
+; tag::entry[]
+; Returns a single entry from the fee table.
+fee.entry@param = {
+    ; The entry or entries to return.
+    0 => [ * fee-table-entry-id ],
+}
+
+; The fee table includes all entries that were requested. If an entry is not
+; there it is not part of the table. Entries that haven't been requested will
+; be missing.
+fee.entry@return = {
+    0 => fee-table,
+}
+; end::entry[]
 
 ; tag::update[]
 ; Update the fee table for a neighborhood. Entries are entirely replaced.
