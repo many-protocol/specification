@@ -12,8 +12,13 @@ fee-table = {
    *fee-table-entry-id => fee-table-entry,
 }
 
-; Fixed cost, in tokens.
-fee-cost = { *ledger-amount => ledger-symbol }
+; Fixed cost, in tokens. All tokens must be provided as fee.
+fee-fixed-cost = { *ledger-amount => ledger-symbol }
+
+; Alternate version of fixed cost. All of these should be accepted by the
+; network, alternatively. For example, a neighborhood which would accept
+; two tokens as form of payment would include both amounts here.
+fee-fixed-alternate-cost = [ *fee-fixed-cost ]
 ; end::types[]
 
 ; tag::events[]
