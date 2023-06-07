@@ -12,6 +12,18 @@ kvstore.info@return = {
 }
 ; end::info[]
 
+; tag::list[]
+kvstore.list@param = {
+    ; The order of the keys. If omitted, the order is not guaranteed.
+    ? 0 => order,
+}
+
+kvstore.list@return = {
+    ; List of keys belonging to the sender
+    0 => [* bstr],
+}
+; end::list[]
+
 ; tag::get[]
 kvstore.get@param = {
     ; The key to get.
