@@ -26,7 +26,7 @@ kvstore.info@return = {
 ; tag::list[]
 kvstore.list@param = {
     ; The number of keys to return. If omitted, all keys are returned.
-    ? 0 => count,
+    ? 0 => uint,
 
     ; The order in which to return the keys. If omitted, the order is not specified.
     ? 1 => order,
