@@ -1,3 +1,14 @@
+; tag::types[]
+; A filter argument for keys
+owner-filter = [0, non-anonymous-address]
+previous-owner-filter = [1, non-anonymous-address]
+disabled-filter = [2, bool]
+
+key-filter /= owner-filter           ; Filter keys by owner
+            / previous-owner-filter  ; Filter keys by previous owner
+            / disabled-filter        ; Filter keys by disabled status
+; end::types[]
+
 ; tag::info[]
 kvstore.info@param = ()
 
@@ -14,12 +25,18 @@ kvstore.info@return = {
 
 ; tag::list[]
 kvstore.list@param = {
-    ; The order of the keys. If omitted, the order is not guaranteed.
-    ? 0 => order,
+    ; The number of keys to return. If omitted, all keys are returned.
+    ? 0 => uint,
+
+    ; The order in which to return the keys. If omitted, the order is not specified.
+    ? 1 => order,
+
+    ; Filters to apply to the keys. If omitted, no filter is applied.
+    ? 2 => [* key-filter],
 }
 
 kvstore.list@return = {
-    ; List of keys belonging to the sender
+    ; List of keys
     0 => [* bstr],
 }
 ; end::list[]
