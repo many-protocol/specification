@@ -1,0 +1,6 @@
+:cddl: ./cddl/
+
+[sources,cddl]
+----
+include::{cddl}/15_compute.cddl[]
+----
