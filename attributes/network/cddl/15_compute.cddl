@@ -1,0 +1,143 @@
+; tag::types[]
+
+K  = 0  ; KiloByte
+KI = 1  ; KibiByte
+M  = 2  ; MegaByte
+MI = 3  ; MebiByte
+G  = 4  ; GigaByte
+GI = 5  ; GibiByte
+T  = 6  ; TeraByte
+TI = 7  ; TebiByte
+P  = 8  ; PetaByte
+PI = 9  ; PebiByte
+E  = 10 ; ExaByte
+EI = 11 ; ExbiByte
+
+byte-type = K / KI / M / MI / G / GI / T / TI / P / PI / E / EI
+
+us-east = 0
+us-west = 1
+
+region = us-east / us-west
+
+deployed = 0 ; Compute instance is deployed
+closed   = 1 ; Compute instance is closed
+
+compute-status = deployed / closed
+
+service-protocol = 0 ; TCP
+                 / 1 ; UDP
+
+provider-info = {
+    ; Host
+    ? 0 => tstr,
+
+    ; Port
+    1 => uint .size 2,
+
+    ; External port
+    2 => uint .size 2,
+
+    ; Service protocol
+    3 => service-protocol
+}
+
+deployment-info = {
+    ; Provider name
+    0 => tstr,
+
+    ; Provider info
+    1 => provider-info,
+
+    ; Price
+    2 => float64,
+}
+
+deployment-meta = {
+    ; Compute status
+    0 => compute-status,
+
+    ; DSEQ
+    1 => uint,
+
+    ; Deployment info
+    ? 2 => deployment-info,
+
+    ; Image name
+    3 => tstr,
+}
+
+all = 0 ; All deployments
+deployment-status = (1, compute-status) ; Deployments with a specific status
+
+compute-list-filter = all / deployment-status
+
+; end::types[]
+
+; tag::info[]
+; `compute.info` endpoint.
+compute.info@param = ()
+compute.info@return = {
+    ; Hash of the current storage state.
+    0 => bstr,
+}
+; end::info[]
+
+; tag::deploy[]
+; `compute.deploy` endpoint.
+compute.deploy@param = {
+    ; Image name
+    0 => tstr,
+
+    ; Internal port
+    1 => uint .size 2,
+
+    ; Number of CPUs
+    2 => uint,
+
+    ; Memory size
+    3 => uint,
+
+    ; Memory size unit type
+    4 => byte-type
+
+    ; Storage size
+    5 => uint,
+
+    ; Storage size unit type
+    6 => byte-type,
+
+    ; Deployment region
+    7 => region,
+}
+
+compute.deploy@return = deployment-meta
+; end::deploy[]
+
+; tag::close[]
+; `compute.close` endpoint.
+compute.close@param = {
+    ; DSEQ
+    0 => uint,
+}
+compute.close@return = ()
+; end::close[]
+
+; tag::list[]
+; `compute.list` endpoint.
+compute.list@param = {
+    ; Owner
+    ? 0 => non-anonymous-address,
+
+    ; Order
+    ? 1 => order,
+
+    ; Filter
+    ? 2 => compute-list-filter
+}
+
+compute.list@return = {
+    ; List of deployments
+    0 => [* deployment-meta],
+}
+; end::list[]
