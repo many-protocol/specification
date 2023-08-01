@@ -1,0 +1,27 @@
+; tag::deploy[]
+; `web.deploy` endpoint.
+web.deploy@param = {
+    ; Site name
+    0 => tstr,
+
+    ; Site description
+    ? 1 => tstr,
+
+    ; Deployment source
+    2 => web-deployment-src,
+}
+
+web.deploy@return = {
+    ; Deployment URL
+    0 => tstr,
+}
+; end::deploy[]
+
+; tag::remove[]
+; `web.remove` endpoint.
+web.remove@param = {
+    ; Site name
+    0 => tstr,
+}
+web.remove@return = ()
+; end::remove[]

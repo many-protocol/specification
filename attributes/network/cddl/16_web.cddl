@@ -1,0 +1,55 @@
+; tag::types[]
+repo-meta = {
+    ; Repository URL
+    0 => tstr,
+
+    ; Build artifact path inside the repository
+    ? 1 => tstr,
+}
+
+github-src = [0, repo-meta]
+web-deployment-src = github-src
+web-deployment-info = {
+    ; Site name
+    0 => tstr,
+
+    ; Site description
+    ? 1 => tstr,
+
+    ; Deployment source
+    2 => web-deployment-src,
+
+    ; Deployment URL
+    3 => tstr,
+}
+
+web-deployment-filter = [0, {}] ; All
+                      / [1, {0: non-anonymous-address}] ; Owner
+; end::types[]
+
+; tag::info[]
+; `web.info` endpoint.
+web.info@param = ()
+web.info@return = {
+    ; Hash of the current storage state.
+    0 => bstr,
+}
+; end::info[]
+
+; tag::list[]
+; `web.list` endpoint.
+web.list@param = {
+    ; Owner
+    ? 0 => non-anonymous-address,
+
+    ; Order
+    ? 1 => order,
+
+    ; Filter
+    ? 2 => web-deployment-filter,
+}
+web.list@return = {
+    ; List of sites
+    0 = [* web-deployment-info],
+}
+; end::list[]
