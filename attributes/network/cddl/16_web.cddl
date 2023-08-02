@@ -1,14 +1,6 @@
 ; tag::types[]
-repo-meta = {
-    ; Repository URL
-    0 => tstr,
-
-    ; Build artifact path inside the repository
-    ? 1 => tstr,
-}
-
-github-src = [0, repo-meta]
-web-deployment-src = github-src
+zip-src = [0, {0: bstr}] ; Zip archive
+web-deployment-src = zip-src
 web-deployment-info = {
     ; Site name
     0 => tstr,
@@ -16,11 +8,8 @@ web-deployment-info = {
     ; Site description
     ? 1 => tstr,
 
-    ; Deployment source
-    2 => web-deployment-src,
-
     ; Deployment URL
-    3 => tstr,
+    2 => tstr,
 }
 
 web-deployment-filter = [0, {}] ; All
