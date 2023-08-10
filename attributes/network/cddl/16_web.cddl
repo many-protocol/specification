@@ -1,6 +1,6 @@
 ; tag::types[]
-zip-src = [0, {0: bstr}] ; Zip archive
-web-deployment-src = zip-src
+archive-src = [0, {0: bstr}] ; Archive
+web-deployment-src = archive-src
 web-deployment-info = {
     ; Site name
     0 => tstr,
@@ -12,8 +12,7 @@ web-deployment-info = {
     2 => tstr,
 }
 
-web-deployment-filter = [0, {}] ; All
-                      / [1, {0: non-anonymous-address}] ; Owner
+web-deployment-filter = [0, {0: non-anonymous-address}] ; Owner
 ; end::types[]
 
 ; tag::info[]
@@ -28,14 +27,11 @@ web.info@return = {
 ; tag::list[]
 ; `web.list` endpoint.
 web.list@param = {
-    ; Owner
-    ? 0 => non-anonymous-address,
-
     ; Order
-    ? 1 => order,
+    ? 0 => order,
 
     ; Filter
-    ? 2 => web-deployment-filter,
+    ? 1 => web-deployment-filter,
 }
 web.list@return = {
     ; List of sites

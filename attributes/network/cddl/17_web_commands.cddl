@@ -1,14 +1,18 @@
 ; tag::deploy[]
 ; `web.deploy` endpoint.
 web.deploy@param = {
+    ; Owner
+    ; Sender will be used if not specified.
+    ? 0 => non-anonymous-address
+
     ; Site name
-    0 => tstr,
+    1 => tstr,
 
     ; Site description
-    ? 1 => tstr,
+    ? 2 => tstr,
 
     ; Deployment source
-    2 => web-deployment-src,
+    3 => web-deployment-src,
 }
 
 web.deploy@return = {
@@ -20,8 +24,12 @@ web.deploy@return = {
 ; tag::remove[]
 ; `web.remove` endpoint.
 web.remove@param = {
+    ; Owner
+    ; Sender will be used if not specified.
+    ? 0 => non-anonymous-address
+
     ; Site name
-    0 => tstr,
+    1 => tstr,
 }
 web.remove@return = ()
 ; end::remove[]
