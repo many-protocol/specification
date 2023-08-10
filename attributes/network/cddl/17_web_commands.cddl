@@ -13,11 +13,14 @@ web.deploy@param = {
 
     ; Deployment source
     3 => web-deployment-src,
+
+    ; Deployment memo
+    ? 4 => memo
 }
 
 web.deploy@return = {
-    ; Deployment URL
-    0 => tstr,
+    ; Deployment info
+    0 => web-deployment-info,
 }
 ; end::deploy[]
 
@@ -30,6 +33,9 @@ web.remove@param = {
 
     ; Site name
     1 => tstr,
+
+    ; Memo
+    ? 2 => memo
 }
 web.remove@return = ()
 ; end::remove[]

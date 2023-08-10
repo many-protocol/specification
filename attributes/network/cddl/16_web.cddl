@@ -2,14 +2,17 @@
 archive-src = [0, {0: bstr}] ; Archive
 web-deployment-src = archive-src
 web-deployment-info = {
+    ; Owner
+    0 => non-anonymous-address,
+
     ; Site name
-    0 => tstr,
+    1 => tstr,
 
     ; Site description
-    ? 1 => tstr,
+    ? 2 => tstr,
 
     ; Deployment URL
-    2 => tstr,
+    3 => tstr,
 }
 
 web-deployment-filter = [0, {0: non-anonymous-address}] ; Owner
