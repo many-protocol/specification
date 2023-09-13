@@ -66,3 +66,28 @@ web.remove@param = {
 }
 web.remove@return = ()
 ; end::remove[]
+
+; tag::update[]
+web.update@param = {
+    ; Owner
+    ; Sender will be used if not specified.
+    ? 0 => non-anonymous-address
+
+    ; Site name
+    1 => tstr,
+
+    ; Site description
+    ? 2 => tstr,
+
+    ; Deployment source
+    3 => web-deployment-src,
+
+    ; Deployment memo
+    ? 4 => memo
+}
+
+web.update@return = {
+    ; Deployment info
+    0 => web-deployment-info,
+}
+; end::update[]
