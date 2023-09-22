@@ -1,0 +1,6 @@
+:cddl: ./cddl/
+
+[sources,cddl]
+----
+include::{cddl}/17_web_commands.cddl[]
+----

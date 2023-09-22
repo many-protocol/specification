@@ -1,0 +1,93 @@
+; tag::types[]
+event-type-web-deploy = [17, 0]
+event-type-web-remove = [17, 1]
+
+event-type /= event-type-web-deploy
+              / event-type-web-remove
+
+event-info-web-deploy = {
+    0 => event-type-web-deploy,
+    1 => non-anonymous-address, ; Owner
+    2 => tstr,                  ; Site name
+    ? 3 => tstr,                ; Site description
+    4 => tstr,                  ; Source hash
+    ? 5 => memo                 ; Memo
+}
+
+event-info-web-remove = {
+    0 => event-type-web-remove,
+    1 => non-anonymous-address, ; Owner
+    2 => tstr,                  ; Site name
+    ? 3 => memo                 ; Memo
+}
+
+event-info /= event-info-web-deploy
+              / event-info-web-remove
+; end::types[]
+
+; tag::deploy[]
+; `web.deploy` endpoint.
+web.deploy@param = {
+    ; Owner
+    ; Sender will be used if not specified.
+    ? 0 => non-anonymous-address
+
+    ; Site name
+    1 => tstr,
+
+    ; Site description
+    ? 2 => tstr,
+
+    ; Deployment source
+    3 => web-deployment-src,
+
+    ; Deployment memo
+    ? 4 => memo
+}
+
+web.deploy@return = {
+    ; Deployment info
+    0 => web-deployment-info,
+}
+; end::deploy[]
+
+; tag::remove[]
+; `web.remove` endpoint.
+web.remove@param = {
+    ; Owner
+    ; Sender will be used if not specified.
+    ? 0 => non-anonymous-address
+
+    ; Site name
+    1 => tstr,
+
+    ; Memo
+    ? 2 => memo
+}
+web.remove@return = ()
+; end::remove[]
+
+; tag::update[]
+web.update@param = {
+    ; Owner
+    ; Sender will be used if not specified.
+    ? 0 => non-anonymous-address
+
+    ; Site name
+    1 => tstr,
+
+    ; Site description
+    ? 2 => tstr,
+
+    ; Deployment source
+    3 => web-deployment-src,
+
+    ; Deployment memo
+    ? 4 => memo
+}
+
+web.update@return = {
+    ; Deployment info
+    0 => web-deployment-info,
+}
+; end::update[]

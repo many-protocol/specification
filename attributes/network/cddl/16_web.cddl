@@ -1,0 +1,43 @@
+; tag::types[]
+archive-src = [0, {0: bstr}] ; Archive
+web-deployment-src = archive-src
+web-deployment-info = {
+    ; Owner
+    0 => non-anonymous-address,
+
+    ; Site name
+    1 => tstr,
+
+    ; Site description
+    ? 2 => tstr,
+
+    ; Deployment URL
+    3 => tstr,
+}
+
+web-deployment-filter = [0, {0: non-anonymous-address}] ; Owner
+; end::types[]
+
+; tag::info[]
+; `web.info` endpoint.
+web.info@param = ()
+web.info@return = {
+    ; Hash of the current storage state.
+    0 => bstr,
+}
+; end::info[]
+
+; tag::list[]
+; `web.list` endpoint.
+web.list@param = {
+    ; Order
+    ? 0 => order,
+
+    ; Filter
+    ? 1 => web-deployment-filter,
+}
+web.list@return = {
+    ; List of sites
+    0 = [* web-deployment-info],
+}
+; end::list[]
