@@ -33,11 +33,17 @@ web.info@return = {
 ; tag::list[]
 ; `web.list` endpoint.
 web.list@param = {
+    ; Count
+    ? 0 => uint,
+
     ; Order
-    ? 0 => order,
+    ? 1 => order,
 
     ; Filter
-    ? 1 => web-deployment-filter,
+    ? 2 => web-deployment-filter,
+
+    ; Page
+    ? 3 => uint,
 }
 web.list@return = {
     ; List of sites
