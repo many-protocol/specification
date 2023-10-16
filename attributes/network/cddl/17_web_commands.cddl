@@ -1,9 +1,11 @@
 ; tag::types[]
 event-type-web-deploy = [17, 0]
 event-type-web-remove = [17, 1]
+event-type-web-update = [17, 2]
 
 event-type /= event-type-web-deploy
               / event-type-web-remove
+              / event-type-web-update
 
 event-info-web-deploy = {
     0 => event-type-web-deploy,
@@ -12,6 +14,7 @@ event-info-web-deploy = {
     ? 3 => tstr,                ; Site description
     4 => tstr,                  ; Source hash
     ? 5 => memo                 ; Memo
+    ? 6 => tstr                 ; Custom domain
 }
 
 event-info-web-remove = {
@@ -21,8 +24,19 @@ event-info-web-remove = {
     ? 3 => memo                 ; Memo
 }
 
+event-info-web-update = {
+    0 => event-type-web-update,
+    1 => non-anonymous-address, ; Owner
+    2 => tstr,                  ; Site name
+    ? 3 => tstr,                ; Site description
+    4 => tstr,                  ; Source hash
+    ? 5 => memo                 ; Memo
+    ? 6 => tstr                 ; Custom domain
+}
+
 event-info /= event-info-web-deploy
               / event-info-web-remove
+              / event-info-web-update
 ; end::types[]
 
 ; tag::deploy[]
@@ -43,6 +57,9 @@ web.deploy@param = {
 
     ; Deployment memo
     ? 4 => memo
+
+    ; Custom domain
+    ? 5 => tstr
 }
 
 web.deploy@return = {
@@ -84,6 +101,9 @@ web.update@param = {
 
     ; Deployment memo
     ? 4 => memo
+
+    ; Custom domain
+    ? 5 => tstr
 }
 
 web.update@return = {
